@@ -28,28 +28,43 @@ export function Features() {
 
   return (
     <section id="features" className="relative px-6 py-[100px]">
+      {/* Section divider top */}
+      <div className="mx-auto mb-[100px] max-w-[1200px]">
+        <div
+          className="h-px w-full"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(124,106,250,0.15), rgba(62,207,207,0.1), transparent)",
+          }}
+        />
+      </div>
+
       <div className="mx-auto max-w-[1200px]">
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
+          className="mb-16"
         >
-          <div className="mb-15 text-left">
-            <motion.div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-forge-accent-2/20 bg-forge-accent-2/8 px-3.5 py-1.25">
-              <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent-2">
-                Capabilities
-              </span>
-            </motion.div>
-            <h2 className="max-w-[560px] font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
-              Everything you need
-              <br />
-              to go viral, automated.
-            </h2>
+          <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-forge-accent-2/20 bg-forge-accent-2/8 px-3.5 py-1.5">
+            <div
+              className="h-1.5 w-1.5 rounded-full bg-forge-accent-2"
+              style={{ boxShadow: "0 0 6px #3ECFCF" }}
+            />
+            <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent-2">
+              Capabilities
+            </span>
           </div>
+          <h2 className="max-w-[560px] font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
+            Everything you need
+            <br />
+            to go viral,{" "}
+            <span className="text-gradient-forge">automated.</span>
+          </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <BentoCard
             delay={0}
             title="AI Viral Detection"
@@ -59,12 +74,14 @@ export function Features() {
           >
             <div className="mt-3.5 flex flex-wrap gap-1.5">
               {["Hook score", "Energy spike", "Sentiment", "Pacing"].map((tag) => (
-                <span
+                <motion.span
                   key={tag}
-                  className="rounded-md border border-[#FF6B6B]/20 bg-[#FF6B6B]/12 px-2 py-0.75 font-mono text-[11px] text-[#FF6B6B]"
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="rounded-md border border-[#FF6B6B]/20 bg-[#FF6B6B]/10 px-2 py-0.5 font-mono text-[11px] text-[#FF6B6B] cursor-default"
                 >
                   {tag}
-                </span>
+                </motion.span>
               ))}
             </div>
           </BentoCard>
@@ -86,9 +103,20 @@ export function Features() {
           >
             <motion.div
               animate={{ width: ["0%", "100%", "0%"] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="mt-3.5 h-0.5 rounded-sm bg-gradient-to-r from-transparent via-forge-accent-2 to-transparent"
+              transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+              style={{ willChange: "transform" }}
+              className="mt-4 h-0.5 rounded-sm bg-gradient-to-r from-transparent via-forge-accent-2 to-transparent"
             />
+            <div className="mt-2.5 flex gap-1.5">
+              {["EN", "ES", "FR", "DE", "ZH", "+35"].map((lang) => (
+                <span
+                  key={lang}
+                  className="rounded border border-forge-accent-2/15 bg-forge-accent-2/8 px-1.5 py-0.5 font-mono text-[10px] text-forge-accent-2/70"
+                >
+                  {lang}
+                </span>
+              ))}
+            </div>
           </BentoCard>
 
           <BentoCard
@@ -100,17 +128,22 @@ export function Features() {
             desc="One click posts to TikTok, Instagram Reels, YouTube Shorts, Twitter/X, and LinkedIn simultaneously."
           >
             <div className="mt-4 flex gap-2.5">
-              {PLATFORMS.map((p) => (
+              {PLATFORMS.map((p, i) => (
                 <motion.div
                   key={p.name}
-                  whileHover={{ y: -3 }}
-                  className="flex h-[34px] w-[34px] items-center justify-center rounded-lg border text-sm"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.4 + i * 0.07, duration: 0.4 }}
+                  whileHover={{ y: -4, scale: 1.1 }}
                   style={{
-                    background: `${p.c}20`,
-                    borderColor: `${p.c}40`,
+                    willChange: "transform",
+                    background: `${p.c}18`,
+                    borderColor: `${p.c}35`,
+                    boxShadow: `0 0 12px ${p.c}20`,
                   }}
+                  className="flex h-[34px] w-[34px] items-center justify-center rounded-lg border text-[13px] font-bold cursor-default select-none"
                 >
-                  {p.name[0]}
+                  <span style={{ color: p.c }}>{p.name[0]}</span>
                 </motion.div>
               ))}
             </div>
