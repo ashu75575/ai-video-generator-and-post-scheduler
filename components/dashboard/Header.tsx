@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Search, 
-  Bell, 
-  Menu, 
-  Plus, 
+import {
+  Search,
+  Bell,
+  Menu,
+  Plus,
   Sparkles,
   Scissors,
   Video,
@@ -23,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -68,7 +67,7 @@ export function Header() {
             </div>
           </SheetContent>
         </Sheet>
-        
+
         <div className="flex items-center gap-1.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.4)]">
             <Scissors size={12} className="text-white" />
@@ -131,13 +130,13 @@ export function Header() {
             className="w-80 rounded-2xl border border-white/8 bg-[#0d0d18]/95 backdrop-blur-2xl p-2 text-white shadow-xl shadow-black/60"
           >
             <div className="flex items-center justify-between px-3 py-2">
-              <DropdownMenuLabel className="font-[family-name:var(--font-space-grotesk)] text-xs font-bold text-white">
+              <span className="font-heading text-xs font-bold text-white">
                 Notifications
-              </DropdownMenuLabel>
+              </span>
               {hasUnread && (
                 <button
                   onClick={markAllRead}
-                  className="font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold text-forge-accent hover:underline cursor-pointer"
+                  className="font-body text-[10px] font-semibold text-forge-accent hover:underline cursor-pointer"
                 >
                   Mark all read
                 </button>
@@ -148,10 +147,10 @@ export function Header() {
               {notifications.map((n) => (
                 <DropdownMenuItem
                   key={n.id}
-                  className="flex flex-col items-start gap-1 rounded-xl p-3 text-xs transition-colors hover:bg-white/[0.04] focus:bg-white/[0.04] cursor-pointer"
+                  className="flex flex-col items-start gap-1 rounded-xl p-3 text-xs transition-colors cursor-pointer"
                 >
                   <div className="flex w-full items-start justify-between gap-2">
-                    <span className="font-[family-name:var(--font-dm-sans)] font-semibold text-white">
+                    <span className="font-body font-semibold text-white">
                       {n.title}
                     </span>
                     {n.unread && (
