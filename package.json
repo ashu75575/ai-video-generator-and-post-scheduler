@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.714.0",
+    "@aws-sdk/s3-request-presigner": "^3.714.0",
     "@base-ui/react": "^1.4.1",
     "@clerk/nextjs": "^7.3.5",
     "@clerk/ui": "^1.11.0",
@@ -20,6 +22,7 @@
     "drizzle-orm": "^0.38.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.38.0",
+    "inngest": "^3.30.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",

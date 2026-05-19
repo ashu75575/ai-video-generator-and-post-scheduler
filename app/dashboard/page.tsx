@@ -100,6 +100,10 @@ export default function DashboardHome() {
   };
 
   const clearSelection = () => {
+    if ((window as any)._activeUploadPoll) {
+      clearInterval((window as any)._activeUploadPoll);
+      (window as any)._activeUploadPoll = null;
+    }
     setSelectedVideoFile(null);
     if (videoPreviewUrl) {
       URL.revokeObjectURL(videoPreviewUrl);
@@ -110,85 +114,127 @@ export default function DashboardHome() {
     setUploadStatusText("");
   };
 
-  const startUpload = () => {
+  const startUpload = async () => {
     if (!selectedVideoFile) return;
     setIsUploadingVideo(true);
     setUploadStatus("uploading");
     setUploadProgress(0);
-    setUploadStatusText("Establishing connection node...");
+    setUploadStatusText("Uploading video to server...");
 
-    const phases = [
-      { threshold: 15, text: "Connecting to secure video node..." },
-      { threshold: 40, text: "Uploading chunks (chunk 1/4 - 12.8 MB/s)..." },
-      { threshold: 65, text: "Uploading chunks (chunk 3/4 - 15.4 MB/s)..." },
-      { threshold: 85, text: "Reassembling files and parsing audio stream..." },
-      { threshold: 95, text: "Syncing video payload to ClipForge AI Isolation Hub..." },
-    ];
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedVideoFile);
+      formData.append("name", selectedVideoFile.name);
 
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        const next = prev + 1;
-        const currentPhase = phases.find((p) => next <= p.threshold);
-        if (currentPhase) {
-          setUploadStatusText(currentPhase.text);
-        } else {
-          setUploadStatusText("Finalizing cloud transfer...");
-        }
-
-        if (next >= 100) {
-          clearInterval(interval);
-          setUploadStatus("success");
-          setUploadStatusText("Upload complete!");
-
-          setTimeout(() => {
-            // Append to context list
-            const newVideoId = `raw-${Date.now()}`;
-            const newRawVideo = {
-              id: newVideoId,
-              title: selectedVideoFile.name,
-              date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-              size: `${(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB`,
-              duration: "1:15",
-              clips: 1,
-              status: "Analyzed" as const,
-              img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80"
-            };
-
-            const newClip = {
-              id: `clip-${Date.now()}`,
-              title: `Isolated Highlight from ${selectedVideoFile.name.split('.')[0]}`,
-              sourceVideo: selectedVideoFile.name,
-              duration: "0:35",
-              viralityScore: 93,
-              views: "0",
-              likes: "0",
-              platform: "Multi-Platform" as const,
-              thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
-              status: "Ready" as const,
-              transcript: "This is a transcript generated from your upload. It represents a highly retention-optimized segment isolated by ClipForge AI.",
-              description: `Checkout this epic clip isolated by ClipForge AI! 🔥 #clips #ai`,
-              tags: ["#clips", "#ai"],
-              metrics: { hookStrength: 95, retentionPotential: 90, pacingScore: 92, visualEngagement: 91 }
-            };
-
-            setRawVideos((prev) => [newRawVideo, ...prev]);
-            setClips((prev) => [newClip, ...prev]);
-
-            toast.success("Upload Successful!", {
-              description: `"${selectedVideoFile.name}" has been uploaded and added to your library.`,
-            });
-
-            // Redirect to clips workspace
-            setTimeout(() => {
-              router.push("/dashboard/clips");
-            }, 1000);
-          }, 1500);
-
-          return 100;
-        }
-        return next;
+      const response = await fetch("/api/projects/upload", {
+        method: "POST",
+        body: formData,
       });
-    }, 30);
+
+      if (!response.ok) {
+        throw new Error("Failed to upload video to server");
+      }
+
+      const data = await response.json();
+      if (!data.success || !data.projectId) {
+        throw new Error(data.error || "Failed to start upload processing");
+      }
+
+      const projectId = data.projectId;
+      setUploadStatusText("Video saved. Background processing started...");
+      setUploadProgress(15);
+
+      // Start polling status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/projects/${projectId}/status`);
+          if (!statusRes.ok) {
+            throw new Error("Failed to fetch processing status");
+          }
+
+          const statusData = await statusRes.json();
+          const { status, progress, videoUrl } = statusData;
+
+          // Update progress bar
+          setUploadProgress(progress);
+
+          if (status === "uploading") {
+            if (progress < 40) {
+              setUploadStatusText("Connecting & starting background pipeline...");
+            } else if (progress < 85) {
+              setUploadStatusText("Uploading segments to AWS S3 bucket...");
+            } else {
+              setUploadStatusText("Acquiring viewer signed URL...");
+            }
+          } else if (status === "completed") {
+            clearInterval(pollInterval);
+            (window as any)._activeUploadPoll = null;
+            setUploadStatus("success");
+            setUploadStatusText("Upload complete!");
+
+            // Add the new video and a generated clip to local context list
+            setTimeout(() => {
+              const newVideoId = `raw-${Date.now()}`;
+              const newRawVideo = {
+                id: newVideoId,
+                title: selectedVideoFile.name,
+                date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                size: `${(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB`,
+                duration: "1:15",
+                clips: 1,
+                status: "Analyzed" as const,
+                img: videoUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80"
+              };
+
+              const newClip = {
+                id: `clip-${Date.now()}`,
+                title: `Isolated Highlight from ${selectedVideoFile.name.split('.')[0]}`,
+                sourceVideo: selectedVideoFile.name,
+                duration: "0:35",
+                viralityScore: 93,
+                views: "0",
+                likes: "0",
+                platform: "Multi-Platform" as const,
+                thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
+                status: "Ready" as const,
+                transcript: "This is a transcript generated from your upload. It represents a highly retention-optimized segment isolated by ClipForge AI.",
+                description: `Checkout this epic clip isolated by ClipForge AI! 🔥 #clips #ai`,
+                tags: ["#clips", "#ai"],
+                metrics: { hookStrength: 95, retentionPotential: 90, pacingScore: 92, visualEngagement: 91 }
+              };
+
+              setRawVideos((prev) => [newRawVideo, ...prev]);
+              setClips((prev) => [newClip, ...prev]);
+
+              toast.success("Upload Successful!", {
+                description: `"${selectedVideoFile.name}" has been uploaded to AWS S3 and added to your library.`,
+              });
+            }, 1000);
+          } else if (status === "failed") {
+            clearInterval(pollInterval);
+            (window as any)._activeUploadPoll = null;
+            setIsUploadingVideo(false);
+            setUploadStatus("idle");
+            toast.error("Processing Failed", {
+              description: "The background upload job failed on the server.",
+            });
+          }
+        } catch (pollErr) {
+          console.error("Polling error:", pollErr);
+        }
+      }, 1500);
+
+      // Save interval reference to clear it if component unmounts or user cancels
+      (window as any)._activeUploadPoll = pollInterval;
+
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setIsUploadingVideo(false);
+      setUploadStatus("idle");
+      toast.error("Upload Failed", {
+        description: error.message || "An unexpected error occurred during upload.",
+      });
+    }
   };
 
   return (
@@ -238,7 +284,7 @@ export default function DashboardHome() {
       </div>
 
       {/* Main Studio Card workspace */}
-      <Card className="relative overflow-hidden bg-white/[0.03] border border-white/8 backdrop-blur-xl rounded-[24px] shadow-forge-panel p-6 md:p-8 min-h-[420px] flex flex-col justify-center select-none">
+      <Card className="relative overflow-hidden bg-white/3 border border-white/8 backdrop-blur-xl rounded-[24px] shadow-forge-panel p-6 md:p-8 min-h-[420px] flex flex-col justify-center select-none">
         <span className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-forge-accent/15 blur-3xl pointer-events-none" />
         <span className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-forge-accent-2/10 blur-3xl pointer-events-none" />
 
@@ -262,10 +308,10 @@ export default function DashboardHome() {
               {/* Left Column: Information Panel */}
               <div className="lg:col-span-5 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white">
+                  <h3 className="font-(family-name:--font-space-grotesk)  text-lg font-bold text-white">
                     Step-by-Step AI Isolation
                   </h3>
-                  <p className="text-white/45 text-xs font-[family-name:var(--font-dm-sans)] leading-relaxed">
+                  <p className="text-white/45 text-xs font-(family-name:--font-dm-sans) leading-relaxed">
                     Our machine learning pipeline scans your file audio-visually to pull viral highlights.
                   </p>
                 </div>
@@ -317,7 +363,7 @@ export default function DashboardHome() {
                   </div>
                   <Button
                     variant="ghost"
-                    className="h-8 rounded-lg border border-white/10 bg-white/[0.02] px-4 text-xs text-white/70 hover:text-white cursor-pointer"
+                    className="h-8 rounded-lg border border-white/10 bg-white/[0.02] px-4 text-xs text-white/70 hover:text-black cursor-pointer"
                   >
                     Select Local Video
                   </Button>
