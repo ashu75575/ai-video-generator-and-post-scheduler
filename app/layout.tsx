@@ -4,7 +4,9 @@ import { dark } from "@clerk/ui/themes";
 import { DM_Sans, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { AuthButtons } from "@/components/landing/AuthButtons";
+import { GlobalHeader } from "@/components/landing/GlobalHeader";
+
+import { checkAndSyncUser } from "@/lib/db/sync";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -27,11 +29,14 @@ export const metadata: Metadata = {
     "AI-powered video clipping, captions, and multi-platform scheduling for creators.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Synchronize authenticated user profile with Neon database
+  await checkAndSyncUser();
+
   return (
     <html
       lang="en"
@@ -47,10 +52,9 @@ export default function RootLayout({
           appearance={{
             theme: dark
           }}
+
         >
-          <header className="fixed top-4 right-6 z-[200] flex items-center gap-3">
-            <AuthButtons />
-          </header>
+          <GlobalHeader />
           {children}
         </ClerkProvider>
       </body>
