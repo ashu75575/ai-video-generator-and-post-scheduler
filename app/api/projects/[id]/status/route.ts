@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { projects } from "@/lib/db/schema";
+import { projects, shortVideos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(
@@ -25,6 +25,13 @@ export async function GET(
     }
 
     const project = result[0];
+
+    // Fetch any generated short videos for this project
+    const shorts = await db
+      .select()
+      .from(shortVideos)
+      .where(eq(shortVideos.projectId, projectId));
+
     return NextResponse.json({
       id: project.id,
       name: project.name,
@@ -33,6 +40,7 @@ export async function GET(
       videoUrl: project.videoUrl,
       transcript: project.transcript,
       captions: project.captions,
+      shortVideos: shorts,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     });
