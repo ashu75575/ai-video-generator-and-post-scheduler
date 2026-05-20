@@ -37,11 +37,11 @@ export const processVideoUpload = inngest.createFunction(
       const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
       const region = process.env.AWS_REGION || "us-east-1";
 
-      // If credentials are not fully configured, fallback to mock upload for development
       if (!bucketName || !accessKeyId || !secretAccessKey) {
-        console.warn("⚠️ AWS S3 is not fully configured. Using mock upload fallback.");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        return `https://www.w3schools.com/html/mov_bbb.mp4?mock_project=${projectId}`;
+        throw new Error(
+          "AWS S3 environment variables are not fully configured. " +
+          "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY."
+        );
       }
 
       // Initialize AWS S3 Client
@@ -68,7 +68,7 @@ export const processVideoUpload = inngest.createFunction(
 
       // Construct the actual direct public URL
       const actualUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
-      
+
       if (db) {
         await db
           .update(projects)
