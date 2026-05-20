@@ -9,14 +9,14 @@ import path from "path";
 export async function POST(req: NextRequest) {
   try {
     // 1. Get Clerk user details
-    let userId = "mock-user-id";
-    try {
-      const authResult = await auth();
-      if (authResult?.userId) {
-        userId = authResult.userId;
-      }
-    } catch (authError) {
-      console.warn("⚠️ Clerk auth error, using mock-user-id for development:", authError);
+    const authResult = await auth();
+    const userId = authResult?.userId;
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized. Please log in first." }, { status: 401 });
+    }
+
+    if (!db) {
+      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
     }
 
     // 2. Parse form data
@@ -46,23 +46,14 @@ export async function POST(req: NextRequest) {
     console.log(`Saved file locally to ${filePath}`);
 
     // 4. Register project in the Neon Database
-    if (db) {
-      try {
-        await db.insert(projects).values({
-          id: projectId,
-          userId,
-          name: fileName,
-          status: "uploading",
-          progress: 10,
-        });
-        console.log(`Database record created for project: ${projectId}`);
-      } catch (dbError) {
-        console.error("❌ Failed to insert project record into DB:", dbError);
-        // We continue in-memory fallback for local dev if db insert fails due to DB network issues
-      }
-    } else {
-      console.warn("⚠️ DB is not connected. Project creation skipped in database.");
-    }
+    await db.insert(projects).values({
+      id: projectId,
+      userId,
+      name: fileName,
+      status: "uploading",
+      progress: 10,
+    });
+    console.log(`Database record created for project: ${projectId}`);
 
     // 5. Trigger the background Inngest event
     try {

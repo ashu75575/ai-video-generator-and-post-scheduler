@@ -4,7 +4,8 @@ import { projects } from "../db/schema";
 import { eq } from "drizzle-orm";
 import fs from "fs/promises";
 import { existsSync, createReadStream } from "fs";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const processVideoUpload = inngest.createFunction(
   { id: "process-video-upload" },
@@ -66,8 +67,12 @@ export const processVideoUpload = inngest.createFunction(
         })
       );
 
-      // Construct the actual direct public URL
-      const actualUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
+      // Generate a presigned URL to allow Deepgram (and the frontend player) to access the private S3 file securely
+      const getCommand = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: s3Key,
+      });
+      const actualUrl = await getSignedUrl(s3, getCommand, { expiresIn: 604800 }); // Valid for 7 days
 
       if (db) {
         await db
@@ -107,5 +112,81 @@ export const processVideoUpload = inngest.createFunction(
     });
 
     return { success: true, url: videoUrl };
+  }
+);
+
+export const analyzeProjectVideo = inngest.createFunction(
+  { id: "analyze-project-video" },
+  { event: "project/analysis.started" },
+  async ({ event, step }) => {
+    const { projectId, videoUrl } = event.data;
+
+    // Step 1: Initialize analysis in DB
+    await step.run("initialize-analysis-db", async () => {
+      if (db) {
+        await db
+          .update(projects)
+          .set({ status: "transcribing", progress: 10, updatedAt: new Date() })
+          .where(eq(projects.id, projectId));
+      }
+    });
+
+    // Step 2: Call Deepgram to transcribe and get captions
+    const result = await step.run("transcribe-video", async () => {
+      if (db) {
+        await db
+          .update(projects)
+          .set({ status: "transcribing", progress: 40, updatedAt: new Date() })
+          .where(eq(projects.id, projectId));
+      }
+
+      const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
+
+      if (!deepgramApiKey) {
+        throw new Error("DEEPGRAM_API_KEY environment variable is not configured.");
+      }
+
+      const response = await fetch(
+        "https://api.deepgram.com/v1/listen?smart_format=true&punctuate=true",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Token ${deepgramApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url: videoUrl }),
+        }
+      );
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Deepgram API failed with code ${response.status}: ${errText}`);
+      }
+
+      const data = await response.json();
+      const transcript = data.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
+      const captions = data.results?.channels?.[0]?.alternatives?.[0]?.words || [];
+
+      return { transcript, captions };
+    });
+
+    // Step 3: Save transcription results and finalize project status
+    await step.run("finalize-analysis-db", async () => {
+      if (db) {
+        await db
+          .update(projects)
+          .set({
+            status: "ready",
+            progress: 100,
+            transcript: result.transcript,
+            captions: result.captions,
+            updatedAt: new Date(),
+          })
+          .where(eq(projects.id, projectId));
+      }
+      console.log(`Successfully transcribed and analyzed video for project: ${projectId}`);
+    });
+
+    return { success: true, result };
   }
 );

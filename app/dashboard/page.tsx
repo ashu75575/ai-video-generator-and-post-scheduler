@@ -48,6 +48,8 @@ export default function DashboardHome() {
   const [uploadStatusText, setUploadStatusText] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Clean up object URL when file changes
   useEffect(() => {
@@ -112,6 +114,7 @@ export default function DashboardHome() {
     setUploadStatus("idle");
     setUploadProgress(0);
     setUploadStatusText("");
+    setUploadedProjectId(null);
   };
 
   const startUpload = async () => {
@@ -141,6 +144,7 @@ export default function DashboardHome() {
       }
 
       const projectId = data.projectId;
+      setUploadedProjectId(projectId);
       setUploadStatusText("Video saved. Background processing started...");
       setUploadProgress(15);
 
@@ -234,6 +238,39 @@ export default function DashboardHome() {
       toast.error("Upload Failed", {
         description: error.message || "An unexpected error occurred during upload.",
       });
+    }
+  };
+
+  const handleStartAnalysis = async () => {
+    if (!uploadedProjectId) return;
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch(`/api/projects/${uploadedProjectId}/analyze`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start project analysis");
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to start analysis");
+      }
+
+      toast.success("Analysis Started!", {
+        description: "Your video transcription and analysis have begun.",
+      });
+
+      // Navigate to the project analysis loading pipeline page
+      router.push(`/dashboard/projects/${uploadedProjectId}`);
+    } catch (err: any) {
+      console.error("Start analysis error:", err);
+      toast.error("Failed to Start Analysis", {
+        description: err.message || "An unexpected error occurred.",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -524,20 +561,46 @@ export default function DashboardHome() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-col items-center justify-center py-8 text-center z-10 w-full"
+              className="flex flex-col items-center justify-center py-8 text-center z-10 w-full space-y-6"
             >
-              <div className="h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(52,211,153,0.25)]">
-                <Check size={32} className="stroke-[3]" />
+              <div className="flex flex-col items-center">
+                <div className="h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(52,211,153,0.25)]">
+                  <Check size={32} className="stroke-[3]" />
+                </div>
+                <h2 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-white mb-2">
+                  Uploaded Successfully!
+                </h2>
+                <p className="text-xs text-white/50 max-w-sm leading-relaxed font-[family-name:var(--font-dm-sans)]">
+                  "{selectedVideoFile?.name}" has been saved to your AWS S3 bucket and registered. Ready for audio transcription and speech extraction.
+                </p>
               </div>
-              <h2 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-white mb-2">
-                Ingested Successfully!
-              </h2>
-              <p className="text-xs text-white/50 max-w-sm leading-relaxed font-[family-name:var(--font-dm-sans)] mb-4">
-                "{selectedVideoFile?.name}" has been registered. AI is slicing viral shorts now. Redirecting you to clips library...
-              </p>
-              <div className="flex items-center gap-2 font-mono text-[10px] text-white/30">
-                <RefreshCw size={10} className="animate-spin" />
-                <span>Redirecting now</span>
+
+              <div className="flex gap-4 w-full max-w-md justify-center">
+                <Button
+                  onClick={clearSelection}
+                  variant="ghost"
+                  className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs px-5 h-10 cursor-pointer font-mono"
+                  disabled={isAnalyzing}
+                >
+                  Cancel & Clear
+                </Button>
+                <Button
+                  onClick={handleStartAnalysis}
+                  className="rounded-xl bg-gradient-forge text-xs px-6 h-10 font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      Initializing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      Start Analysis
+                    </>
+                  )}
+                </Button>
               </div>
             </motion.div>
           )}

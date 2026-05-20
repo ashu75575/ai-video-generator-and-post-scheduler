@@ -27,7 +27,7 @@ export function Sidebar() {
   const menuItems = [
     { href: "/dashboard", label: "Home", icon: Home },
     { href: "/dashboard/clips", label: "AI Clips", icon: Sparkles },
-    { href: "/dashboard/videos", label: "My Videos", icon: Film },
+    { href: "/dashboard/my-videos", label: "My Videos", icon: Film },
     { href: "/dashboard/schedule", label: "Schedule Posts", icon: Calendar },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   ] as const;

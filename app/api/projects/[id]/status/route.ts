@@ -11,15 +11,7 @@ export async function GET(
     const { id: projectId } = await params;
 
     if (!db) {
-      // Graceful fallback for mock database status during development
-      return NextResponse.json({
-        id: projectId,
-        name: "Mock Video",
-        status: "completed",
-        progress: 100,
-        videoUrl: `https://www.w3schools.com/html/mov_bbb.mp4?mock_project=${projectId}`,
-        isMock: true,
-      });
+      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
     }
 
     const result = await db
@@ -39,6 +31,8 @@ export async function GET(
       status: project.status,
       progress: project.progress,
       videoUrl: project.videoUrl,
+      transcript: project.transcript,
+      captions: project.captions,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     });

@@ -153,28 +153,40 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   ]);
 
-  const [rawVideos, setRawVideos] = useState<RawVideo[]>([
-    {
-      id: "raw-1",
-      title: "nextjs15_guide.mp4",
-      date: "May 18, 2026",
-      size: "145.2 MB",
-      duration: "12:30",
-      clips: 1,
-      status: "Analyzed",
-      img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80"
-    },
-    {
-      id: "raw-2",
-      title: "startup_lessons.mp4",
-      date: "May 17, 2026",
-      size: "312.4 MB",
-      duration: "24:15",
-      clips: 1,
-      status: "Analyzed",
-      img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
+  const [rawVideos, setRawVideos] = useState<RawVideo[]>([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("/api/projects");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.projects) {
+            const mappedVideos: RawVideo[] = data.projects.map((proj: any) => ({
+              id: proj.id,
+              title: proj.name,
+              date: new Date(proj.createdAt).toLocaleDateString("en-US", { 
+                month: "short", 
+                day: "numeric", 
+                year: "numeric" 
+              }),
+              size: "120 MB",
+              duration: "0:45",
+              clips: proj.status === "ready" ? 1 : 0,
+              status: proj.status === "ready" ? "Analyzed" : "Analyzing",
+              img: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+            }));
+            setRawVideos(mappedVideos);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching projects in useDashboard:", error);
+      }
+    };
+    if (user) {
+      fetchProjects();
     }
-  ]);
+  }, [user]);
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);

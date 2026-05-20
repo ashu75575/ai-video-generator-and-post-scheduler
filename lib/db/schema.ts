@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(), // Clerk User ID (e.g. user_2d...)
@@ -14,9 +14,11 @@ export const projects = pgTable("projects", {
   id: text("id").primaryKey(),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   name: text("name").notNull(),
-  status: text("status").default("pending").notNull(), // "pending", "uploading", "completed", "failed"
+  status: text("status").default("pending").notNull(), // "pending", "uploading", "completed", "failed", "transcribing", "ready"
   progress: integer("progress").default(0).notNull(),
   videoUrl: text("video_url"),
+  transcript: text("transcript"),
+  captions: jsonb("captions"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
