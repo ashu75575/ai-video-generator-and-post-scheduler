@@ -31,10 +31,20 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
   // Current playback time in seconds, calculated frame-accurately
   const currentTime = startTime + frame / fps;
 
-  // Find the word active at this specific timestamp
-  const activeWord = captions?.find(
+  // Find index of the active word in the captions array
+  const activeIndex = captions ? captions.findIndex(
     (w) => currentTime >= w.start && currentTime <= w.end,
-  );
+  ) : -1;
+
+  const CHUNK_SIZE = 3;
+  let wordGroup: Word[] = [];
+  let groupStart = -1;
+
+  if (activeIndex !== -1 && captions) {
+    groupStart = Math.floor(activeIndex / CHUNK_SIZE) * CHUNK_SIZE;
+    const groupEnd = Math.min(groupStart + CHUNK_SIZE, captions.length);
+    wordGroup = captions.slice(groupStart, groupEnd);
+  }
 
   const startFrame = Math.round(startTime * fps);
 
@@ -59,11 +69,11 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
         }}
       />
 
-      {activeWord && (
+      {wordGroup.length > 0 && (
         <div
           style={{
             position: "absolute",
-            top: "25%",
+            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
@@ -72,34 +82,54 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
             alignItems: "center",
             pointerEvents: "none",
             zIndex: 10,
-            padding: "0 8%",
+            padding: "0 6%",
           }}
         >
-          <span
+          <div
             style={{
-              backgroundColor: "rgba(5, 5, 10, 0.85)",
-              color: "#facc15", // bright viral yellow
-              fontSize: "4.2rem",
-              fontWeight: 900,
-              padding: "16px 36px",
-              borderRadius: "24px",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              textAlign: "center",
-              textShadow: `
-                -3px -3px 0 #000,
-                 3px -3px 0 #000,
-                -3px  3px 0 #000,
-                 3px  3px 0 #000,
-                 0px  6px 12px rgba(0, 0, 0, 0.9)
-              `,
-              maxWidth: "90%",
+              backgroundColor: "rgba(5, 5, 10, 0.88)",
+              padding: "24px 44px",
+              borderRadius: "32px",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "24px",
+              maxWidth: "92%",
               wordBreak: "break-word",
-              animation: "scaleIn 0.08s ease-out forwards",
             }}
           >
-            {activeWord.word}
-          </span>
+            {wordGroup.map((w, idx) => {
+              const globalIdx = groupStart + idx;
+              const isCurrent = globalIdx === activeIndex;
+
+              return (
+                <span
+                  key={globalIdx}
+                  style={{
+                    color: isCurrent ? "#facc15" : "#ffffff", // Neon yellow for current, white for others
+                    fontSize: isCurrent ? "5.4rem" : "4.8rem", // Highlight speaking word with larger font size
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.04em",
+                    transform: isCurrent ? "scale(1.1)" : "scale(1.0)",
+                    transition: "transform 0.05s ease-out, color 0.05s ease-out",
+                    display: "inline-block",
+                    textShadow: `
+                      -4px -4px 0 #000,
+                       4px -4px 0 #000,
+                      -4px  4px 0 #000,
+                       4px  4px 0 #000,
+                       0px  6px 12px rgba(0, 0, 0, 0.9)
+                    `,
+                    animation: isCurrent ? "scaleIn 0.08s ease-out forwards" : "none",
+                  }}
+                >
+                  {w.word}
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
