@@ -12,7 +12,7 @@ export function GlobalHeader() {
   }
 
   return (
-    <header className="fixed top-4 right-6 z-[200] flex items-center gap-3">
+    <header className="fixed top-4 right-6 z-200 flex items-center gap-3">
       <AuthButtons />
     </header>
   );

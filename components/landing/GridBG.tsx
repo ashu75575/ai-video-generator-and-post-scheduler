@@ -51,7 +51,7 @@ export function GridBG() {
         animate={{ y: [24, -24, 24], rotate: [0, -10, 0] }}
         transition={{ repeat: Infinity, duration: 18, ease: "easeInOut" }}
         style={{ willChange: "transform" }}
-        className="absolute top-[25%] right-[3%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(62,207,207,0.09)_0%,transparent_70%)] blur-[40px]"
+        className="absolute top-[25%] right-[3%] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(62,207,207,0.09)_0%,transparent_70%)] blur-2xl"
       />
       {/* Small accent blob bottom */}
       <motion.div

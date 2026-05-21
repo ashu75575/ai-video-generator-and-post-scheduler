@@ -105,7 +105,7 @@ export function CTA() {
               }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-7 py-4 font-sans text-base font-semibold text-white/60 transition-colors duration-200"
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/4 px-7 py-4 font-sans text-base font-semibold text-white/60 transition-colors duration-200"
             >
               Schedule a demo
             </motion.button>
