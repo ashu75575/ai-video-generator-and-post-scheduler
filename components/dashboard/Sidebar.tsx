@@ -45,7 +45,7 @@ export function Sidebar() {
   const userAvatar = isLoaded && user ? user.imageUrl : "";
 
   return (
-    <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/5 bg-[#05050a]/90 backdrop-blur-xl px-4 py-6 md:flex">
+    <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/5 bg-forge-bg/90 backdrop-blur-xl px-4 py-6 md:flex">
       {/* Sidebar Logo */}
       <div className="mb-8 flex items-center gap-2.5 px-3">
         <motion.div
@@ -55,7 +55,7 @@ export function Sidebar() {
         >
           <Scissors size={14} className="text-white" />
         </motion.div>
-        <span className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold tracking-tight text-white">
+        <span className="font-heading text-lg font-bold tracking-tight text-white">
           ClipForge
           <span className="text-gradient-forge font-extrabold">AI</span>
         </span>
@@ -72,16 +72,16 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group relative flex w-full items-center gap-3.5 rounded-xl px-3.5 py-3 font-[family-name:var(--font-dm-sans)] text-sm font-medium transition-all duration-300 cursor-pointer select-none",
+                "group relative flex w-full items-center gap-3.5 rounded-xl px-3.5 py-3 font-sans text-sm font-medium transition-all duration-300 cursor-pointer select-none",
                 isActive
                   ? "text-white"
-                  : "text-white/45 hover:bg-white/[0.03] hover:text-white/80",
+                  : "text-white/45 hover:bg-white/3 hover:text-white/80",
               )}
             >
               {isActive && (
                 <motion.span
                   layoutId="sidebar-active-pill"
-                  className="absolute inset-0 z-0 rounded-xl bg-white/[0.04] border border-white/[0.06] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
+                  className="absolute inset-0 z-0 rounded-xl bg-white/4 border border-white/6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
                   transition={{ type: "spring", bounce: 0.18, duration: 0.5 }}
                 />
               )}
@@ -121,7 +121,7 @@ export function Sidebar() {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-[family-name:var(--font-dm-sans)] text-xs font-semibold text-white truncate leading-none">
+            <span className="font-sans text-xs font-semibold text-white truncate leading-none">
               {userDisplayName}
             </span>
             <span className="mt-1 font-mono text-[10px] text-white/35 truncate">
@@ -134,7 +134,7 @@ export function Sidebar() {
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant="ghost"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.04] px-2 py-2 text-xs font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/1 hover:bg-white/4 px-2 py-2 text-xs font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
           >
             <Settings size={13} className="text-white/40" />
             <span>Settings</span>
@@ -143,7 +143,7 @@ export function Sidebar() {
           <Button
             onClick={() => signOut({ redirectUrl: "/" })}
             variant="ghost"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-red-500/10 px-2 py-2 text-xs font-medium text-white/60 hover:text-red-400 cursor-pointer transition-colors"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/1 hover:bg-red-500/10 px-2 py-2 text-xs font-medium text-white/60 hover:text-red-400 cursor-pointer transition-colors"
           >
             <LogOut
               size={13}

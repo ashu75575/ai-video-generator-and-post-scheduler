@@ -25,7 +25,7 @@ export default function ClipsPage() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold text-white tracking-tight">
+          <h1 className="font-heading text-2xl font-bold text-white tracking-tight">
             AI Clips Workspace
           </h1>
           <p className="text-sm text-white/40 mt-1">
@@ -45,7 +45,7 @@ export default function ClipsPage() {
         {/* Left Column: Clips List Grid */}
         <div className="lg:col-span-2 space-y-4">
           {clips.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-white/20 border border-dashed border-white/5 bg-white/[0.005] rounded-2xl p-6 min-h-[350px]">
+            <div className="flex flex-col items-center justify-center py-20 text-center text-white/20 border border-dashed border-white/5 bg-white/0.5 rounded-2xl p-6 min-h-[350px]">
               <Video size={36} className="stroke-[1.5] mb-3 text-white/10" />
               <span className="text-sm font-semibold text-white/40">
                 Your clips library is empty
@@ -65,7 +65,7 @@ export default function ClipsPage() {
             clips.map((clip) => (
               <Card
                 key={clip.id}
-                className="bg-white/[0.02] border border-white/5 hover:border-white/10 p-5 rounded-2xl transition-all duration-300 group relative overflow-hidden"
+                className="bg-white/2 border border-white/5 hover:border-white/10 p-5 rounded-2xl transition-all duration-300 group relative overflow-hidden"
               >
                 <div className="flex flex-col sm:flex-row gap-5">
                   {/* Thumbnail container */}
@@ -124,7 +124,7 @@ export default function ClipsPage() {
                         <Button
                           onClick={() => triggerInspectDialog(clip)}
                           variant="ghost"
-                          className="h-8 rounded-lg border border-white/5 bg-white/[0.01] hover:bg-white/[0.06] px-3 text-xs font-semibold text-white/70 hover:text-white cursor-pointer"
+                          className="h-8 rounded-lg border border-white/5 bg-white/1 hover:bg-white/6 px-3 text-xs font-semibold text-white/70 hover:text-white cursor-pointer"
                         >
                           Inspect AI
                         </Button>
@@ -145,10 +145,10 @@ export default function ClipsPage() {
 
         {/* Right Column: AI Auto Captions presets */}
         <div className="space-y-6">
-          <Card className="bg-white/[0.025] border border-white/5 rounded-[20px] p-6">
+          <Card className="bg-white/2.5 border border-white/5 rounded-[20px] p-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles size={16} className="text-forge-accent-2" />
-              <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white">
+              <h3 className="font-heading text-sm font-bold text-white">
                 Subtitles Presets (Auto-Captions)
               </h3>
             </div>
@@ -181,10 +181,10 @@ export default function ClipsPage() {
               ].map((style, i) => (
                 <div
                   key={i}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-300 hover:bg-white/[0.03] ${
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-300 hover:bg-white/3 ${
                     i === 0
                       ? "border-forge-accent bg-forge-accent/5"
-                      : "border-white/5 bg-white/[0.01]"
+                      : "border-white/5 bg-white/1"
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1.5">
@@ -195,7 +195,7 @@ export default function ClipsPage() {
                       {style.tags}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-center h-14 bg-black/60 rounded-lg border border-white/5 font-[family-name:var(--font-space-grotesk)] text-sm font-extrabold tracking-tight text-gradient-forge shadow-inner">
+                  <div className="flex items-center justify-center h-14 bg-black/60 rounded-lg border border-white/5 font-heading text-sm font-extrabold tracking-tight text-gradient-forge shadow-inner">
                     {style.example}
                   </div>
                 </div>

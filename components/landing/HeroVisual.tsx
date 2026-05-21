@@ -78,7 +78,7 @@ export function HeroVisual() {
         initial={mounted ? { opacity: 0, y: 30, rotateX: 8 } : false}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="rounded-[20px] border border-white/10 bg-white/[0.03] p-5 shadow-forge-panel backdrop-blur-xl"
+        className="rounded-[20px] border border-white/10 bg-white/3 p-5 shadow-forge-panel backdrop-blur-xl"
       >
         <div className="mb-4 flex items-center gap-2">
           <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]" />
@@ -144,7 +144,7 @@ export function HeroVisual() {
           </svg>
           {mounted && (
             <motion.div
-              className="absolute top-9 bottom-3.5 w-0.5 rounded-sm bg-gradient-to-b from-transparent via-forge-accent-2 to-transparent shadow-[0_0_8px_#3ECFCF]"
+              className="absolute top-9 bottom-3.5 w-0.5 rounded-sm bg-linear-to-b from-transparent via-forge-accent-2 to-transparent shadow-[0_0_8px_#3ECFCF]"
               style={{ left: `${scanPos}%` }}
             />
           )}
@@ -179,13 +179,13 @@ export function HeroVisual() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   whileHover={{ scale: 1.03 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative cursor-pointer overflow-hidden rounded-[10px] border border-white/8 bg-white/[0.04] px-3 py-2.5 hover:bg-white/[0.07]"
+                  className="relative cursor-pointer overflow-hidden rounded-[10px] border border-white/8 bg-white/4 px-3 py-2.5 hover:bg-white/[0.07]"
                 >
                   <div
                     className="absolute top-0 bottom-0 left-0 w-0.5 rounded-l-sm"
                     style={{ background: clip.color }}
                   />
-                  <p className="mb-1 font-[family-name:var(--font-dm-sans)] text-xs font-semibold text-white/85">
+                  <p className="mb-1 font-sans text-xs font-semibold text-white/85">
                     {clip.label}
                   </p>
                   <div className="flex items-center justify-between">
@@ -238,7 +238,7 @@ export function HeroVisual() {
                 className="h-1.5 w-1.5 rounded-full"
                 style={{ background: p.dot }}
               />
-              <span className="min-w-[70px] font-[family-name:var(--font-dm-sans)] text-xs text-white/70">
+              <span className="min-w-[70px] font-sans text-xs text-white/70">
                 {p.platform}
               </span>
               <span className="font-mono text-[11px] text-white/35">
@@ -263,7 +263,7 @@ export function HeroVisual() {
           <p className="mb-0.5 font-mono text-[11px] text-forge-accent-2">
             ✦ AUTO CAPTIONS
           </p>
-          <p className="font-[family-name:var(--font-dm-sans)] text-xs text-white/70">
+          <p className="font-sans text-xs text-white/70">
             &quot;This changes everything—&quot;
           </p>
         </motion.div>

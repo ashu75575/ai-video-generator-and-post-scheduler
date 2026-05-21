@@ -64,7 +64,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#05050a]/60 backdrop-blur-xl px-4 md:px-8">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/5 bg-forge-bg/60 backdrop-blur-xl px-4 md:px-8">
       {/* Mobile Sidebar Sheet Trigger & Brand */}
       <div className="flex items-center gap-3 md:hidden">
         <Sheet>
@@ -73,7 +73,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-lg border border-white/10 bg-white/[0.03] text-white/70 hover:text-white cursor-pointer"
+                className="h-9 w-9 rounded-lg border border-white/10 bg-white/3 text-white/70 hover:text-white cursor-pointer"
               />
             }
           >
@@ -81,7 +81,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-[270px] bg-[#05050a] border-r border-white/5 p-0"
+            className="w-[270px] bg-forge-bg border-r border-white/5 p-0"
           >
             <div className="h-full pt-4">
               <Sidebar />
@@ -93,7 +93,7 @@ export function Header() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.4)]">
             <Scissors size={12} className="text-white" />
           </div>
-          <span className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold tracking-tight text-white">
+          <span className="font-heading text-sm font-bold tracking-tight text-white">
             ClipForge
           </span>
         </div>
@@ -107,9 +107,9 @@ export function Header() {
         <Input
           type="text"
           placeholder="Quick search clips, posts... (⌘K)"
-          className="h-9 w-full rounded-xl border border-white/8 bg-white/[0.03] pl-9 pr-12 font-[family-name:var(--font-dm-sans)] text-xs text-white placeholder-white/35 transition-all duration-300 focus:border-forge-accent/50 focus:bg-white/[0.05] focus:ring-0"
+          className="h-9 w-full rounded-xl border border-white/8 bg-white/3 pl-9 pr-12 font-sans text-xs text-white placeholder-white/35 transition-all duration-300 focus:border-forge-accent/50 focus:bg-white/5 focus:ring-0"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-white/10 bg-white/[0.05] px-1.5 py-0.5 font-mono text-[9px] text-white/30">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-white/30">
           ⌘K
         </div>
       </div>
@@ -120,7 +120,7 @@ export function Header() {
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             onClick={() => setIsUploadOpen(true)}
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-gradient-forge px-4 font-[family-name:var(--font-dm-sans)] text-xs font-bold text-white shadow-md cursor-pointer"
+            className="flex h-9 items-center gap-1.5 rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow-md cursor-pointer"
           >
             <Plus size={14} className="stroke-[2.5]" />
             <span>Create Clip</span>
@@ -134,7 +134,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-9 w-9 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-white/60 hover:text-white cursor-pointer transition-colors"
+                className="relative h-9 w-9 rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/60 hover:text-white cursor-pointer transition-colors"
               />
             }
           >

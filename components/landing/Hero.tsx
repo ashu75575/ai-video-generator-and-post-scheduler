@@ -59,7 +59,7 @@ export function Hero() {
               >
                 <Sparkles size={12} className="text-forge-accent" />
               </motion.div>
-              <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
+              <span className="font-sans text-xs font-medium text-forge-accent">
                 Powered by GPT-4o Vision · v2.1
               </span>
             </div>
@@ -68,7 +68,7 @@ export function Hero() {
           {/* Headline */}
           <motion.h1
             variants={item}
-            className="mb-6 font-[family-name:var(--font-space-grotesk)] text-[clamp(38px,5vw,64px)] leading-[1.07] font-extrabold tracking-[-2px] text-white"
+            className="mb-6 font-heading text-[clamp(38px,5vw,64px)] leading-[1.07] font-extrabold tracking-[-2px] text-white"
           >
             Turn long videos
             <br />
@@ -80,7 +80,7 @@ export function Hero() {
           {/* Subtext */}
           <motion.p
             variants={item}
-            className="mb-9 max-w-[440px] font-[family-name:var(--font-dm-sans)] text-[17px] leading-relaxed text-white/50"
+            className="mb-9 max-w-[440px] font-sans text-[17px] leading-relaxed text-white/50"
           >
             ClipForge AI analyzes your content, detects viral moments with AI,
             generates captions, and schedules posts across every platform — in
@@ -94,7 +94,7 @@ export function Hero() {
               whileHover={{ scale: 1.04, boxShadow: `0 0 50px ${FORGE_GLOW}` }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2 rounded-[10px] bg-gradient-forge px-[26px] py-3.5 font-[family-name:var(--font-dm-sans)] text-[15px] font-bold text-white shadow-[0_0_24px_rgba(124,106,250,0.3)] transition-shadow duration-300"
+              className="flex cursor-pointer items-center gap-2 rounded-[10px] bg-gradient-forge px-[26px] py-3.5 font-sans text-[15px] font-bold text-white shadow-[0_0_24px_rgba(124,106,250,0.3)] transition-shadow duration-300"
             >
               Start clipping free <ArrowRight size={16} />
             </motion.button>
@@ -106,7 +106,7 @@ export function Hero() {
               }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2 rounded-[10px] border border-white/12 bg-white/[0.04] px-6 py-3.5 font-[family-name:var(--font-dm-sans)] text-[15px] font-semibold text-white/75 transition-colors duration-200"
+              className="flex cursor-pointer items-center gap-2 rounded-[10px] border border-white/12 bg-white/4 px-6 py-3.5 font-sans text-[15px] font-semibold text-white/75 transition-colors duration-200"
             >
               <Play size={15} fill="currentColor" /> Watch demo
             </motion.button>
@@ -124,13 +124,11 @@ export function Hero() {
                     duration: 0.5,
                     ease: [0.16, 1, 0.3, 1],
                   }}
-                  className="font-[family-name:var(--font-space-grotesk)] text-xl font-extrabold text-white"
+                  className="font-heading text-xl font-extrabold text-white"
                 >
                   {val}
                 </motion.div>
-                <div className="font-[family-name:var(--font-dm-sans)] text-xs text-white/35">
-                  {label}
-                </div>
+                <div className="font-sans text-xs text-white/35">{label}</div>
               </div>
             ))}
           </motion.div>

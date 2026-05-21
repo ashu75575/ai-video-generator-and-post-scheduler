@@ -32,7 +32,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CAPTION_STYLES, CaptionStyle, getStyleById } from "@/lib/caption-styles";
+import {
+  CAPTION_STYLES,
+  CaptionStyle,
+  getStyleById,
+} from "@/lib/caption-styles";
 import { Paintbrush } from "lucide-react";
 
 interface CaptionWord {
@@ -263,7 +267,7 @@ export default function ProjectAnalysisPage() {
       {/* Background radial overlays */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[15%] top-[5%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.08)_0%,transparent_70%)] blur-[50px]" />
-        <div className="absolute right-[10%] top-[25%] h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.05)_0%,transparent_70%)] blur-[40px]" />
+        <div className="absolute right-[10%] top-[25%] h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(6,182,212,0.05)_0%,transparent_70%)] blur-2xl" />
       </div>
 
       <div className="max-w-7xl mx-auto space-y-8 relative z-10">
@@ -285,7 +289,7 @@ export default function ProjectAnalysisPage() {
         {/* Project Name Header */}
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-[family-name:var(--font-space-grotesk)] font-bold bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold bg-linear-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
               {project.name}
             </h1>
             <span
@@ -312,7 +316,7 @@ export default function ProjectAnalysisPage() {
             PIPELINE STATUS VIEW (Active during processing)
             ========================================== */}
         {project.status !== "ready" && (
-          <Card className="border border-white/10 bg-white/[0.01] backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-violet-950/20">
+          <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-violet-950/20">
             <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-500 animate-pulse" />
               ClipForge Processing Pipeline
@@ -384,7 +388,7 @@ export default function ProjectAnalysisPage() {
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
+                          className="h-full bg-linear-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
@@ -435,7 +439,7 @@ export default function ProjectAnalysisPage() {
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-violet-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 animate-pulse"
+                          className="h-full bg-linear-to-r from-violet-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 animate-pulse"
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
@@ -461,7 +465,7 @@ export default function ProjectAnalysisPage() {
               >
                 <div className="flex items-center gap-2 border-b border-white/5 pb-4">
                   <Flame className="h-5 w-5 text-violet-500" />
-                  <h2 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white uppercase tracking-wider">
+                  <h2 className="font-heading text-lg font-bold text-white uppercase tracking-wider">
                     Isolated AI Clips Grid ({project.shortVideos.length})
                   </h2>
                 </div>
@@ -477,10 +481,10 @@ export default function ProjectAnalysisPage() {
                     return (
                       <Card
                         key={clip.id}
-                        className="border border-white/10 bg-white/[0.01] hover:bg-white/[0.02] hover:border-white/15 backdrop-blur-xl p-5 rounded-3xl flex flex-col justify-between gap-5 transition-all duration-300 shadow-xl overflow-hidden group relative"
+                        className="border border-white/10 bg-white/1 hover:bg-white/2 hover:border-white/15 backdrop-blur-xl p-5 rounded-3xl flex flex-col justify-between gap-5 transition-all duration-300 shadow-xl overflow-hidden group relative"
                       >
                         {/* Top: Video Player Panel */}
-                        <div className="w-full aspect-[9/16] relative rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+                        <div className="w-full aspect-9/16 relative rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
                           <RemotionPlayer
                             videoUrl={project.videoUrl || ""}
                             startTime={clip.startTime}
@@ -503,7 +507,7 @@ export default function ProjectAnalysisPage() {
                         <div className="space-y-4 flex-1 flex flex-col justify-between">
                           <div className="space-y-2">
                             <div className="flex items-start justify-between gap-3">
-                              <h3 className="text-sm font-bold text-white font-[family-name:var(--font-space-grotesk)] leading-tight flex-1">
+                              <h3 className="text-sm font-bold text-white font-heading leading-tight flex-1">
                                 {clip.title}
                               </h3>
 
@@ -530,7 +534,7 @@ export default function ProjectAnalysisPage() {
                         </div>
 
                         {/* Bottom: Action Buttons */}
-                        <div className="flex gap-2 pt-2 border-t border-white/[0.04]">
+                        <div className="flex gap-2 pt-2 border-t border-white/4">
                           <Button
                             onClick={() => handleEditClick(clip)}
                             className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1 cursor-pointer transition-colors"
@@ -547,7 +551,7 @@ export default function ProjectAnalysisPage() {
                           </Button>
                           <Button
                             onClick={() => handleScheduleClick(clip)}
-                            className="bg-gradient-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
+                            className="bg-linear-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
                           >
                             <Calendar size={11} /> Schedule
                           </Button>
@@ -563,7 +567,7 @@ export default function ProjectAnalysisPage() {
                     onClick={() =>
                       setShowTechnicalDetails(!showTechnicalDetails)
                     }
-                    className="w-full flex justify-between items-center p-4 bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 rounded-2xl transition-colors font-mono text-xs font-bold text-white/60 uppercase tracking-wider"
+                    className="w-full flex justify-between items-center p-4 bg-white/1 hover:bg-white/2 border border-white/5 rounded-2xl transition-colors font-mono text-xs font-bold text-white/60 uppercase tracking-wider"
                   >
                     <span className="flex items-center gap-2">
                       <FileText size={14} className="text-violet-400" />
@@ -587,7 +591,7 @@ export default function ProjectAnalysisPage() {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {/* Deepgram generated transcript */}
-                          <Card className="border border-white/10 bg-white/[0.01] p-5 rounded-2xl flex flex-col">
+                          <Card className="border border-white/10 bg-white/1 p-5 rounded-2xl flex flex-col">
                             <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-white/60 mb-3.5 flex items-center gap-2">
                               Full Source Transcript
                             </h3>
@@ -608,7 +612,7 @@ export default function ProjectAnalysisPage() {
                           </Card>
 
                           {/* Words timeline */}
-                          <Card className="border border-white/10 bg-white/[0.01] p-5 rounded-2xl flex flex-col">
+                          <Card className="border border-white/10 bg-white/1 p-5 rounded-2xl flex flex-col">
                             <h3 className="text-xs font-bold uppercase tracking-wider font-mono text-white/60 mb-3.5 flex items-center gap-2">
                               Aligned Timecodes (JSON Words)
                             </h3>
@@ -619,7 +623,7 @@ export default function ProjectAnalysisPage() {
                                   {project.captions.map((w, idx) => (
                                     <div
                                       key={idx}
-                                      className="px-2 py-0.5 bg-white/[0.02] border border-white/5 rounded flex items-center gap-1"
+                                      className="px-2 py-0.5 bg-white/2 border border-white/5 rounded flex items-center gap-1"
                                     >
                                       <span className="text-white font-bold">
                                         {w.word}
@@ -648,14 +652,15 @@ export default function ProjectAnalysisPage() {
 
         {/* DIALOG: EDIT CAPTION STYLE*/}
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-          <DialogContent className="!max-w-[90vw] !w-[90vw] h-[85vh] max-h-[800px] rounded-3xl border border-white/10 bg-black/90 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80 flex flex-col overflow-hidden">
+          <DialogContent className="max-w-[90vw]! w-[90vw] h-[85vh] max-h-[800px] rounded-3xl border border-white/10 bg-black/90 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80 flex flex-col overflow-hidden">
             <DialogHeader className="shrink-0 mb-4">
-              <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-white flex items-center gap-2">
+              <DialogTitle className="font-heading text-xl font-bold text-white flex items-center gap-2">
                 <Paintbrush size={18} className="text-violet-500" />
                 Customize Caption Design
               </DialogTitle>
               <DialogDescription className="text-xs text-white/40">
-                Customize fonts, colors, and layout styles for captions in real-time. Changes will be saved to your video.
+                Customize fonts, colors, and layout styles for captions in
+                real-time. Changes will be saved to your video.
               </DialogDescription>
             </DialogHeader>
 
@@ -676,13 +681,16 @@ export default function ProjectAnalysisPage() {
                           className={`p-3 rounded-xl border text-left cursor-pointer transition-all duration-200 ${
                             customStyle.id === preset.id
                               ? "border-violet-500 bg-violet-500/10 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
-                              : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
+                              : "border-white/5 bg-white/2 hover:bg-white/4 hover:border-white/10"
                           }`}
                         >
                           <span className="block font-semibold text-xs text-white">
                             {preset.name}
                           </span>
-                          <span className="block text-[9px] text-white/40 font-mono mt-0.5 truncate" style={{ fontFamily: preset.fontFamily }}>
+                          <span
+                            className="block text-[9px] text-white/40 font-mono mt-0.5 truncate"
+                            style={{ fontFamily: preset.fontFamily }}
+                          >
                             {preset.fontFamily.split(",")[0].replace(/'/g, "")}
                           </span>
                         </button>
@@ -691,29 +699,47 @@ export default function ProjectAnalysisPage() {
                   </div>
 
                   {/* Font Customization */}
-                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                  <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
                     <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
                       Typography & Alignment
                     </span>
 
                     {/* Font Family Selection */}
                     <div className="space-y-2">
-                      <label className="text-xs text-white/60 block">Font Family</label>
+                      <label className="text-xs text-white/60 block">
+                        Font Family
+                      </label>
                       <div className="flex flex-wrap gap-2">
                         {[
-                          { label: "Impact", value: "Impact, Arial Black, sans-serif" },
-                          { label: "Outfit", value: "'Outfit', 'Inter', sans-serif" },
+                          {
+                            label: "Impact",
+                            value: "Impact, Arial Black, sans-serif",
+                          },
+                          {
+                            label: "Outfit",
+                            value: "'Outfit', 'Inter', sans-serif",
+                          },
                           { label: "Inter", value: "'Inter', sans-serif" },
-                          { label: "Courier New", value: "'Courier New', Courier, monospace" },
-                          { label: "Space Grotesk", value: "'Space Grotesk', sans-serif" },
+                          {
+                            label: "Courier New",
+                            value: "'Courier New', Courier, monospace",
+                          },
+                          {
+                            label: "Space Grotesk",
+                            value: "'Space Grotesk', sans-serif",
+                          },
                         ].map((f) => (
                           <button
                             key={f.label}
-                            onClick={() => setCustomStyle(prev => prev ? { ...prev, fontFamily: f.value } : null)}
+                            onClick={() =>
+                              setCustomStyle((prev) =>
+                                prev ? { ...prev, fontFamily: f.value } : null,
+                              )
+                            }
                             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                               customStyle.fontFamily === f.value
                                 ? "border-violet-500 bg-violet-500/20 text-white"
-                                : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white"
+                                : "border-white/5 bg-white/2 text-white/60 hover:bg-white/4 hover:text-white"
                             }`}
                           >
                             {f.label}
@@ -724,7 +750,9 @@ export default function ProjectAnalysisPage() {
 
                     {/* Case Transformation */}
                     <div className="space-y-2 pt-2">
-                      <label className="text-xs text-white/60 block">Letter Case</label>
+                      <label className="text-xs text-white/60 block">
+                        Letter Case
+                      </label>
                       <div className="flex gap-2">
                         {[
                           { label: "ALL CAPS", value: "uppercase" as const },
@@ -733,11 +761,17 @@ export default function ProjectAnalysisPage() {
                         ].map((c) => (
                           <button
                             key={c.label}
-                            onClick={() => setCustomStyle(prev => prev ? { ...prev, textTransform: c.value } : null)}
+                            onClick={() =>
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? { ...prev, textTransform: c.value }
+                                  : null,
+                              )
+                            }
                             className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-center ${
                               customStyle.textTransform === c.value
                                 ? "border-violet-500 bg-violet-500/20 text-white"
-                                : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white"
+                                : "border-white/5 bg-white/2 text-white/60 hover:bg-white/4 hover:text-white"
                             }`}
                           >
                             {c.label}
@@ -748,19 +782,31 @@ export default function ProjectAnalysisPage() {
                   </div>
 
                   {/* Colors Customization */}
-                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                  <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
                     <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
                       Subtitles Styling & Colors
                     </span>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs text-white/60">Active Word Color</label>
-                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-2 rounded-xl">
+                        <label className="text-xs text-white/60">
+                          Active Word Color
+                        </label>
+                        <div className="flex items-center gap-2 bg-white/2 border border-white/5 p-2 rounded-xl">
                           <input
                             type="color"
-                            value={customStyle.colorActive.startsWith("#") ? customStyle.colorActive : "#facc15"}
-                            onChange={(e) => setCustomStyle(prev => prev ? { ...prev, colorActive: e.target.value } : null)}
+                            value={
+                              customStyle.colorActive.startsWith("#")
+                                ? customStyle.colorActive
+                                : "#facc15"
+                            }
+                            onChange={(e) =>
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? { ...prev, colorActive: e.target.value }
+                                  : null,
+                              )
+                            }
                             className="w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer shrink-0"
                           />
                           <span className="text-xs font-mono text-white/70 uppercase">
@@ -770,12 +816,24 @@ export default function ProjectAnalysisPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs text-white/60">Inactive Word Color</label>
-                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-2 rounded-xl">
+                        <label className="text-xs text-white/60">
+                          Inactive Word Color
+                        </label>
+                        <div className="flex items-center gap-2 bg-white/2 border border-white/5 p-2 rounded-xl">
                           <input
                             type="color"
-                            value={customStyle.colorInactive.startsWith("#") ? customStyle.colorInactive : "#ffffff"}
-                            onChange={(e) => setCustomStyle(prev => prev ? { ...prev, colorInactive: e.target.value } : null)}
+                            value={
+                              customStyle.colorInactive.startsWith("#")
+                                ? customStyle.colorInactive
+                                : "#ffffff"
+                            }
+                            onChange={(e) =>
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? { ...prev, colorInactive: e.target.value }
+                                  : null,
+                              )
+                            }
                             className="w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer shrink-0"
                           />
                           <span className="text-xs font-mono text-white/70 uppercase">
@@ -787,19 +845,29 @@ export default function ProjectAnalysisPage() {
                   </div>
 
                   {/* Sizes Customization */}
-                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                  <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
                     <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
                       Caption Sizes
                     </span>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-xs text-white/60">Active Font Size</label>
-                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1 rounded-xl justify-between">
+                        <label className="text-xs text-white/60">
+                          Active Font Size
+                        </label>
+                        <div className="flex items-center gap-2 bg-white/2 border border-white/5 p-1 rounded-xl justify-between">
                           <button
                             onClick={() => {
-                              const val = parseFloat(customStyle.fontSizeActive) - 0.2;
-                              setCustomStyle(prev => prev ? { ...prev, fontSizeActive: `${val.toFixed(1)}rem` } : null);
+                              const val =
+                                parseFloat(customStyle.fontSizeActive) - 0.2;
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      fontSizeActive: `${val.toFixed(1)}rem`,
+                                    }
+                                  : null,
+                              );
                             }}
                             className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
                           >
@@ -810,8 +878,16 @@ export default function ProjectAnalysisPage() {
                           </span>
                           <button
                             onClick={() => {
-                              const val = parseFloat(customStyle.fontSizeActive) + 0.2;
-                              setCustomStyle(prev => prev ? { ...prev, fontSizeActive: `${val.toFixed(1)}rem` } : null);
+                              const val =
+                                parseFloat(customStyle.fontSizeActive) + 0.2;
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      fontSizeActive: `${val.toFixed(1)}rem`,
+                                    }
+                                  : null,
+                              );
                             }}
                             className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
                           >
@@ -821,12 +897,22 @@ export default function ProjectAnalysisPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs text-white/60">Inactive Font Size</label>
-                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1 rounded-xl justify-between">
+                        <label className="text-xs text-white/60">
+                          Inactive Font Size
+                        </label>
+                        <div className="flex items-center gap-2 bg-white/2 border border-white/5 p-1 rounded-xl justify-between">
                           <button
                             onClick={() => {
-                              const val = parseFloat(customStyle.fontSizeInactive) - 0.2;
-                              setCustomStyle(prev => prev ? { ...prev, fontSizeInactive: `${val.toFixed(1)}rem` } : null);
+                              const val =
+                                parseFloat(customStyle.fontSizeInactive) - 0.2;
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      fontSizeInactive: `${val.toFixed(1)}rem`,
+                                    }
+                                  : null,
+                              );
                             }}
                             className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
                           >
@@ -837,8 +923,16 @@ export default function ProjectAnalysisPage() {
                           </span>
                           <button
                             onClick={() => {
-                              const val = parseFloat(customStyle.fontSizeInactive) + 0.2;
-                              setCustomStyle(prev => prev ? { ...prev, fontSizeInactive: `${val.toFixed(1)}rem` } : null);
+                              const val =
+                                parseFloat(customStyle.fontSizeInactive) + 0.2;
+                              setCustomStyle((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      fontSizeInactive: `${val.toFixed(1)}rem`,
+                                    }
+                                  : null,
+                              );
                             }}
                             className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
                           >
@@ -850,7 +944,7 @@ export default function ProjectAnalysisPage() {
                   </div>
 
                   {/* Background Box Opacity */}
-                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                  <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block">
                         Background Overlay Opacity
@@ -858,9 +952,12 @@ export default function ProjectAnalysisPage() {
                       <span className="text-xs font-mono font-bold text-white/80">
                         {Math.round(
                           (customStyle.backgroundColor.includes("rgba")
-                            ? parseFloat(customStyle.backgroundColor.split(",")[3])
-                            : 0.9) * 100
-                        )}%
+                            ? parseFloat(
+                                customStyle.backgroundColor.split(",")[3],
+                              )
+                            : 0.9) * 100,
+                        )}
+                        %
                       </span>
                     </div>
                     <div className="flex items-center gap-4">
@@ -871,15 +968,20 @@ export default function ProjectAnalysisPage() {
                         step="0.05"
                         value={
                           customStyle.backgroundColor.includes("rgba")
-                            ? parseFloat(customStyle.backgroundColor.split(",")[3])
+                            ? parseFloat(
+                                customStyle.backgroundColor.split(",")[3],
+                              )
                             : 0.9
                         }
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          setCustomStyle(prev => {
+                          setCustomStyle((prev) => {
                             if (!prev) return null;
                             const base = prev.backgroundColor.startsWith("rgba")
-                              ? prev.backgroundColor.substring(0, prev.backgroundColor.lastIndexOf(","))
+                              ? prev.backgroundColor.substring(
+                                  0,
+                                  prev.backgroundColor.lastIndexOf(","),
+                                )
                               : "rgba(5, 5, 10";
                             return {
                               ...prev,
@@ -915,14 +1017,14 @@ export default function ProjectAnalysisPage() {
               <Button
                 onClick={() => setIsEditModalOpen(false)}
                 variant="ghost"
-                className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-xs font-semibold text-white/70 cursor-pointer"
+                className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/70 cursor-pointer"
               >
                 Cancel
               </Button>
               <Button
                 disabled={isSavingStyle}
                 onClick={handleApplyStyle}
-                className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-5 text-xs font-bold text-white shadow-md shadow-violet-900/30 hover:shadow-violet-900/50 hover:from-violet-500 hover:to-indigo-400 cursor-pointer"
+                className="rounded-xl bg-linear-to-r from-violet-600 to-indigo-500 px-5 text-xs font-bold text-white shadow-md shadow-violet-900/30 hover:shadow-violet-900/50 hover:from-violet-500 hover:to-indigo-400 cursor-pointer"
               >
                 {isSavingStyle ? "Saving Style..." : "Apply Style"}
               </Button>

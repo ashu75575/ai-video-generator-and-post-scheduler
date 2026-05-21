@@ -21,7 +21,7 @@ export default function SchedulePage() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold text-white tracking-tight">
+          <h1 className="font-heading text-2xl font-bold text-white tracking-tight">
             Post Delivery Pipeline
           </h1>
           <p className="text-sm text-white/40 mt-1">
@@ -33,13 +33,13 @@ export default function SchedulePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Columns: Scheduled queue timeline */}
         <div className="lg:col-span-2 space-y-4">
-          <Card className="bg-white/[0.025] border border-white/5 rounded-[20px] p-6">
-            <h2 className="font-[family-name:var(--font-space-grotesk)] text-base font-bold text-white mb-5">
+          <Card className="bg-white/2.5 border border-white/5 rounded-[20px] p-6">
+            <h2 className="font-heading text-base font-bold text-white mb-5">
               Delivery Queue
             </h2>
 
             {scheduledPosts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center text-white/20 border border-dashed border-white/5 rounded-2xl bg-white/[0.005]">
+              <div className="flex flex-col items-center justify-center py-16 text-center text-white/20 border border-dashed border-white/5 rounded-2xl bg-white/0.5">
                 <Calendar
                   size={32}
                   className="stroke-[1.5] mb-2.5 text-white/10"
@@ -62,9 +62,9 @@ export default function SchedulePage() {
                 {scheduledPosts.map((post) => (
                   <div key={post.id} className="relative space-y-2">
                     {/* Glowing bullet on timeline */}
-                    <span className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-forge-accent shadow-[0_0_8px_#7c6afa] ring-4 ring-forge-bg" />
+                    <span className="absolute left-[-30px] top-1.5 h-3 w-3 rounded-full bg-forge-accent shadow-[0_0_8px_#7c6afa] ring-4 ring-forge-bg" />
 
-                    <div className="p-4 rounded-xl bg-white/[0.015] border border-white/5 hover:border-white/10 hover:bg-white/[0.025] transition-all duration-300">
+                    <div className="p-4 rounded-xl bg-white/1.5 border border-white/5 hover:border-white/10 hover:bg-white/2.5 transition-all duration-300">
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                         <div className="flex items-center gap-2">
                           <Badge className="bg-forge-accent-2/10 border-forge-accent-2/20 text-forge-accent-2 font-mono text-[9px] uppercase tracking-wider">
@@ -82,7 +82,7 @@ export default function SchedulePage() {
                       <h3 className="font-semibold text-sm text-white mb-1.5">
                         {post.title}
                       </h3>
-                      <p className="text-xs text-white/50 italic leading-relaxed font-[family-name:var(--font-dm-sans)]">
+                      <p className="text-xs text-white/50 italic leading-relaxed font-sans">
                         "{post.caption}"
                       </p>
                     </div>
@@ -95,8 +95,8 @@ export default function SchedulePage() {
 
         {/* Right Column: Connection accounts status */}
         <div className="space-y-6">
-          <Card className="bg-white/[0.025] border border-white/5 rounded-[20px] p-6">
-            <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white mb-4">
+          <Card className="bg-white/2.5 border border-white/5 rounded-[20px] p-6">
+            <h3 className="font-heading text-sm font-bold text-white mb-4">
               Connected Accounts
             </h3>
 
@@ -133,7 +133,7 @@ export default function SchedulePage() {
               ].map((acc, i) => (
                 <div
                   key={i}
-                  className="p-3.5 rounded-xl bg-white/[0.015] border border-white/5 flex items-center justify-between gap-3"
+                  className="p-3.5 rounded-xl bg-white/1.5 border border-white/5 flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0 space-y-0.5">
                     <span className="block font-semibold text-xs text-white">

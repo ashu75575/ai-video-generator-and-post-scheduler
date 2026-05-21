@@ -12,7 +12,7 @@ export function AuthButtons() {
             type="button"
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className="font-[family-name:var(--font-dm-sans)] text-sm text-white/60 transition-colors duration-200 hover:text-white cursor-pointer"
+            className="font-sans text-sm text-white/60 transition-colors duration-200 hover:text-white cursor-pointer"
           >
             Sign in
           </motion.button>
@@ -25,7 +25,7 @@ export function AuthButtons() {
               boxShadow: "0 0 30px rgba(124,106,250,0.45)",
             }}
             whileTap={{ scale: 0.97 }}
-            className="cursor-pointer rounded-lg bg-gradient-forge px-[18px] py-2 font-[family-name:var(--font-dm-sans)] text-sm font-semibold tracking-wide text-white transition-shadow duration-200"
+            className="cursor-pointer rounded-lg bg-gradient-forge px-[18px] py-2 font-sans text-sm font-semibold tracking-wide text-white transition-shadow duration-200"
           >
             Get started free
           </motion.button>

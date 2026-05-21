@@ -22,11 +22,11 @@ Use hex values with opacity modifiers (e.g., `#FF6B6B` for danger/energy accents
 
 ## 2. Typography
 
-| Role        | Font Variable          | Class                                          |
-| ----------- | ---------------------- | ---------------------------------------------- |
-| Headings    | `--font-space-grotesk` | `font-[family-name:var(--font-space-grotesk)]` |
-| Body / UI   | `--font-dm-sans`       | `font-[family-name:var(--font-dm-sans)]`       |
-| Code / Mono | `--font-geist-mono`    | `font-mono`                                    |
+| Role        | Font Variable          | Class          |
+| ----------- | ---------------------- | -------------- |
+| Headings    | `--font-space-grotesk` | `font-heading` |
+| Body / UI   | `--font-dm-sans`       | `font-sans`    |
+| Code / Mono | `--font-geist-mono`    | `font-mono`    |
 
 - Headings use `font-extrabold`, `tracking-[-1.5px]` to `tracking-[-2px]`
 - Body uses `leading-relaxed`
@@ -104,9 +104,7 @@ All section badges follow this pattern:
 
 ```tsx
 <div className="inline-flex items-center gap-1.5 rounded-full border border-forge-accent/20 bg-forge-accent/10 px-3.5 py-1.25">
-  <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
-    Label
-  </span>
+  <span className="font-sans text-xs font-medium text-forge-accent">Label</span>
 </div>
 ```
 

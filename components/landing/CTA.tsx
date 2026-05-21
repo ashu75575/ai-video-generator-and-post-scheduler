@@ -68,19 +68,19 @@ export function CTA() {
                 fill={FORGE_ACCENT}
               />
             </motion.div>
-            <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
+            <span className="font-sans text-xs font-medium text-forge-accent">
               No credit card required
             </span>
           </div>
 
           {/* Headline */}
-          <h2 className="mb-5 font-[family-name:var(--font-space-grotesk)] text-[clamp(36px,5vw,64px)] leading-[1.05] font-extrabold tracking-[-2px] text-white">
+          <h2 className="mb-5 font-heading text-[clamp(36px,5vw,64px)] leading-[1.05] font-extrabold tracking-[-2px] text-white">
             Start creating viral
             <br />
             <span className="text-gradient-forge">clips today. For free.</span>
           </h2>
 
-          <p className="mb-11 font-[family-name:var(--font-dm-sans)] text-[17px] leading-relaxed text-white/45">
+          <p className="mb-11 font-sans text-[17px] leading-relaxed text-white/45">
             Join 10,000+ creators who use ClipForge AI to grow faster.
             <br />
             Process your first 5 videos for free, no setup required.
@@ -93,7 +93,7 @@ export function CTA() {
               whileHover={{ scale: 1.05, boxShadow: `0 0 70px ${FORGE_GLOW}` }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-gradient-forge px-8 py-4 font-[family-name:var(--font-dm-sans)] text-base font-bold text-white shadow-[0_0_30px_rgba(124,106,250,0.3)] transition-shadow duration-300"
+              className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-gradient-forge px-8 py-4 font-sans text-base font-bold text-white shadow-[0_0_30px_rgba(124,106,250,0.3)] transition-shadow duration-300"
             >
               Get started free <ArrowRight size={18} />
             </motion.button>
@@ -105,7 +105,7 @@ export function CTA() {
               }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-7 py-4 font-[family-name:var(--font-dm-sans)] text-base font-semibold text-white/60 transition-colors duration-200"
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-7 py-4 font-sans text-base font-semibold text-white/60 transition-colors duration-200"
             >
               Schedule a demo
             </motion.button>
@@ -126,9 +126,7 @@ export function CTA() {
                 >
                   <Check size={10} className="text-forge-accent-2" />
                 </div>
-                <span className="font-[family-name:var(--font-dm-sans)] text-[13px] text-white/40">
-                  {f}
-                </span>
+                <span className="font-sans text-[13px] text-white/40">{f}</span>
               </div>
             ))}
           </motion.div>

@@ -52,11 +52,11 @@ export function Features() {
               className="h-1.5 w-1.5 rounded-full bg-forge-accent-2"
               style={{ boxShadow: "0 0 6px #3ECFCF" }}
             />
-            <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent-2">
+            <span className="font-sans text-xs font-medium text-forge-accent-2">
               Capabilities
             </span>
           </div>
-          <h2 className="max-w-[560px] font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
+          <h2 className="max-w-[560px] font-heading text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
             Everything you need
             <br />
             to go viral, <span className="text-gradient-forge">automated.</span>
@@ -110,7 +110,7 @@ export function Features() {
                 ease: "easeInOut",
               }}
               style={{ willChange: "transform" }}
-              className="mt-4 h-0.5 rounded-sm bg-gradient-to-r from-transparent via-forge-accent-2 to-transparent"
+              className="mt-4 h-0.5 rounded-sm bg-linear-to-r from-transparent via-forge-accent-2 to-transparent"
             />
             <div className="mt-2.5 flex gap-1.5">
               {["EN", "ES", "FR", "DE", "ZH", "+35"].map((lang) => (

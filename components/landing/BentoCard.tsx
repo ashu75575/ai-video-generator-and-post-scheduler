@@ -67,8 +67,8 @@ export function BentoCard({
           transition: "box-shadow 0.3s ease",
         }}
         className={cn(
-          "group relative cursor-default overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/[0.025] p-7 min-h-fit",
-          "hover:border-white/[0.12]",
+          "group relative cursor-default overflow-hidden rounded-[18px] border border-white/[0.07] bg-white/2.5 p-7 min-h-fit",
+          "hover:border-white/12",
           "[transition:border-color_300ms]",
         )}
       >
@@ -103,12 +103,12 @@ export function BentoCard({
         </motion.div>
 
         {/* Title */}
-        <div className="mb-2 font-[family-name:var(--font-space-grotesk)] text-[17px] font-bold text-white">
+        <div className="mb-2 font-heading text-[17px] font-bold text-white">
           {title}
         </div>
 
         {/* Description */}
-        <div className="font-[family-name:var(--font-dm-sans)] text-sm leading-relaxed text-white/45">
+        <div className="font-sans text-sm leading-relaxed text-white/45">
           {desc}
         </div>
 

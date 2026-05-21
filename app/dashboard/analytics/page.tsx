@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
       className="space-y-6 max-w-[1200px] mx-auto"
     >
       <div>
-        <h1 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold text-white tracking-tight">
+        <h1 className="font-heading text-2xl font-bold text-white tracking-tight">
           Platform Performance
         </h1>
         <p className="text-sm text-white/40 mt-1">
@@ -59,10 +59,10 @@ export default function AnalyticsPage() {
       {/* Growth charts and data panels */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Multi-channel view count AreaChart */}
-        <Card className="lg:col-span-2 bg-white/[0.025] border border-white/5 rounded-[20px] p-6">
+        <Card className="lg:col-span-2 bg-white/2.5 border border-white/5 rounded-[20px] p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white">
+              <h3 className="font-heading text-sm font-bold text-white">
                 Weekly Views Analytics
               </h3>
               <p className="text-[10px] text-white/30">
@@ -152,15 +152,15 @@ export default function AnalyticsPage() {
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full w-full bg-white/[0.02] animate-pulse rounded-xl" />
+              <div className="h-full w-full bg-white/2 animate-pulse rounded-xl" />
             )}
           </div>
         </Card>
 
         {/* Virality Factors bar chart */}
-        <Card className="bg-white/[0.025] border border-white/5 rounded-[20px] p-6">
+        <Card className="bg-white/2.5 border border-white/5 rounded-[20px] p-6">
           <div className="mb-6">
-            <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white">
+            <h3 className="font-heading text-sm font-bold text-white">
               Success Factors Analysis
             </h3>
             <p className="text-[10px] text-white/30">
@@ -208,7 +208,7 @@ export default function AnalyticsPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full w-full bg-white/[0.02] animate-pulse rounded-xl" />
+              <div className="h-full w-full bg-white/2 animate-pulse rounded-xl" />
             )}
           </div>
         </Card>

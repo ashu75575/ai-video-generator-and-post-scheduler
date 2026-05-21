@@ -68,7 +68,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-forge-bg font-[family-name:var(--font-dm-sans)] text-white overflow-x-hidden selection:bg-forge-accent/30 relative">
+    <div className="min-h-screen bg-forge-bg font-sans text-white overflow-x-hidden selection:bg-forge-accent/30 relative">
       {/* Premium Ambient Glow Background Elements */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {/* Dot pattern */}
@@ -138,7 +138,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       >
         <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#0d0d18]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
           <DialogHeader>
-            <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2">
               <Sparkles size={16} className="text-forge-accent" />
               Forge Viral Clips
             </DialogTitle>
@@ -159,7 +159,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 className={`border border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
                   dragActive
                     ? "border-forge-accent bg-forge-accent/5"
-                    : "border-white/8 hover:border-white/15 bg-white/[0.01]"
+                    : "border-white/8 hover:border-white/15 bg-white/1"
                 }`}
               >
                 <input
@@ -217,7 +217,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Input
                 type="text"
                 placeholder="Paste YouTube, Zoom, or Twitch recording URL..."
-                className="h-9 w-full rounded-xl border border-white/8 bg-white/[0.02] text-xs text-white placeholder-white/25 focus:border-forge-accent/50 focus:ring-0 focus:bg-white/[0.04]"
+                className="h-9 w-full rounded-xl border border-white/8 bg-white/2 text-xs text-white placeholder-white/25 focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4"
                 onChange={(e) => {
                   if (e.target.value.trim() !== "") {
                     setSelectedFile({ name: "YouTube Import Link" } as any);
@@ -231,14 +231,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Button
                   onClick={() => setIsUploadOpen(false)}
                   variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   disabled={!selectedFile}
                   onClick={startAIForger}
-                  className="rounded-xl bg-gradient-forge px-4 font-[family-name:var(--font-dm-sans)] text-xs font-bold text-white shadow-md disabled:opacity-40 cursor-pointer"
+                  className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow-md disabled:opacity-40 cursor-pointer"
                 >
                   Forge Shorts
                 </Button>
@@ -304,14 +304,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     Source: {selectedClip.sourceVideo}
                   </span>
                 </div>
-                <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white mt-1.5">
+                <DialogTitle className="font-heading text-lg font-bold text-white mt-1.5">
                   {selectedClip.title}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                 {/* 9:16 Video player mockup on left */}
-                <div className="md:col-span-2 relative aspect-[9/16] max-h-[340px] mx-auto rounded-xl overflow-hidden border border-white/10 bg-black flex flex-col justify-between p-4">
+                <div className="md:col-span-2 relative aspect-9/16 max-h-[340px] mx-auto rounded-xl overflow-hidden border border-white/10 bg-black flex flex-col justify-between p-4">
                   <img
                     src={selectedClip.thumbnail}
                     alt="clip preview"
@@ -327,7 +327,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       <Play size={16} className="fill-white ml-0.5" />
                     </div>
                     {/* Mock dynamic glass subtitle overlay */}
-                    <div className="bg-black/60 border border-white/5 backdrop-blur-md px-3 py-2 rounded-lg text-center font-[family-name:var(--font-space-grotesk)] text-xs font-extrabold tracking-tight text-white leading-tight shadow-md">
+                    <div className="bg-black/60 border border-white/5 backdrop-blur-md px-3 py-2 rounded-lg text-center font-heading text-xs font-extrabold tracking-tight text-white leading-tight shadow-md">
                       THE ABSOLUTE{" "}
                       <span className="text-forge-accent-2">#1 RULE</span>
                     </div>
@@ -343,7 +343,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         <FileText size={11} />
                         AI Transcript (Auto-Spliced)
                       </span>
-                      <ScrollArea className="h-28 rounded-xl border border-white/5 bg-white/[0.015] p-3 text-xs leading-relaxed text-white/70 italic select-all">
+                      <ScrollArea className="h-28 rounded-xl border border-white/5 bg-white/1.5 p-3 text-xs leading-relaxed text-white/70 italic select-all">
                         {selectedClip.transcript}
                       </ScrollArea>
                     </div>
@@ -354,7 +354,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         <Share2 size={11} />
                         Suggested Post Caption
                       </span>
-                      <ScrollArea className="h-20 rounded-xl border border-white/5 bg-white/[0.015] p-3 text-xs leading-relaxed text-white/70 select-all">
+                      <ScrollArea className="h-20 rounded-xl border border-white/5 bg-white/1.5 p-3 text-xs leading-relaxed text-white/70 select-all">
                         {selectedClip.description}
                       </ScrollArea>
                     </div>
@@ -364,7 +364,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     <Button
                       onClick={() => handleDownload(selectedClip.title)}
                       variant="ghost"
-                      className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-xs font-semibold text-white/70 cursor-pointer"
+                      className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/70 cursor-pointer"
                     >
                       <Download size={13} className="mr-1.5" />
                       Download MP4
@@ -394,7 +394,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {clipToSchedule && (
             <div className="space-y-5">
               <DialogHeader>
-                <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white flex items-center gap-2">
+                <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2">
                   <Calendar size={16} className="text-forge-accent" />
                   Schedule Publication
                 </DialogTitle>
@@ -434,7 +434,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-300 ${
                           schedulePlatform === plt.id
                             ? "border-forge-accent bg-forge-accent/5"
-                            : "border-white/5 bg-white/[0.01] hover:bg-white/[0.03]"
+                            : "border-white/5 bg-white/1 hover:bg-white/3"
                         }`}
                       >
                         <span className="block font-semibold text-xs text-white">
@@ -457,7 +457,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     type="text"
                     value={scheduleTime}
                     onChange={(e) => setScheduleTime(e.target.value)}
-                    className="h-9 w-full rounded-xl border border-white/8 bg-white/[0.02] text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/[0.04]"
+                    className="h-9 w-full rounded-xl border border-white/8 bg-white/2 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4"
                   />
                 </div>
 
@@ -470,7 +470,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     rows={4}
                     value={scheduleCaption}
                     onChange={(e) => setScheduleCaption(e.target.value)}
-                    className="w-full rounded-xl border border-white/8 bg-white/[0.02] p-3 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/[0.04] leading-relaxed resize-none"
+                    className="w-full rounded-xl border border-white/8 bg-white/2 p-3 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4 leading-relaxed resize-none"
                   />
                 </div>
               </div>
@@ -479,13 +479,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Button
                   onClick={() => setIsScheduleOpen(false)}
                   variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleScheduleSubmit}
-                  className="rounded-xl bg-gradient-forge px-4 font-[family-name:var(--font-dm-sans)] text-xs font-bold text-white shadow cursor-pointer hover:shadow-forge-glow"
+                  className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow cursor-pointer hover:shadow-forge-glow"
                 >
                   Schedule Post
                 </Button>

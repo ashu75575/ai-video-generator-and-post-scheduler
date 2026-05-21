@@ -35,9 +35,9 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
   const currentTime = startTime + frame / fps;
 
   // Find index of the active word in the captions array
-  const activeIndex = captions ? captions.findIndex(
-    (w) => currentTime >= w.start && currentTime <= w.end,
-  ) : -1;
+  const activeIndex = captions
+    ? captions.findIndex((w) => currentTime >= w.start && currentTime <= w.end)
+    : -1;
 
   const CHUNK_SIZE = 3;
   let wordGroup: Word[] = [];
@@ -91,7 +91,8 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
         >
           <div
             style={{
-              backgroundColor: captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)",
+              backgroundColor:
+                captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)",
               padding: captionStyle?.padding || "24px 44px",
               borderRadius: captionStyle?.borderRadius || "32px",
               border: captionStyle?.border || "none",
@@ -112,27 +113,34 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
                 <span
                   key={globalIdx}
                   style={{
-                    fontFamily: captionStyle?.fontFamily || "Impact, Arial Black, sans-serif",
-                    color: isCurrent 
-                      ? (captionStyle?.colorActive || "#facc15") 
-                      : (captionStyle?.colorInactive || "#ffffff"),
-                    fontSize: isCurrent 
-                      ? (captionStyle?.fontSizeActive || "5.4rem") 
-                      : (captionStyle?.fontSizeInactive || "4.8rem"),
+                    fontFamily:
+                      captionStyle?.fontFamily ||
+                      "Impact, Arial Black, sans-serif",
+                    color: isCurrent
+                      ? captionStyle?.colorActive || "#facc15"
+                      : captionStyle?.colorInactive || "#ffffff",
+                    fontSize: isCurrent
+                      ? captionStyle?.fontSizeActive || "5.4rem"
+                      : captionStyle?.fontSizeInactive || "4.8rem",
                     fontWeight: 900,
                     textTransform: captionStyle?.textTransform || "uppercase",
                     letterSpacing: captionStyle?.letterSpacing || "0.04em",
                     transform: isCurrent ? "scale(1.1)" : "scale(1.0)",
-                    transition: "transform 0.05s ease-out, color 0.05s ease-out",
+                    transition:
+                      "transform 0.05s ease-out, color 0.05s ease-out",
                     display: "inline-block",
-                    textShadow: captionStyle?.textShadow || `
+                    textShadow:
+                      captionStyle?.textShadow ||
+                      `
                       -4px -4px 0 #000,
                        4px -4px 0 #000,
                       -4px  4px 0 #000,
                        4px  4px 0 #000,
                        0px  6px 12px rgba(0, 0, 0, 0.9)
                     `,
-                    animation: isCurrent ? "scaleIn 0.08s ease-out forwards" : "none",
+                    animation: isCurrent
+                      ? "scaleIn 0.08s ease-out forwards"
+                      : "none",
                   }}
                 >
                   {w.word}
@@ -161,7 +169,7 @@ export default function RemotionPlayer({
 
   if (!isMounted) {
     return (
-      <div className="aspect-[9/16] w-full bg-[#0a0814] rounded-2xl flex items-center justify-center border border-white/5">
+      <div className="aspect-9/16 w-full bg-[#0a0814] rounded-2xl flex items-center justify-center border border-white/5">
         <div className="animate-pulse text-xs text-white/40 uppercase tracking-widest font-mono">
           Initializing Engine...
         </div>
@@ -175,7 +183,7 @@ export default function RemotionPlayer({
   const durationInFrames = Math.max(30, Math.round(durationInSeconds * fps));
 
   return (
-    <div className="relative aspect-[9/16] w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.15)] bg-black">
+    <div className="relative aspect-9/16 w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.15)] bg-black">
       <Player
         component={ShortVideoComposition}
         inputProps={{ videoUrl, startTime, endTime, captions, captionStyle }}

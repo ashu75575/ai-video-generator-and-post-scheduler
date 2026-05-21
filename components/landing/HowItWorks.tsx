@@ -66,11 +66,11 @@ export function HowItWorks() {
               className="h-1.5 w-1.5 rounded-full bg-forge-accent"
               style={{ boxShadow: "0 0 6px #7C6AFA" }}
             />
-            <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
+            <span className="font-sans text-xs font-medium text-forge-accent">
               Process
             </span>
           </div>
-          <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
+          <h2 className="font-heading text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
             From raw footage to
             <br />
             <span className="text-gradient-forge">viral content</span> in 4
@@ -90,7 +90,7 @@ export function HowItWorks() {
                 ease: [0.16, 1, 0.3, 1],
               }}
               style={{ originX: 0, willChange: "transform" }}
-              className="h-full bg-gradient-to-r from-[#FF6B6B]/30 via-forge-accent/30 to-[#F6C90E]/30"
+              className="h-full bg-linear-to-r from-[#FF6B6B]/30 via-forge-accent/30 to-[#F6C90E]/30"
             />
           </div>
 
@@ -136,10 +136,10 @@ export function HowItWorks() {
                 <p className="mb-2.5 font-mono text-xs tracking-widest text-white/20">
                   {step.num}
                 </p>
-                <h3 className="mb-2.5 font-[family-name:var(--font-space-grotesk)] text-lg font-bold tracking-tight text-white">
+                <h3 className="mb-2.5 font-heading text-lg font-bold tracking-tight text-white">
                   {step.title}
                 </h3>
-                <p className="font-[family-name:var(--font-dm-sans)] text-sm leading-relaxed text-white/45">
+                <p className="font-sans text-sm leading-relaxed text-white/45">
                   {step.desc}
                 </p>
               </motion.article>

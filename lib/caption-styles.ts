@@ -121,5 +121,7 @@ export const DEFAULT_CAPTION_STYLE = CAPTION_STYLES[0];
 
 export function getStyleById(id?: string): CaptionStyle {
   if (!id) return DEFAULT_CAPTION_STYLE;
-  return CAPTION_STYLES.find((style) => style.id === id) || DEFAULT_CAPTION_STYLE;
+  return (
+    CAPTION_STYLES.find((style) => style.id === id) || DEFAULT_CAPTION_STYLE
+  );
 }

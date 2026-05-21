@@ -308,11 +308,11 @@ export default function DashboardHome() {
               AI Forge Engine v2.0
             </span>
           </div>
-          <h1 className="font-[family-name:var(--font-space-grotesk)] text-3xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white leading-tight">
             Welcome back,{" "}
             {isLoaded && user?.firstName ? user.firstName : "Alex"} 👋
           </h1>
-          <p className="text-white/55 text-sm font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/55 text-sm font-sans">
             Load, preview, and process your long-form video assets to extract
             high-virality short clips.
           </p>
@@ -322,7 +322,7 @@ export default function DashboardHome() {
           <Link href="/dashboard/videos">
             <Button
               variant="ghost"
-              className="rounded-xl border border-white/10 bg-white/[0.02]  text-white/80 text-xs font-semibold px-4 h-9 cursor-pointer"
+              className="rounded-xl border border-white/10 bg-white/2  text-white/80 text-xs font-semibold px-4 h-9 cursor-pointer"
             >
               <Video size={14} className="mr-1.5" />
               My Videos ({rawVideos.length})
@@ -362,7 +362,7 @@ export default function DashboardHome() {
               {/* Left Column: Information Panel */}
               <div className="lg:col-span-5 space-y-6">
                 <div className="space-y-2">
-                  <h3 className="font-(family-name:--font-space-grotesk)  text-lg font-bold text-white">
+                  <h3 className="font-heading  text-lg font-bold text-white">
                     Step-by-Step AI Isolation
                   </h3>
                   <p className="text-white/45 text-xs font-(family-name:--font-dm-sans) leading-relaxed">
@@ -417,24 +417,24 @@ export default function DashboardHome() {
                   className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-500 min-h-[300px] flex flex-col items-center justify-center gap-4 ${
                     dragActive
                       ? "border-forge-accent bg-forge-accent/10 shadow-[0_0_20px_rgba(124,106,250,0.25)]"
-                      : "border-white/10 hover:border-white/20 bg-white/[0.01] hover:bg-white/[0.03]"
+                      : "border-white/10 hover:border-white/20 bg-white/1 hover:bg-white/3"
                   }`}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none rounded-2xl" />
+                  <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none rounded-2xl" />
                   <div className="p-4 rounded-full bg-forge-accent/10 text-forge-accent border border-forge-accent/15 shadow-inner">
                     <Upload size={32} className="animate-pulse" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-[family-name:var(--font-space-grotesk)] font-bold text-sm text-white">
+                    <h3 className="font-heading font-bold text-sm text-white">
                       Drag & Drop your video file here
                     </h3>
-                    <p className="text-xs text-white/40 max-w-xs mx-auto font-[family-name:var(--font-dm-sans)]">
+                    <p className="text-xs text-white/40 max-w-xs mx-auto font-sans">
                       Or click to browse from local directories
                     </p>
                   </div>
                   <Button
                     variant="ghost"
-                    className="h-8 rounded-lg border border-white/10 bg-white/[0.02] px-4 text-xs text-white/70 hover:text-black cursor-pointer"
+                    className="h-8 rounded-lg border border-white/10 bg-white/2 px-4 text-xs text-white/70 hover:text-black cursor-pointer"
                   >
                     Select Local Video
                   </Button>
@@ -482,11 +482,11 @@ export default function DashboardHome() {
                   </Badge>
 
                   <div className="space-y-2">
-                    <h2 className="font-[family-name:var(--font-space-grotesk)] font-bold text-lg text-white leading-snug break-words">
+                    <h2 className="font-heading font-bold text-lg text-white leading-snug wrap-break-word">
                       {selectedVideoFile.name}
                     </h2>
 
-                    <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-xs text-white/50">
+                    <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/2 border border-white/5 font-mono text-xs text-white/50">
                       <div>
                         <span className="block text-[9px] text-white/30 uppercase">
                           Size
@@ -533,7 +533,7 @@ export default function DashboardHome() {
                   <Button
                     onClick={clearSelection}
                     variant="ghost"
-                    className="flex-1 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs px-4 h-10 cursor-pointer"
+                    className="flex-1 rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-4 h-10 cursor-pointer"
                   >
                     <X size={14} className="mr-1.5" />
                     Clear File
@@ -612,7 +612,7 @@ export default function DashboardHome() {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white/[0.01] border border-white/5 flex gap-3 text-[10px] text-white/40 leading-relaxed font-mono">
+                <div className="p-3.5 rounded-xl bg-white/1 border border-white/5 flex gap-3 text-[10px] text-white/40 leading-relaxed font-mono">
                   <Info
                     size={14}
                     className="text-forge-accent shrink-0 mt-0.5"
@@ -626,7 +626,7 @@ export default function DashboardHome() {
                 <Button
                   onClick={clearSelection}
                   variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs px-4 h-9 cursor-pointer"
+                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-4 h-9 cursor-pointer"
                 >
                   Cancel Upload
                 </Button>
@@ -642,12 +642,12 @@ export default function DashboardHome() {
             >
               <div className="flex flex-col items-center">
                 <div className="h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(52,211,153,0.25)]">
-                  <Check size={32} className="stroke-[3]" />
+                  <Check size={32} className="stroke-3" />
                 </div>
-                <h2 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-white mb-2">
+                <h2 className="font-heading text-xl font-bold text-white mb-2">
                   Uploaded Successfully!
                 </h2>
-                <p className="text-xs text-white/50 max-w-sm leading-relaxed font-[family-name:var(--font-dm-sans)]">
+                <p className="text-xs text-white/50 max-w-sm leading-relaxed font-sans">
                   "{selectedVideoFile?.name}" has been saved to your AWS S3
                   bucket and registered. Ready for audio transcription and
                   speech extraction.
@@ -658,7 +658,7 @@ export default function DashboardHome() {
                 <Button
                   onClick={clearSelection}
                   variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] text-white/70 hover:text-white text-xs px-5 h-10 cursor-pointer font-mono"
+                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-5 h-10 cursor-pointer font-mono"
                   disabled={isAnalyzing}
                 >
                   Cancel & Clear

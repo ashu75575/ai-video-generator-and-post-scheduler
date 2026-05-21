@@ -32,7 +32,7 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.05] px-6 pt-[60px] pb-10">
+    <footer className="relative border-t border-white/5 px-6 pt-[60px] pb-10">
       {/* Subtle top glow */}
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-px w-[600px]"
@@ -54,11 +54,11 @@ export function Footer() {
               <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.3)]">
                 <Scissors size={13} className="text-white" />
               </div>
-              <span className="font-[family-name:var(--font-space-grotesk)] text-base font-bold text-white">
+              <span className="font-heading text-base font-bold text-white">
                 ClipForge<span className="text-forge-accent">AI</span>
               </span>
             </motion.div>
-            <p className="max-w-[260px] font-[family-name:var(--font-dm-sans)] text-sm leading-relaxed text-white/30">
+            <p className="max-w-[260px] font-sans text-sm leading-relaxed text-white/30">
               Turn any long-form video into viral short clips with AI. Built for
               creators.
             </p>
@@ -69,7 +69,7 @@ export function Footer() {
                 <a
                   key={s.label}
                   href={s.href}
-                  className="rounded-md border border-white/8 bg-white/[0.03] px-3 py-1.5 font-[family-name:var(--font-dm-sans)] text-xs text-white/30 transition-all duration-200 hover:border-white/15 hover:bg-white/[0.06] hover:text-white/60"
+                  className="rounded-md border border-white/8 bg-white/3 px-3 py-1.5 font-sans text-xs text-white/30 transition-all duration-200 hover:border-white/15 hover:bg-white/6 hover:text-white/60"
                 >
                   {s.label}
                 </a>
@@ -80,14 +80,14 @@ export function Footer() {
           {/* Link columns */}
           {COLS.map((col) => (
             <div key={col.heading}>
-              <div className="mb-4 font-[family-name:var(--font-dm-sans)] text-xs font-bold tracking-wider text-white/40 uppercase">
+              <div className="mb-4 font-sans text-xs font-bold tracking-wider text-white/40 uppercase">
                 {col.heading}
               </div>
               {col.links.map((link) => (
                 <a
                   key={link}
                   href="#"
-                  className="group mb-2.5 flex items-center gap-1.5 font-[family-name:var(--font-dm-sans)] text-sm text-white/30 no-underline transition-colors duration-200 hover:text-white/70"
+                  className="group mb-2.5 flex items-center gap-1.5 font-sans text-sm text-white/30 no-underline transition-colors duration-200 hover:text-white/70"
                 >
                   <span className="h-px w-0 bg-forge-accent transition-all duration-200 group-hover:w-3 rounded-full" />
                   {link}
@@ -98,8 +98,8 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/[0.05] pt-7">
-          <span className="font-[family-name:var(--font-dm-sans)] text-[13px] text-white/20">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-7">
+          <span className="font-sans text-[13px] text-white/20">
             © 2026 ClipForge AI Inc. All rights reserved.
           </span>
           <div className="flex gap-6">
@@ -108,7 +108,7 @@ export function Footer() {
                 <a
                   key={label}
                   href="#"
-                  className="font-[family-name:var(--font-dm-sans)] text-[13px] text-white/20 no-underline transition-colors duration-200 hover:text-white/45"
+                  className="font-sans text-[13px] text-white/20 no-underline transition-colors duration-200 hover:text-white/45"
                 >
                   {label}
                 </a>
