@@ -6,13 +6,16 @@ import { eq } from "drizzle-orm";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: projectId } = await params;
 
     if (!db) {
-      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database connection is not available." },
+        { status: 500 },
+      );
     }
 
     let videoUrl = "";
@@ -32,7 +35,7 @@ export async function POST(
     if (!videoUrl) {
       return NextResponse.json(
         { error: "Project does not have an uploaded video URL yet." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -45,13 +48,21 @@ export async function POST(
           videoUrl,
         },
       });
-      console.log(`Inngest workflow triggered for event 'project/analysis.started' with project: ${projectId}`);
+      console.log(
+        `Inngest workflow triggered for event 'project/analysis.started' with project: ${projectId}`,
+      );
     } catch (inngestError) {
-      console.error("❌ Failed to trigger Inngest analysis workflow:", inngestError);
-      return NextResponse.json({
-        success: false,
-        error: "Failed to trigger background analysis workflow.",
-      }, { status: 500 });
+      console.error(
+        "❌ Failed to trigger Inngest analysis workflow:",
+        inngestError,
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to trigger background analysis workflow.",
+        },
+        { status: 500 },
+      );
     }
 
     // Update DB status to transcribing initially
@@ -72,7 +83,7 @@ export async function POST(
     console.error("❌ Analyze project route error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

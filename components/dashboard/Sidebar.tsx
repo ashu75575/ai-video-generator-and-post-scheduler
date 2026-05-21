@@ -10,7 +10,7 @@ import {
   Settings,
   LogOut,
   Scissors,
-  User
+  User,
 } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,8 +32,16 @@ export function Sidebar() {
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   ] as const;
 
-  const userDisplayName = isLoaded && user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username || "Creator" : "Alex Vance";
-  const userEmail = isLoaded && user ? user.primaryEmailAddress?.emailAddress : "alex@clipforge.ai";
+  const userDisplayName =
+    isLoaded && user
+      ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+        user.username ||
+        "Creator"
+      : "Alex Vance";
+  const userEmail =
+    isLoaded && user
+      ? user.primaryEmailAddress?.emailAddress
+      : "alex@clipforge.ai";
   const userAvatar = isLoaded && user ? user.imageUrl : "";
 
   return (
@@ -48,7 +56,8 @@ export function Sidebar() {
           <Scissors size={14} className="text-white" />
         </motion.div>
         <span className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold tracking-tight text-white">
-          ClipForge<span className="text-gradient-forge font-extrabold">AI</span>
+          ClipForge
+          <span className="text-gradient-forge font-extrabold">AI</span>
         </span>
       </div>
 
@@ -66,7 +75,7 @@ export function Sidebar() {
                 "group relative flex w-full items-center gap-3.5 rounded-xl px-3.5 py-3 font-[family-name:var(--font-dm-sans)] text-sm font-medium transition-all duration-300 cursor-pointer select-none",
                 isActive
                   ? "text-white"
-                  : "text-white/45 hover:bg-white/[0.03] hover:text-white/80"
+                  : "text-white/45 hover:bg-white/[0.03] hover:text-white/80",
               )}
             >
               {isActive && (
@@ -86,7 +95,9 @@ export function Sidebar() {
                 size={18}
                 className={cn(
                   "relative z-10 transition-colors duration-300",
-                  isActive ? "text-forge-accent" : "text-white/40 group-hover:text-white/70"
+                  isActive
+                    ? "text-forge-accent"
+                    : "text-white/40 group-hover:text-white/70",
                 )}
               />
               <span className="relative z-10">{item.label}</span>
@@ -134,7 +145,10 @@ export function Sidebar() {
             variant="ghost"
             className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-red-500/10 px-2 py-2 text-xs font-medium text-white/60 hover:text-red-400 cursor-pointer transition-colors"
           >
-            <LogOut size={13} className="text-white/40 group-hover:text-red-400" />
+            <LogOut
+              size={13}
+              className="text-white/40 group-hover:text-red-400"
+            />
             <span>Logout</span>
           </Button>
         </div>

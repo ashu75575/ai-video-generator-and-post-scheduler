@@ -50,9 +50,8 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <ClerkProvider
           appearance={{
-            theme: dark
+            theme: dark,
           }}
-
         >
           <GlobalHeader />
           {children}

@@ -14,7 +14,12 @@ type ClipItem = {
 const CLIP_DATA: ClipItem[] = [
   { label: "🔥 Viral moment", time: "0:32", score: 98, color: "#FF6B6B" },
   { label: "⚡ Peak energy", time: "1:14", score: 91, color: FORGE_ACCENT },
-  { label: "😂 High engagement", time: "2:47", score: 87, color: FORGE_ACCENT_2 },
+  {
+    label: "😂 High engagement",
+    time: "2:47",
+    score: 87,
+    color: FORGE_ACCENT_2,
+  },
   { label: "💡 Key insight", time: "3:59", score: 83, color: "#F6C90E" },
 ];
 
@@ -39,7 +44,11 @@ const WAVE_POINTS = Array.from({ length: 80 }, (_, i) => {
 const emptySubscribe = () => () => {};
 
 export function HeroVisual() {
-  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const [scanPos, setScanPos] = useState(30);
   const [clips, setClips] = useState<ClipItem[]>([]);
 
@@ -104,10 +113,34 @@ export function HeroVisual() {
               strokeWidth="0.7"
               vectorEffect="non-scaling-stroke"
             />
-            <rect x="20" y="0" width="12" height="100" fill="rgba(255,107,107,0.15)" />
-            <rect x="42" y="0" width="10" height="100" fill={`${FORGE_ACCENT}20`} />
-            <rect x="65" y="0" width="11" height="100" fill={`${FORGE_ACCENT_2}20`} />
-            <rect x="82" y="0" width="9" height="100" fill="rgba(246,201,14,0.15)" />
+            <rect
+              x="20"
+              y="0"
+              width="12"
+              height="100"
+              fill="rgba(255,107,107,0.15)"
+            />
+            <rect
+              x="42"
+              y="0"
+              width="10"
+              height="100"
+              fill={`${FORGE_ACCENT}20`}
+            />
+            <rect
+              x="65"
+              y="0"
+              width="11"
+              height="100"
+              fill={`${FORGE_ACCENT_2}20`}
+            />
+            <rect
+              x="82"
+              y="0"
+              width="9"
+              height="100"
+              fill="rgba(246,201,14,0.15)"
+            />
           </svg>
           {mounted && (
             <motion.div
@@ -156,7 +189,9 @@ export function HeroVisual() {
                     {clip.label}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] text-white/40">{clip.time}</span>
+                    <span className="font-mono text-[11px] text-white/40">
+                      {clip.time}
+                    </span>
                     <span
                       className="font-mono text-[11px] font-bold"
                       style={{ color: clip.color }}
@@ -168,7 +203,11 @@ export function HeroVisual() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${clip.score}%` }}
-                      transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      transition={{
+                        duration: 0.8,
+                        delay: 0.2,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
                       className="h-full rounded-sm"
                       style={{ background: clip.color }}
                     />
@@ -190,7 +229,9 @@ export function HeroVisual() {
           animate={mounted ? { y: [-4, 4, -4] } : undefined}
           transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
         >
-          <div className="mb-2 font-mono text-[11px] text-white/40">SCHEDULED POSTS</div>
+          <div className="mb-2 font-mono text-[11px] text-white/40">
+            SCHEDULED POSTS
+          </div>
           {SCHEDULED_POSTS.map((p) => (
             <div key={p.platform} className="mb-1.5 flex items-center gap-2">
               <div
@@ -200,7 +241,9 @@ export function HeroVisual() {
               <span className="min-w-[70px] font-[family-name:var(--font-dm-sans)] text-xs text-white/70">
                 {p.platform}
               </span>
-              <span className="font-mono text-[11px] text-white/35">{p.time}</span>
+              <span className="font-mono text-[11px] text-white/35">
+                {p.time}
+              </span>
             </div>
           ))}
         </motion.div>

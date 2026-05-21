@@ -9,11 +9,17 @@ export async function GET(req: NextRequest) {
     const authResult = await auth();
     const userId = authResult?.userId;
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized. Please log in first." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized. Please log in first." },
+        { status: 401 },
+      );
     }
 
     if (!db) {
-      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database connection is not available." },
+        { status: 500 },
+      );
     }
 
     const userProjects = await db
@@ -30,7 +36,7 @@ export async function GET(req: NextRequest) {
     console.error("❌ GET projects route error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -5,13 +5,16 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: projectId } = await params;
 
     if (!db) {
-      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database connection is not available." },
+        { status: 500 },
+      );
     }
 
     const result = await db
@@ -48,7 +51,7 @@ export async function GET(
     console.error("❌ Get project status route error:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

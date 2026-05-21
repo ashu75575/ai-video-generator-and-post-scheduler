@@ -13,11 +13,17 @@ export async function POST(req: NextRequest) {
     const authResult = await auth();
     const userId = authResult?.userId;
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized. Please log in first." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized. Please log in first." },
+        { status: 401 },
+      );
     }
 
     if (!db) {
-      return NextResponse.json({ error: "Database connection is not available." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Database connection is not available." },
+        { status: 500 },
+      );
     }
 
     // 2. Parse form data
@@ -40,31 +46,37 @@ export async function POST(req: NextRequest) {
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
         return NextResponse.json(
-          { error: "Daily upload limit reached. You can only upload 3 videos per day." },
-          { status: 429 }
+          {
+            error:
+              "Daily upload limit reached. You can only upload 3 videos per day.",
+          },
+          { status: 429 },
         );
       }
       if (decision.reason.isPromptInjection()) {
         return NextResponse.json(
-          { error: "Suspicious file name detected. Request blocked by prompt injection filter." },
-          { status: 400 }
+          {
+            error:
+              "Suspicious file name detected. Request blocked by prompt injection filter.",
+          },
+          { status: 400 },
         );
       }
       if (decision.reason.isBot()) {
         return NextResponse.json(
           { error: "Access denied. Bot activity detected." },
-          { status: 403 }
+          { status: 403 },
         );
       }
       if (decision.reason.isShield()) {
         return NextResponse.json(
           { error: "Access denied. Suspicious activity blocked by Shield." },
-          { status: 403 }
+          { status: 403 },
         );
       }
       return NextResponse.json(
         { error: "Request blocked by security policies." },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -76,7 +88,7 @@ export async function POST(req: NextRequest) {
 
     const uploadDir = path.join(process.cwd(), "public", "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
-    
+
     // Use a safe, unique file name to avoid collisions
     const safeFileName = `${projectId}-${fileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
     const filePath = path.join(uploadDir, safeFileName);
@@ -104,13 +116,18 @@ export async function POST(req: NextRequest) {
           fileName,
         },
       });
-      console.log(`Inngest workflow triggered for event 'video/upload.started' with project: ${projectId}`);
+      console.log(
+        `Inngest workflow triggered for event 'video/upload.started' with project: ${projectId}`,
+      );
     } catch (inngestError) {
       console.error("❌ Failed to trigger Inngest workflow:", inngestError);
-      return NextResponse.json({
-        success: false,
-        error: "Failed to trigger background processing workflow.",
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to trigger background processing workflow.",
+        },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({
@@ -119,9 +136,11 @@ export async function POST(req: NextRequest) {
       fileName,
       message: "Video upload received. Processing has started.",
     });
-
   } catch (err: any) {
     console.error("❌ Upload route error:", err);
-    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Internal server error" },
+      { status: 500 },
+    );
   }
 }

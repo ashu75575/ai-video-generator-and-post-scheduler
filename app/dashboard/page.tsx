@@ -18,7 +18,7 @@ import {
   Check,
   FileVideo,
   RefreshCw,
-  Info
+  Info,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useDashboard } from "@/hooks/use-dashboard";
@@ -32,23 +32,22 @@ import { useRouter } from "next/navigation";
 export default function DashboardHome() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const {
-    clips,
-    setClips,
-    rawVideos,
-    setRawVideos
-  } = useDashboard();
+  const { clips, setClips, rawVideos, setRawVideos } = useDashboard();
 
   // Local Video Upload UI States
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success">("idle");
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "success"
+  >("idle");
   const [uploadStatusText, setUploadStatusText] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(null);
+  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(
+    null,
+  );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Clean up object URL when file changes
@@ -164,7 +163,9 @@ export default function DashboardHome() {
 
           if (status === "uploading") {
             if (progress < 40) {
-              setUploadStatusText("Connecting & starting background pipeline...");
+              setUploadStatusText(
+                "Connecting & starting background pipeline...",
+              );
             } else if (progress < 85) {
               setUploadStatusText("Uploading segments to AWS S3 bucket...");
             } else {
@@ -182,29 +183,42 @@ export default function DashboardHome() {
               const newRawVideo = {
                 id: newVideoId,
                 title: selectedVideoFile.name,
-                date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                date: new Date().toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }),
                 size: `${(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB`,
                 duration: "1:15",
                 clips: 1,
                 status: "Analyzed" as const,
-                img: videoUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80"
+                img:
+                  videoUrl ||
+                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
               };
 
               const newClip = {
                 id: `clip-${Date.now()}`,
-                title: `Isolated Highlight from ${selectedVideoFile.name.split('.')[0]}`,
+                title: `Isolated Highlight from ${selectedVideoFile.name.split(".")[0]}`,
                 sourceVideo: selectedVideoFile.name,
                 duration: "0:35",
                 viralityScore: 93,
                 views: "0",
                 likes: "0",
                 platform: "Multi-Platform" as const,
-                thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
+                thumbnail:
+                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
                 status: "Ready" as const,
-                transcript: "This is a transcript generated from your upload. It represents a highly retention-optimized segment isolated by ClipForge AI.",
+                transcript:
+                  "This is a transcript generated from your upload. It represents a highly retention-optimized segment isolated by ClipForge AI.",
                 description: `Checkout this epic clip isolated by ClipForge AI! 🔥 #clips #ai`,
                 tags: ["#clips", "#ai"],
-                metrics: { hookStrength: 95, retentionPotential: 90, pacingScore: 92, visualEngagement: 91 }
+                metrics: {
+                  hookStrength: 95,
+                  retentionPotential: 90,
+                  pacingScore: 92,
+                  visualEngagement: 91,
+                },
               };
 
               setRawVideos((prev) => [newRawVideo, ...prev]);
@@ -230,13 +244,13 @@ export default function DashboardHome() {
 
       // Save interval reference to clear it if component unmounts or user cancels
       (window as any)._activeUploadPoll = pollInterval;
-
     } catch (error: any) {
       console.error("Upload error:", error);
       setIsUploadingVideo(false);
       setUploadStatus("idle");
       toast.error("Upload Failed", {
-        description: error.message || "An unexpected error occurred during upload.",
+        description:
+          error.message || "An unexpected error occurred during upload.",
       });
     }
   };
@@ -245,9 +259,12 @@ export default function DashboardHome() {
     if (!uploadedProjectId) return;
     setIsAnalyzing(true);
     try {
-      const response = await fetch(`/api/projects/${uploadedProjectId}/analyze`, {
-        method: "POST",
-      });
+      const response = await fetch(
+        `/api/projects/${uploadedProjectId}/analyze`,
+        {
+          method: "POST",
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to start project analysis");
@@ -292,10 +309,12 @@ export default function DashboardHome() {
             </span>
           </div>
           <h1 className="font-[family-name:var(--font-space-grotesk)] text-3xl font-extrabold tracking-tight text-white leading-tight">
-            Welcome back, {isLoaded && user?.firstName ? user.firstName : "Alex"} 👋
+            Welcome back,{" "}
+            {isLoaded && user?.firstName ? user.firstName : "Alex"} 👋
           </h1>
           <p className="text-white/55 text-sm font-[family-name:var(--font-dm-sans)]">
-            Load, preview, and process your long-form video assets to extract high-virality short clips.
+            Load, preview, and process your long-form video assets to extract
+            high-virality short clips.
           </p>
         </div>
 
@@ -310,9 +329,7 @@ export default function DashboardHome() {
             </Button>
           </Link>
           <Link href="/dashboard/clips">
-            <Button
-              className="rounded-xl bg-gradient-forge text-xs font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 px-4 h-9 cursor-pointer"
-            >
+            <Button className="rounded-xl bg-gradient-forge text-xs font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 px-4 h-9 cursor-pointer">
               <Scissors size={14} className="mr-1.5" />
               AI Clips ({clips.length})
             </Button>
@@ -349,23 +366,40 @@ export default function DashboardHome() {
                     Step-by-Step AI Isolation
                   </h3>
                   <p className="text-white/45 text-xs font-(family-name:--font-dm-sans) leading-relaxed">
-                    Our machine learning pipeline scans your file audio-visually to pull viral highlights.
+                    Our machine learning pipeline scans your file audio-visually
+                    to pull viral highlights.
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   {[
-                    { step: "1", title: "Video ingestion", desc: "Drag and drop any MP4, MOV, or WebM video file up to 2GB." },
-                    { step: "2", title: "Speech & waveform scan", desc: "AI models transcribe speech and analyze facial expressions." },
-                    { step: "3", title: "Viral moments extraction", desc: "Renders vertical clips with subtitles, ready to publish." }
+                    {
+                      step: "1",
+                      title: "Video ingestion",
+                      desc: "Drag and drop any MP4, MOV, or WebM video file up to 2GB.",
+                    },
+                    {
+                      step: "2",
+                      title: "Speech & waveform scan",
+                      desc: "AI models transcribe speech and analyze facial expressions.",
+                    },
+                    {
+                      step: "3",
+                      title: "Viral moments extraction",
+                      desc: "Renders vertical clips with subtitles, ready to publish.",
+                    },
                   ].map((item, index) => (
                     <div key={index} className="flex gap-3">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-forge-accent/20 border border-forge-accent/30 text-forge-accent font-mono text-xs font-bold">
                         {item.step}
                       </div>
                       <div className="space-y-0.5">
-                        <h4 className="text-xs font-bold text-white/90">{item.title}</h4>
-                        <p className="text-[10px] text-white/40 leading-normal">{item.desc}</p>
+                        <h4 className="text-xs font-bold text-white/90">
+                          {item.title}
+                        </h4>
+                        <p className="text-[10px] text-white/40 leading-normal">
+                          {item.desc}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -430,7 +464,10 @@ export default function DashboardHome() {
                     playsInline
                   />
                 ) : (
-                  <FileVideo size={48} className="text-white/25 animate-pulse" />
+                  <FileVideo
+                    size={48}
+                    className="text-white/25 animate-pulse"
+                  />
                 )}
                 <div className="absolute top-3 left-3 bg-black/60 border border-white/10 backdrop-blur-md px-2.5 py-0.5 rounded-lg text-[9px] font-mono text-forge-accent-2 tracking-wider">
                   LOCAL PREVIEW PLAYER
@@ -451,25 +488,43 @@ export default function DashboardHome() {
 
                     <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 font-mono text-xs text-white/50">
                       <div>
-                        <span className="block text-[9px] text-white/30 uppercase">Size</span>
-                        <strong className="text-white/80">{(selectedVideoFile.size / (1024 * 1024)).toFixed(2)} MB</strong>
+                        <span className="block text-[9px] text-white/30 uppercase">
+                          Size
+                        </span>
+                        <strong className="text-white/80">
+                          {(selectedVideoFile.size / (1024 * 1024)).toFixed(2)}{" "}
+                          MB
+                        </strong>
                       </div>
                       <div>
-                        <span className="block text-[9px] text-white/30 uppercase">Format</span>
-                        <strong className="text-white/80">{selectedVideoFile.type.split("/")[1]?.toUpperCase() || "MP4"}</strong>
+                        <span className="block text-[9px] text-white/30 uppercase">
+                          Format
+                        </span>
+                        <strong className="text-white/80">
+                          {selectedVideoFile.type
+                            .split("/")[1]
+                            ?.toUpperCase() || "MP4"}
+                        </strong>
                       </div>
                     </div>
                   </div>
 
                   {/* Optimization Platform checklist */}
                   <div className="space-y-2 pt-2">
-                    <span className="block text-[10px] text-white/40 uppercase font-mono tracking-wider">Target Platforms</span>
+                    <span className="block text-[10px] text-white/40 uppercase font-mono tracking-wider">
+                      Target Platforms
+                    </span>
                     <div className="flex gap-2">
-                      {["TikTok", "YouTube Shorts", "Instagram Reels"].map((p, idx) => (
-                        <Badge key={idx} className="bg-white/5 border border-white/10 text-white/70 font-mono text-[9px] py-1 px-2">
-                          {p}
-                        </Badge>
-                      ))}
+                      {["TikTok", "YouTube Shorts", "Instagram Reels"].map(
+                        (p, idx) => (
+                          <Badge
+                            key={idx}
+                            className="bg-white/5 border border-white/10 text-white/70 font-mono text-[9px] py-1 px-2"
+                          >
+                            {p}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
                 </div>
@@ -514,8 +569,13 @@ export default function DashboardHome() {
                   />
                 )}
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/45 backdrop-blur-sm animate-in fade-in duration-300">
-                  <RefreshCw size={28} className="text-forge-accent animate-spin" />
-                  <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase">SYNCING VIDEO FILE</span>
+                  <RefreshCw
+                    size={28}
+                    className="text-forge-accent animate-spin"
+                  />
+                  <span className="text-[10px] font-mono text-white/40 tracking-widest uppercase">
+                    SYNCING VIDEO FILE
+                  </span>
                 </div>
               </div>
 
@@ -523,8 +583,12 @@ export default function DashboardHome() {
               <div className="lg:col-span-5 space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">Uploading segments</span>
-                    <span className="font-mono font-bold text-forge-accent">{uploadProgress}%</span>
+                    <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
+                      Uploading segments
+                    </span>
+                    <span className="font-mono font-bold text-forge-accent">
+                      {uploadProgress}%
+                    </span>
                   </div>
 
                   {/* Glowing Linear Progress Bar */}
@@ -537,13 +601,26 @@ export default function DashboardHome() {
 
                   <div className="flex justify-between items-center text-[10px] text-white/30 font-mono">
                     <span className="animate-pulse">{uploadStatusText}</span>
-                    <span>{(uploadProgress * 0.45).toFixed(1)} MB / {(selectedVideoFile ? (selectedVideoFile.size / (1024 * 1024)) : 0).toFixed(1)} MB</span>
+                    <span>
+                      {(uploadProgress * 0.45).toFixed(1)} MB /{" "}
+                      {(selectedVideoFile
+                        ? selectedVideoFile.size / (1024 * 1024)
+                        : 0
+                      ).toFixed(1)}{" "}
+                      MB
+                    </span>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-white/[0.01] border border-white/5 flex gap-3 text-[10px] text-white/40 leading-relaxed font-mono">
-                  <Info size={14} className="text-forge-accent shrink-0 mt-0.5" />
-                  <span>Transfer speed optimized at 15.4 MB/s. Do not close or refresh this tab while upload is active.</span>
+                  <Info
+                    size={14}
+                    className="text-forge-accent shrink-0 mt-0.5"
+                  />
+                  <span>
+                    Transfer speed optimized at 15.4 MB/s. Do not close or
+                    refresh this tab while upload is active.
+                  </span>
                 </div>
 
                 <Button
@@ -571,7 +648,9 @@ export default function DashboardHome() {
                   Uploaded Successfully!
                 </h2>
                 <p className="text-xs text-white/50 max-w-sm leading-relaxed font-[family-name:var(--font-dm-sans)]">
-                  "{selectedVideoFile?.name}" has been saved to your AWS S3 bucket and registered. Ready for audio transcription and speech extraction.
+                  "{selectedVideoFile?.name}" has been saved to your AWS S3
+                  bucket and registered. Ready for audio transcription and
+                  speech extraction.
                 </p>
               </div>
 

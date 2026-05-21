@@ -98,7 +98,11 @@ export function Navbar() {
                     <motion.span
                       layoutId="nav-pill"
                       className="absolute inset-0 rounded-lg bg-white/[0.06]"
-                      transition={{ type: "spring", bounce: 0.25, duration: 0.4 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.25,
+                        duration: 0.4,
+                      }}
                     />
                   )}
                   <span className="relative z-10">{link.label}</span>

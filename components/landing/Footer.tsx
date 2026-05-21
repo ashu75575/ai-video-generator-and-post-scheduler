@@ -10,7 +10,13 @@ const COLS = [
   },
   {
     heading: "Developers",
-    links: ["Documentation", "SDK Reference", "API Status", "GitHub", "Examples"],
+    links: [
+      "Documentation",
+      "SDK Reference",
+      "API Status",
+      "GitHub",
+      "Examples",
+    ],
   },
   {
     heading: "Company",
@@ -31,7 +37,8 @@ export function Footer() {
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-px w-[600px]"
         style={{
-          background: "linear-gradient(90deg, transparent, rgba(124,106,250,0.25), transparent)",
+          background:
+            "linear-gradient(90deg, transparent, rgba(124,106,250,0.25), transparent)",
         }}
       />
 
@@ -96,15 +103,17 @@ export function Footer() {
             © 2026 ClipForge AI Inc. All rights reserved.
           </span>
           <div className="flex gap-6">
-            {["Privacy Policy", "Terms of Service", "Cookie Settings"].map((label) => (
-              <a
-                key={label}
-                href="#"
-                className="font-[family-name:var(--font-dm-sans)] text-[13px] text-white/20 no-underline transition-colors duration-200 hover:text-white/45"
-              >
-                {label}
-              </a>
-            ))}
+            {["Privacy Policy", "Terms of Service", "Cookie Settings"].map(
+              (label) => (
+                <a
+                  key={label}
+                  href="#"
+                  className="font-[family-name:var(--font-dm-sans)] text-[13px] text-white/20 no-underline transition-colors duration-200 hover:text-white/45"
+                >
+                  {label}
+                </a>
+              ),
+            )}
           </div>
         </div>
       </div>

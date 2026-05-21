@@ -73,7 +73,8 @@ export function HowItWorks() {
           <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
             From raw footage to
             <br />
-            <span className="text-gradient-forge">viral content</span> in 4 steps.
+            <span className="text-gradient-forge">viral content</span> in 4
+            steps.
           </h2>
         </motion.div>
 
@@ -83,7 +84,11 @@ export function HowItWorks() {
             <motion.div
               initial={{ scaleX: 0 }}
               animate={inView ? { scaleX: 1 } : {}}
-              transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                duration: 1.2,
+                delay: 0.3,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               style={{ originX: 0, willChange: "transform" }}
               className="h-full bg-gradient-to-r from-[#FF6B6B]/30 via-forge-accent/30 to-[#F6C90E]/30"
             />

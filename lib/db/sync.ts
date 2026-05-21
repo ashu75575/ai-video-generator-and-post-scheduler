@@ -23,7 +23,9 @@ export async function checkAndSyncUser() {
 
     const email = clerkUser.emailAddresses[0]?.emailAddress;
     if (!email) {
-      console.warn(`User ${clerkUser.id} does not have an email address. Skipping sync.`);
+      console.warn(
+        `User ${clerkUser.id} does not have an email address. Skipping sync.`,
+      );
       return;
     }
 
@@ -52,7 +54,9 @@ export async function checkAndSyncUser() {
         },
       });
 
-    console.log(`✅ Successfully synced user profile in Neon DB: ${clerkUser.id} (${email})`);
+    console.log(
+      `✅ Successfully synced user profile in Neon DB: ${clerkUser.id} (${email})`,
+    );
   } catch (error) {
     console.error("❌ Failed to sync user with Neon database:", error);
   }

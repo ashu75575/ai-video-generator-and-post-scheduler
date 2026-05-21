@@ -6,7 +6,7 @@ const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   console.warn(
-    "⚠️ WARNING: DATABASE_URL is not set in your environment variables. Database operations will be skipped."
+    "⚠️ WARNING: DATABASE_URL is not set in your environment variables. Database operations will be skipped.",
   );
 }
 

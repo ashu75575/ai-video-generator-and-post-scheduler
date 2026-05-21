@@ -10,7 +10,7 @@ import {
   Share2,
   Download,
   Calendar,
-  Clock
+  Clock,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { Sidebar } from "./Sidebar";
@@ -21,7 +21,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     setScheduleTime,
     scheduleCaption,
     setScheduleCaption,
-    handleScheduleSubmit
+    handleScheduleSubmit,
   } = useDashboard();
 
   useEffect(() => {
@@ -74,8 +74,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         {/* Dot pattern */}
         <svg className="absolute inset-0 h-full w-full opacity-35" aria-hidden>
           <defs>
-            <pattern id="dashboard-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(124, 106, 250, 0.15)" strokeWidth="0.5" />
+            <pattern
+              id="dashboard-grid"
+              width="40"
+              height="40"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 40 0 L 0 0 0 40"
+                fill="none"
+                stroke="rgba(124, 106, 250, 0.15)"
+                strokeWidth="0.5"
+              />
             </pattern>
             <radialGradient id="dashboard-fade" cx="50%" cy="40%" r="60%">
               <stop offset="0%" stopColor="white" stopOpacity="1" />
@@ -86,7 +96,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <rect width="100%" height="100%" fill="url(#dashboard-fade)" />
             </mask>
           </defs>
-          <rect width="100%" height="100%" fill="url(#dashboard-grid)" mask="url(#dashboard-mask)" />
+          <rect
+            width="100%"
+            height="100%"
+            fill="url(#dashboard-grid)"
+            mask="url(#dashboard-mask)"
+          />
         </svg>
 
         {/* Glowing Blobs */}
@@ -112,7 +127,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* ========================================================
           DIALOG: FORGE CLIPS (INTERACTIVE MULTI-STAGE UPLOADER)
           ======================================================== */}
-      <Dialog open={isUploadOpen} onOpenChange={(open) => { if (!isForging) { setIsUploadOpen(open); setSelectedFile(null); } }}>
+      <Dialog
+        open={isUploadOpen}
+        onOpenChange={(open) => {
+          if (!isForging) {
+            setIsUploadOpen(open);
+            setSelectedFile(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#0d0d18]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
           <DialogHeader>
             <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-white flex items-center gap-2">
@@ -120,7 +143,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               Forge Viral Clips
             </DialogTitle>
             <DialogDescription className="text-xs text-white/40">
-              Select or drop your long-form video. Our AI model isolates highlights, crops speaker faces, and structures subtitles.
+              Select or drop your long-form video. Our AI model isolates
+              highlights, crops speaker faces, and structures subtitles.
             </DialogDescription>
           </DialogHeader>
 
@@ -133,7 +157,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
                 className={`border border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-                  dragActive ? "border-forge-accent bg-forge-accent/5" : "border-white/8 hover:border-white/15 bg-white/[0.01]"
+                  dragActive
+                    ? "border-forge-accent bg-forge-accent/5"
+                    : "border-white/8 hover:border-white/15 bg-white/[0.01]"
                 }`}
               >
                 <input
@@ -143,9 +169,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   accept="video/*"
                   onChange={handleFileSelect}
                 />
-                <label htmlFor="dialog-file-input" className="cursor-pointer block">
+                <label
+                  htmlFor="dialog-file-input"
+                  className="cursor-pointer block"
+                >
                   <div className="flex flex-col items-center gap-2">
-                    <Upload size={22} className="text-white/40 hover:text-white transition-colors duration-200" />
+                    <Upload
+                      size={22}
+                      className="text-white/40 hover:text-white transition-colors duration-200"
+                    />
                     {selectedFile ? (
                       <div className="space-y-1">
                         <span className="block font-semibold text-xs text-forge-accent-2 truncate max-w-[280px]">
@@ -157,8 +189,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       </div>
                     ) : (
                       <div className="space-y-0.5">
-                        <span className="block font-semibold text-xs text-white/80">Choose long-form video file</span>
-                        <span className="block text-[10px] text-white/30">MP4, MOV, or WEBM up to 2GB</span>
+                        <span className="block font-semibold text-xs text-white/80">
+                          Choose long-form video file
+                        </span>
+                        <span className="block text-[10px] text-white/30">
+                          MP4, MOV, or WEBM up to 2GB
+                        </span>
                       </div>
                     )}
                   </div>
@@ -167,7 +203,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
               {/* YouTube Link Option */}
               <div className="relative">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div
+                  className="absolute inset-0 flex items-center"
+                  aria-hidden="true"
+                >
                   <div className="w-full border-t border-white/5"></div>
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-widest text-white/20">
@@ -210,8 +249,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-white/80 animate-pulse">{forgePhase}</span>
-                  <span className="font-mono font-bold text-forge-accent-2">{forgeProgress}%</span>
+                  <span className="font-semibold text-white/80 animate-pulse">
+                    {forgePhase}
+                  </span>
+                  <span className="font-mono font-bold text-forge-accent-2">
+                    {forgeProgress}%
+                  </span>
                 </div>
                 <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
                   <div
@@ -285,7 +328,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     </div>
                     {/* Mock dynamic glass subtitle overlay */}
                     <div className="bg-black/60 border border-white/5 backdrop-blur-md px-3 py-2 rounded-lg text-center font-[family-name:var(--font-space-grotesk)] text-xs font-extrabold tracking-tight text-white leading-tight shadow-md">
-                      THE ABSOLUTE <span className="text-forge-accent-2">#1 RULE</span>
+                      THE ABSOLUTE{" "}
+                      <span className="text-forge-accent-2">#1 RULE</span>
                     </div>
                   </div>
                 </div>
@@ -326,7 +370,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       Download MP4
                     </Button>
                     <Button
-                      onClick={() => { setIsDetailOpen(false); triggerScheduleDialog(selectedClip); }}
+                      onClick={() => {
+                        setIsDetailOpen(false);
+                        triggerScheduleDialog(selectedClip);
+                      }}
                       className="rounded-xl bg-gradient-forge px-4 text-xs font-bold text-white shadow hover:shadow-forge-glow cursor-pointer"
                     >
                       Schedule Publication
@@ -352,7 +399,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   Schedule Publication
                 </DialogTitle>
                 <DialogDescription className="text-xs text-white/40">
-                  Choose which platform and time you want ClipForge AI to auto-schedule your post.
+                  Choose which platform and time you want ClipForge AI to
+                  auto-schedule your post.
                 </DialogDescription>
               </DialogHeader>
 
@@ -364,9 +412,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </span>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: "TikTok", label: "TikTok", desc: "@devin_creations" },
-                      { id: "YouTube Shorts", label: "YouTube Shorts", desc: "Devin Innovations" },
-                      { id: "Instagram Reels", label: "Instagram Reels", desc: "@devin_tech" }
+                      {
+                        id: "TikTok",
+                        label: "TikTok",
+                        desc: "@devin_creations",
+                      },
+                      {
+                        id: "YouTube Shorts",
+                        label: "YouTube Shorts",
+                        desc: "Devin Innovations",
+                      },
+                      {
+                        id: "Instagram Reels",
+                        label: "Instagram Reels",
+                        desc: "@devin_tech",
+                      },
                     ].map((plt) => (
                       <button
                         key={plt.id}
@@ -377,8 +437,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             : "border-white/5 bg-white/[0.01] hover:bg-white/[0.03]"
                         }`}
                       >
-                        <span className="block font-semibold text-xs text-white">{plt.label}</span>
-                        <span className="block font-mono text-[8px] text-white/30 truncate mt-0.5">{plt.desc}</span>
+                        <span className="block font-semibold text-xs text-white">
+                          {plt.label}
+                        </span>
+                        <span className="block font-mono text-[8px] text-white/30 truncate mt-0.5">
+                          {plt.desc}
+                        </span>
                       </button>
                     ))}
                   </div>

@@ -34,7 +34,6 @@ export function AuthButtons() {
       <Show when="signed-in">
         <UserButton
           appearance={{
-            
             elements: {
               avatarBox: {
                 width: "34px",
@@ -45,7 +44,8 @@ export function AuthButtons() {
                 background: "rgba(13,13,24,0.97)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(24px)",
-                boxShadow: "0 0 60px rgba(124,106,250,0.15), 0 20px 40px rgba(0,0,0,0.7)",
+                boxShadow:
+                  "0 0 60px rgba(124,106,250,0.15), 0 20px 40px rgba(0,0,0,0.7)",
               },
               userPreviewMainIdentifier: {
                 color: "#ffffff",

@@ -12,7 +12,7 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip as ChartTooltip
+  Tooltip as ChartTooltip,
 } from "recharts";
 
 export default function AnalyticsPage() {
@@ -65,7 +65,9 @@ export default function AnalyticsPage() {
               <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white">
                 Weekly Views Analytics
               </h3>
-              <p className="text-[10px] text-white/30">Average multi-channel impressions.</p>
+              <p className="text-[10px] text-white/30">
+                Average multi-channel impressions.
+              </p>
             </div>
             <div className="flex items-center gap-3 font-mono text-[10px]">
               <span className="flex items-center gap-1.5">
@@ -83,30 +85,70 @@ export default function AnalyticsPage() {
           <div className="h-64 w-full">
             {mounted ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weeklyViewsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart
+                  data={weeklyViewsData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorTikTok" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="colorTikTok"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#7c6afa" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#7c6afa" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="colorShorts" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="colorShorts"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#3ecfcf" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#3ecfcf" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="day" stroke="#ffffff" opacity={0.2} fontSize={10} tickLine={false} />
-                  <YAxis stroke="#ffffff" opacity={0.2} fontSize={10} tickLine={false} />
+                  <XAxis
+                    dataKey="day"
+                    stroke="#ffffff"
+                    opacity={0.2}
+                    fontSize={10}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="#ffffff"
+                    opacity={0.2}
+                    fontSize={10}
+                    tickLine={false}
+                  />
                   <ChartTooltip
                     contentStyle={{
                       backgroundColor: "#0d0d18",
                       borderColor: "rgba(255,255,255,0.08)",
                       borderRadius: "12px",
                       fontSize: "11px",
-                      color: "#ffffff"
+                      color: "#ffffff",
                     }}
                   />
-                  <Area type="monotone" dataKey="tiktok" stroke="#7c6afa" strokeWidth={2} fillOpacity={1} fill="url(#colorTikTok)" />
-                  <Area type="monotone" dataKey="shorts" stroke="#3ecfcf" strokeWidth={2} fillOpacity={1} fill="url(#colorShorts)" />
+                  <Area
+                    type="monotone"
+                    dataKey="tiktok"
+                    stroke="#7c6afa"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorTikTok)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="shorts"
+                    stroke="#3ecfcf"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorShorts)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -121,27 +163,46 @@ export default function AnalyticsPage() {
             <h3 className="font-[family-name:var(--font-space-grotesk)] text-sm font-bold text-white">
               Success Factors Analysis
             </h3>
-            <p className="text-[10px] text-white/30">Average metrics of high-performing clips.</p>
+            <p className="text-[10px] text-white/30">
+              Average metrics of high-performing clips.
+            </p>
           </div>
 
           <div className="h-64 w-full">
             {mounted ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={viralityIndexData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="name" stroke="#ffffff" opacity={0.2} fontSize={10} tickLine={false} />
-                  <YAxis stroke="#ffffff" opacity={0.2} fontSize={10} tickLine={false} />
+                <BarChart
+                  data={viralityIndexData}
+                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                >
+                  <XAxis
+                    dataKey="name"
+                    stroke="#ffffff"
+                    opacity={0.2}
+                    fontSize={10}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="#ffffff"
+                    opacity={0.2}
+                    fontSize={10}
+                    tickLine={false}
+                  />
                   <ChartTooltip
                     contentStyle={{
                       backgroundColor: "#0d0d18",
                       borderColor: "rgba(255,255,255,0.08)",
                       borderRadius: "12px",
                       fontSize: "11px",
-                      color: "#ffffff"
+                      color: "#ffffff",
                     }}
                   />
                   <Bar dataKey="score" radius={[8, 8, 0, 0]}>
                     {viralityIndexData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#7c6afa" : "#3ecfcf"} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index % 2 === 0 ? "#7c6afa" : "#3ecfcf"}
+                      />
                     ))}
                   </Bar>
                 </BarChart>

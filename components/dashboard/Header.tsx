@@ -13,7 +13,7 @@ import {
   Flame,
   Calendar,
   Layers,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { Input } from "@/components/ui/input";
@@ -34,15 +34,33 @@ export function Header() {
   const { user } = useUser();
   const { setIsUploadOpen } = useDashboard();
   const [notifications, setNotifications] = useState([
-    { id: 1, title: "AI Clip Generated Successfully", desc: "Your video 'How to build SaaS' has 3 new clips.", time: "2 min ago", unread: true },
-    { id: 2, title: "Instagram Post Scheduled", desc: "Reel scheduled for today at 6:00 PM.", time: "1 hr ago", unread: true },
-    { id: 3, title: "Analytics Spike Alert!", desc: "TikTok video views increased by +124% in 24h.", time: "4 hr ago", unread: false },
+    {
+      id: 1,
+      title: "AI Clip Generated Successfully",
+      desc: "Your video 'How to build SaaS' has 3 new clips.",
+      time: "2 min ago",
+      unread: true,
+    },
+    {
+      id: 2,
+      title: "Instagram Post Scheduled",
+      desc: "Reel scheduled for today at 6:00 PM.",
+      time: "1 hr ago",
+      unread: true,
+    },
+    {
+      id: 3,
+      title: "Analytics Spike Alert!",
+      desc: "TikTok video views increased by +124% in 24h.",
+      time: "4 hr ago",
+      unread: false,
+    },
   ]);
 
-  const hasUnread = notifications.some(n => n.unread);
+  const hasUnread = notifications.some((n) => n.unread);
 
   const markAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, unread: false })));
+    setNotifications(notifications.map((n) => ({ ...n, unread: false })));
   };
 
   return (
@@ -61,7 +79,10 @@ export function Header() {
           >
             <Menu size={18} />
           </SheetTrigger>
-          <SheetContent side="left" className="w-[270px] bg-[#05050a] border-r border-white/5 p-0">
+          <SheetContent
+            side="left"
+            className="w-[270px] bg-[#05050a] border-r border-white/5 p-0"
+          >
             <div className="h-full pt-4">
               <Sidebar />
             </div>
@@ -157,8 +178,12 @@ export function Header() {
                       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-forge-accent mt-1" />
                     )}
                   </div>
-                  <span className="text-white/45 font-normal leading-relaxed">{n.desc}</span>
-                  <span className="mt-1 font-mono text-[9px] text-white/30">{n.time}</span>
+                  <span className="text-white/45 font-normal leading-relaxed">
+                    {n.desc}
+                  </span>
+                  <span className="mt-1 font-mono text-[9px] text-white/30">
+                    {n.time}
+                  </span>
                 </DropdownMenuItem>
               ))}
             </div>

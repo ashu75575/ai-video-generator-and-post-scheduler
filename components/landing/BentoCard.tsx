@@ -41,7 +41,8 @@ export function BentoCard({
     setSpotlight({ x, y, visible: true });
   };
 
-  const handleMouseLeave = () => setSpotlight((s) => ({ ...s, visible: false }));
+  const handleMouseLeave = () =>
+    setSpotlight((s) => ({ ...s, visible: false }));
 
   return (
     <motion.div

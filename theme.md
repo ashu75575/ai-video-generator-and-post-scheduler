@@ -6,14 +6,14 @@ These rules MUST be followed by all agents working on this project. Violating th
 
 ## 1. Color Palette
 
-| Token | Value | Usage |
-|---|---|---|
-| `--color-forge-accent` | `#7C6AFA` | Primary accent — CTAs, active states, highlights |
-| `--color-forge-accent-2` | `#3ECFCF` | Secondary accent — badges, captions, teal accents |
-| `--color-forge-bg` | `#05050A` | Page background (deep near-black) |
-| White text | `text-white` | Headings only |
-| Muted text | `text-white/45` to `text-white/55` | Body copy |
-| Subtle text | `text-white/25` to `text-white/35` | Captions, timestamps, labels |
+| Token                    | Value                              | Usage                                             |
+| ------------------------ | ---------------------------------- | ------------------------------------------------- |
+| `--color-forge-accent`   | `#7C6AFA`                          | Primary accent — CTAs, active states, highlights  |
+| `--color-forge-accent-2` | `#3ECFCF`                          | Secondary accent — badges, captions, teal accents |
+| `--color-forge-bg`       | `#05050A`                          | Page background (deep near-black)                 |
+| White text               | `text-white`                       | Headings only                                     |
+| Muted text               | `text-white/45` to `text-white/55` | Body copy                                         |
+| Subtle text              | `text-white/25` to `text-white/35` | Captions, timestamps, labels                      |
 
 **Never use plain Tailwind colors** (red-500, blue-500, etc.) for brand elements.  
 Use hex values with opacity modifiers (e.g., `#FF6B6B` for danger/energy accents).
@@ -22,11 +22,11 @@ Use hex values with opacity modifiers (e.g., `#FF6B6B` for danger/energy accents
 
 ## 2. Typography
 
-| Role | Font Variable | Class |
-|---|---|---|
-| Headings | `--font-space-grotesk` | `font-[family-name:var(--font-space-grotesk)]` |
-| Body / UI | `--font-dm-sans` | `font-[family-name:var(--font-dm-sans)]` |
-| Code / Mono | `--font-geist-mono` | `font-mono` |
+| Role        | Font Variable          | Class                                          |
+| ----------- | ---------------------- | ---------------------------------------------- |
+| Headings    | `--font-space-grotesk` | `font-[family-name:var(--font-space-grotesk)]` |
+| Body / UI   | `--font-dm-sans`       | `font-[family-name:var(--font-dm-sans)]`       |
+| Code / Mono | `--font-geist-mono`    | `font-mono`                                    |
 
 - Headings use `font-extrabold`, `tracking-[-1.5px]` to `tracking-[-2px]`
 - Body uses `leading-relaxed`
@@ -49,6 +49,7 @@ The app is **always dark**. There is no light mode toggle.
 ## 4. Glassmorphism Panels
 
 All cards and floating panels use:
+
 ```
 bg-white/[0.03]  (or 0.025 for subtle, 0.04 for hover)
 border border-white/8  (or white/10 for elevated panels)
@@ -57,6 +58,7 @@ rounded-[18px]  (or 14px for smaller cards, 20px for major panels)
 ```
 
 Shadow system:
+
 - `shadow-forge-glow` → `box-shadow: 0 0 40px rgba(124,106,250,0.35)`
 - `shadow-forge-panel` → `box-shadow: 0 0 80px rgba(124,106,250,0.2), 0 30px 60px rgba(0,0,0,0.5)`
 
@@ -99,6 +101,7 @@ Both go `from-forge-accent to-forge-accent-2` at `br` (bottom-right) direction.
 ## 8. Badge / Pill Labels
 
 All section badges follow this pattern:
+
 ```tsx
 <div className="inline-flex items-center gap-1.5 rounded-full border border-forge-accent/20 bg-forge-accent/10 px-3.5 py-1.25">
   <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
@@ -106,6 +109,7 @@ All section badges follow this pattern:
   </span>
 </div>
 ```
+
 Use `forge-accent` color for primary badges, `forge-accent-2` for secondary.
 
 ---
@@ -113,6 +117,7 @@ Use `forge-accent` color for primary badges, `forge-accent-2` for secondary.
 ## 9. Button Styles
 
 **Primary (gradient):**
+
 ```tsx
 className="flex items-center gap-2 rounded-[10px] bg-gradient-forge px-[26px] py-3.5 text-[15px] font-bold text-white"
 whileHover={{ scale: 1.04, boxShadow: `0 0 40px rgba(124,106,250,0.35)` }}
@@ -120,6 +125,7 @@ whileTap={{ scale: 0.97 }}
 ```
 
 **Secondary (ghost):**
+
 ```tsx
 className="flex items-center gap-2 rounded-[10px] border border-white/12 bg-white/[0.04] px-6 py-3.5 text-[15px] font-semibold text-white/75"
 whileHover={{ scale: 1.04 }}
@@ -131,6 +137,7 @@ whileTap={{ scale: 0.97 }}
 ## 10. Clerk Authentication Appearance
 
 **Always apply dark theming to Clerk components:**
+
 ```tsx
 import { dark } from "@clerk/themes";
 

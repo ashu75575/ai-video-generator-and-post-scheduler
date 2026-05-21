@@ -62,7 +62,11 @@ export function CTA() {
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
               style={{ willChange: "transform" }}
             >
-              <Zap size={12} className="text-forge-accent" fill={FORGE_ACCENT} />
+              <Zap
+                size={12}
+                className="text-forge-accent"
+                fill={FORGE_ACCENT}
+              />
             </motion.div>
             <span className="font-[family-name:var(--font-dm-sans)] text-xs font-medium text-forge-accent">
               No credit card required
@@ -95,7 +99,10 @@ export function CTA() {
             </motion.button>
             <motion.button
               type="button"
-              whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.07)" }}
+              whileHover={{
+                scale: 1.04,
+                backgroundColor: "rgba(255,255,255,0.07)",
+              }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
               className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-7 py-4 font-[family-name:var(--font-dm-sans)] text-base font-semibold text-white/60 transition-colors duration-200"

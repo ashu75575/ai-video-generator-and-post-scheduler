@@ -3,16 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { 
-  Upload, 
-  Video, 
-  CheckCircle2, 
-  Sparkles, 
-  RefreshCw, 
-  ChevronRight, 
-  FileText, 
+import {
+  Upload,
+  Video,
+  CheckCircle2,
+  Sparkles,
+  RefreshCw,
+  ChevronRight,
+  FileText,
   Clock,
-  AlertTriangle 
+  AlertTriangle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,13 @@ interface ProjectItem {
   id: string;
   userId: string;
   name: string;
-  status: "pending" | "uploading" | "completed" | "failed" | "transcribing" | "ready";
+  status:
+    | "pending"
+    | "uploading"
+    | "completed"
+    | "failed"
+    | "transcribing"
+    | "ready";
   progress: number;
   videoUrl: string | null;
   transcript: string | null;
@@ -51,7 +57,7 @@ export default function MyVideosPage() {
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to load videos", {
-        description: err.message || "An unexpected error occurred."
+        description: err.message || "An unexpected error occurred.",
       });
     } finally {
       setLoading(false);
@@ -80,7 +86,7 @@ export default function MyVideosPage() {
       }
 
       toast.success("Analysis Triggered", {
-        description: "Background transcription and caption extraction started."
+        description: "Background transcription and caption extraction started.",
       });
 
       // Redirect user to the loading pipeline page
@@ -88,7 +94,7 @@ export default function MyVideosPage() {
     } catch (err: any) {
       console.error(err);
       toast.error("Analysis Failed", {
-        description: err.message || "Could not start audio transcription."
+        description: err.message || "Could not start audio transcription.",
       });
     } finally {
       setActionLoading(null);
@@ -110,7 +116,8 @@ export default function MyVideosPage() {
             My Uploaded Library
           </h1>
           <p className="text-sm text-white/40 mt-1">
-            Manage your long-form uploads, trigger Deepgram voice analyses, and view timecoded subtitles.
+            Manage your long-form uploads, trigger Deepgram voice analyses, and
+            view timecoded subtitles.
           </p>
         </div>
         <Button
@@ -125,14 +132,19 @@ export default function MyVideosPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
-          <p className="text-xs text-white/30 font-mono tracking-widest uppercase">FETCHING VIDEO LIBRARY</p>
+          <p className="text-xs text-white/30 font-mono tracking-widest uppercase">
+            FETCHING VIDEO LIBRARY
+          </p>
         </div>
       ) : projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center text-white/20 border border-dashed border-white/5 bg-white/[0.005] rounded-2xl p-6 min-h-[300px]">
           <Video size={40} className="stroke-[1.5] mb-3 text-white/10" />
-          <span className="text-sm font-semibold text-white/40">Your uploaded library is empty</span>
+          <span className="text-sm font-semibold text-white/40">
+            Your uploaded library is empty
+          </span>
           <span className="text-xs mt-1 max-w-sm mx-auto leading-relaxed">
-            You haven't uploaded any long-form source videos yet. Get started by uploading a raw file.
+            You haven't uploaded any long-form source videos yet. Get started by
+            uploading a raw file.
           </span>
           <Button
             onClick={() => router.push("/dashboard")}
@@ -146,10 +158,10 @@ export default function MyVideosPage() {
           {projects.map((project) => {
             const isAnalyzed = project.status === "ready";
             const isProcessing = project.status === "transcribing";
-            
+
             return (
-              <Card 
-                key={project.id} 
+              <Card
+                key={project.id}
                 className="bg-white/[0.015] border border-white/5 rounded-2xl overflow-hidden group hover:border-white/10 transition-colors duration-300 flex flex-col h-full justify-between"
               >
                 {/* Visual Preview Box */}
@@ -164,19 +176,23 @@ export default function MyVideosPage() {
                   ) : (
                     <Video size={36} className="text-white/10" />
                   )}
-                  
+
                   {/* Status Badge */}
                   <div className="absolute top-3 left-3">
-                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-mono border uppercase tracking-wider ${
-                      isAnalyzed 
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : isProcessing
-                        ? "bg-violet-500/10 text-violet-400 border-violet-500/20 animate-pulse"
-                        : project.status === "failed"
-                        ? "bg-red-500/10 text-red-400 border-red-500/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                    }`}>
-                      {project.status === "completed" ? "uploaded" : project.status}
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[8px] font-mono border uppercase tracking-wider ${
+                        isAnalyzed
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : isProcessing
+                            ? "bg-violet-500/10 text-violet-400 border-violet-500/20 animate-pulse"
+                            : project.status === "failed"
+                              ? "bg-red-500/10 text-red-400 border-red-500/20"
+                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                      }`}
+                    >
+                      {project.status === "completed"
+                        ? "uploaded"
+                        : project.status}
                     </span>
                   </div>
                 </div>
@@ -188,14 +204,19 @@ export default function MyVideosPage() {
                       {project.name}
                     </h3>
                     <div className="flex gap-2 font-mono text-[9px] text-white/35">
-                      <span>Created: {new Date(project.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        Created:{" "}
+                        {new Date(project.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
 
                   {/* Actions Area */}
                   <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/5">
                     {/* Render Start Analysis if unanalyzed and completed/pending */}
-                    {!isAnalyzed && !isProcessing && project.status !== "failed" ? (
+                    {!isAnalyzed &&
+                    !isProcessing &&
+                    project.status !== "failed" ? (
                       <>
                         <span className="font-mono text-[9px] text-white/35 flex items-center gap-1">
                           <Clock size={11} className="text-amber-400" />
@@ -225,10 +246,13 @@ export default function MyVideosPage() {
 
                         <Button
                           size="sm"
-                          onClick={() => router.push(`/dashboard/projects/${project.id}`)}
+                          onClick={() =>
+                            router.push(`/dashboard/projects/${project.id}`)
+                          }
                           className="h-7 rounded-lg bg-white/[0.04] border border-white/8 hover:bg-white/[0.08] px-3 text-[10px] font-bold text-white cursor-pointer flex items-center"
                         >
-                          View Progress <ChevronRight size={10} className="ml-0.5" />
+                          View Progress{" "}
+                          <ChevronRight size={10} className="ml-0.5" />
                         </Button>
                       </>
                     ) : project.status === "failed" ? (
@@ -255,7 +279,9 @@ export default function MyVideosPage() {
 
                         <Button
                           size="sm"
-                          onClick={() => router.push(`/dashboard/projects/${project.id}`)}
+                          onClick={() =>
+                            router.push(`/dashboard/projects/${project.id}`)
+                          }
                           className="h-7 rounded-lg bg-white/[0.04] border border-white/8 hover:bg-white/[0.08] px-3 text-[10px] font-bold text-white cursor-pointer flex items-center gap-1"
                         >
                           <FileText size={10} />

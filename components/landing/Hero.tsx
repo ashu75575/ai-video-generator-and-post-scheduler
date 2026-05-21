@@ -100,7 +100,10 @@ export function Hero() {
             </motion.button>
             <motion.button
               type="button"
-              whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.07)" }}
+              whileHover={{
+                scale: 1.04,
+                backgroundColor: "rgba(255,255,255,0.07)",
+              }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
               className="flex cursor-pointer items-center gap-2 rounded-[10px] border border-white/12 bg-white/[0.04] px-6 py-3.5 font-[family-name:var(--font-dm-sans)] text-[15px] font-semibold text-white/75 transition-colors duration-200"
@@ -116,7 +119,11 @@ export function Hero() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.6 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{
+                    delay: 0.6 + i * 0.1,
+                    duration: 0.5,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                   className="font-[family-name:var(--font-space-grotesk)] text-xl font-extrabold text-white"
                 >
                   {val}

@@ -1,4 +1,9 @@
-import arcjet, { detectBot, detectPromptInjection, shield, slidingWindow } from "@arcjet/next";
+import arcjet, {
+  detectBot,
+  detectPromptInjection,
+  shield,
+  slidingWindow,
+} from "@arcjet/next";
 
 // 1. Arcjet client for protecting the video upload API route
 // This includes:
@@ -17,8 +22,8 @@ export const uploadApiProtector = arcjet({
     slidingWindow({
       mode: "LIVE",
       characteristics: ["userId"], // Rate limit tracked by Clerk User ID
-      max: 3,                      // Max 3 uploads
-      interval: 86400,             // 24 hours in seconds
+      max: 3, // Max 3 uploads
+      interval: 86400, // 24 hours in seconds
     }),
     detectPromptInjection({
       mode: "LIVE",

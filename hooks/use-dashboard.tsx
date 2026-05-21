@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 
@@ -83,7 +89,9 @@ interface DashboardContextType {
   clipToSchedule: Clip | null;
   setClipToSchedule: (clip: Clip | null) => void;
   schedulePlatform: "TikTok" | "Instagram Reels" | "YouTube Shorts";
-  setSchedulePlatform: (platform: "TikTok" | "Instagram Reels" | "YouTube Shorts") => void;
+  setSchedulePlatform: (
+    platform: "TikTok" | "Instagram Reels" | "YouTube Shorts",
+  ) => void;
   scheduleTime: string;
   setScheduleTime: (time: string) => void;
   scheduleCaption: string;
@@ -100,7 +108,9 @@ interface DashboardContextType {
   handleDownload: (clipTitle: string) => void;
 }
 
-const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
+const DashboardContext = createContext<DashboardContextType | undefined>(
+  undefined,
+);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
@@ -116,12 +126,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       views: "124K",
       likes: "12.8K",
       platform: "Multi-Platform",
-      thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
+      thumbnail:
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
       status: "Ready",
-      transcript: "Base UI handles hydration seamlessly and avoids nesting errors by using clean render composition. This is a game changer for building modern Next.js applications.",
-      description: "Next.js 15 + Base UI is a game-changer! 🚀 Here is why you should switch. #nextjs #webdev #baseui",
+      transcript:
+        "Base UI handles hydration seamlessly and avoids nesting errors by using clean render composition. This is a game changer for building modern Next.js applications.",
+      description:
+        "Next.js 15 + Base UI is a game-changer! 🚀 Here is why you should switch. #nextjs #webdev #baseui",
       tags: ["#nextjs", "#webdev", "#baseui"],
-      metrics: { hookStrength: 94, retentionPotential: 89, pacingScore: 92, visualEngagement: 93 }
+      metrics: {
+        hookStrength: 94,
+        retentionPotential: 89,
+        pacingScore: 92,
+        visualEngagement: 93,
+      },
     },
     {
       id: "clip-2",
@@ -132,13 +150,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       views: "89K",
       likes: "7.4K",
       platform: "TikTok",
-      thumbnail: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
+      thumbnail:
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
       status: "Scheduled",
-      transcript: "Product-market fit is not something you think of. It is something you find by talking to customers. Most startups fail because they build in a vacuum.",
-      description: "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
+      transcript:
+        "Product-market fit is not something you think of. It is something you find by talking to customers. Most startups fail because they build in a vacuum.",
+      description:
+        "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
       tags: ["#startups", "#business", "#tips"],
-      metrics: { hookStrength: 91, retentionPotential: 88, pacingScore: 90, visualEngagement: 85 }
-    }
+      metrics: {
+        hookStrength: 91,
+        retentionPotential: 88,
+        pacingScore: 90,
+        visualEngagement: 85,
+      },
+    },
   ]);
 
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([
@@ -146,11 +172,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       id: "post-1",
       clipId: "clip-2",
       title: "Why Most Startups Fail in First 6 Months",
-      caption: "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
+      caption:
+        "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
       platform: "TikTok",
       time: "Today, 6:00 PM",
-      status: "Pending"
-    }
+      status: "Pending",
+    },
   ]);
 
   const [rawVideos, setRawVideos] = useState<RawVideo[]>([]);
@@ -165,10 +192,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             const mappedVideos: RawVideo[] = data.projects.map((proj: any) => ({
               id: proj.id,
               title: proj.name,
-              date: new Date(proj.createdAt).toLocaleDateString("en-US", { 
-                month: "short", 
-                day: "numeric", 
-                year: "numeric" 
+              date: new Date(proj.createdAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
               }),
               size: "120 MB",
               duration: "0:45",
@@ -201,7 +228,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [clipToSchedule, setClipToSchedule] = useState<Clip | null>(null);
-  const [schedulePlatform, setSchedulePlatform] = useState<"TikTok" | "Instagram Reels" | "YouTube Shorts">("TikTok");
+  const [schedulePlatform, setSchedulePlatform] = useState<
+    "TikTok" | "Instagram Reels" | "YouTube Shorts"
+  >("TikTok");
   const [scheduleTime, setScheduleTime] = useState("Today, 8:00 PM");
   const [scheduleCaption, setScheduleCaption] = useState("");
 
@@ -237,23 +266,43 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     setForgeLogs([]);
 
     const phases = [
-      { pct: 0, text: "Initializing forge engine & transcribing long-form speech spectrum...", log: "🎙️ [01/05] Speech-to-Text audio decoding: extracting semantic keywords." },
-      { pct: 25, text: "Analyzing emotional waveforms & face tracking indices...", log: "🎥 [02/05] Vision tracking active: tagging camera zooms, speaker transitions, and facial dynamics." },
-      { pct: 50, text: "Isolating high-retention clips using virality match engine...", log: "⚡ [03/05] Hook extraction complete: found 1 moment with high virality markers (95% match)." },
-      { pct: 75, text: "Reframing to 9:16 vertical viewport & rendering dynamic subtitles...", log: "🎨 [04/05] Applying premium glassmorphic subtitle overlays and visual enhancers." },
-      { pct: 95, text: "Indexing virality scores & compiling metadata tags...", log: "🤖 [05/05] Meta indexing: title generation, tags suggestion, and description auto-formatting complete." },
+      {
+        pct: 0,
+        text: "Initializing forge engine & transcribing long-form speech spectrum...",
+        log: "🎙️ [01/05] Speech-to-Text audio decoding: extracting semantic keywords.",
+      },
+      {
+        pct: 25,
+        text: "Analyzing emotional waveforms & face tracking indices...",
+        log: "🎥 [02/05] Vision tracking active: tagging camera zooms, speaker transitions, and facial dynamics.",
+      },
+      {
+        pct: 50,
+        text: "Isolating high-retention clips using virality match engine...",
+        log: "⚡ [03/05] Hook extraction complete: found 1 moment with high virality markers (95% match).",
+      },
+      {
+        pct: 75,
+        text: "Reframing to 9:16 vertical viewport & rendering dynamic subtitles...",
+        log: "🎨 [04/05] Applying premium glassmorphic subtitle overlays and visual enhancers.",
+      },
+      {
+        pct: 95,
+        text: "Indexing virality scores & compiling metadata tags...",
+        log: "🤖 [05/05] Meta indexing: title generation, tags suggestion, and description auto-formatting complete.",
+      },
     ];
 
     let currentPhaseIndex = 0;
 
     const interval = setInterval(() => {
-      setForgeProgress(prev => {
+      setForgeProgress((prev) => {
         const next = prev + 1;
 
         const phase = phases[currentPhaseIndex];
         if (phase && next >= phase.pct) {
           setForgePhase(phase.text);
-          setForgeLogs(logs => [...logs, phase.log]);
+          setForgeLogs((logs) => [...logs, phase.log]);
           currentPhaseIndex++;
         }
 
@@ -269,32 +318,47 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
               views: "0",
               likes: "0",
               platform: "Multi-Platform",
-              thumbnail: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+              thumbnail:
+                "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
               status: "Ready",
-              transcript: "Bootstrapping is not a constraint; it is a massive competitive advantage. It forces you to focus strictly on revenue, customer feedback, and real product value instead of catering to pitch deck slides. Every dollar you spend is real, which makes every decision sharp.",
-              description: "Why bootstrapping makes your startup indestructible. 💸🔥 #bootstrapping #startups #founders",
+              transcript:
+                "Bootstrapping is not a constraint; it is a massive competitive advantage. It forces you to focus strictly on revenue, customer feedback, and real product value instead of catering to pitch deck slides. Every dollar you spend is real, which makes every decision sharp.",
+              description:
+                "Why bootstrapping makes your startup indestructible. 💸🔥 #bootstrapping #startups #founders",
               tags: ["#bootstrapping", "#startups", "#founders", "#business"],
-              metrics: { hookStrength: 97, retentionPotential: 94, pacingScore: 96, visualEngagement: 92 }
+              metrics: {
+                hookStrength: 97,
+                retentionPotential: 94,
+                pacingScore: 96,
+                visualEngagement: 92,
+              },
             };
 
             const newRawVideo: RawVideo = {
               id: `raw-${Date.now()}`,
               title: selectedFile.name || "Imported Video Source",
-              date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-              size: selectedFile.size ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB` : "120 MB",
+              date: new Date().toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }),
+              size: selectedFile.size
+                ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
+                : "120 MB",
               duration: "0:45",
               clips: 1,
               status: "Analyzed",
-              img: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80"
+              img: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
             };
 
-            setClips(prevClips => [newClip, ...prevClips]);
-            setRawVideos(prev => [newRawVideo, ...prev]);
+            setClips((prevClips) => [newClip, ...prevClips]);
+            setRawVideos((prev) => [newRawVideo, ...prev]);
             setIsForging(false);
             setIsUploadOpen(false);
             setSelectedFile(null);
             toast("AI Clips Forged!", {
-              description: "Successfully extracted 1 viral short. Ready in AI Clips.",
+              description:
+                "Successfully extracted 1 viral short. Ready in AI Clips.",
             });
           }, 800);
           return 100;
@@ -314,14 +378,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       caption: scheduleCaption || clipToSchedule.description,
       platform: schedulePlatform,
       time: scheduleTime,
-      status: "Pending"
+      status: "Pending",
     };
 
-    setScheduledPosts(prev => [newPost, ...prev]);
-    setClips(prev => prev.map(c => c.id === clipToSchedule.id ? { ...c, status: "Scheduled" } : c));
+    setScheduledPosts((prev) => [newPost, ...prev]);
+    setClips((prev) =>
+      prev.map((c) =>
+        c.id === clipToSchedule.id ? { ...c, status: "Scheduled" } : c,
+      ),
+    );
     setIsScheduleOpen(false);
     toast("Post Scheduled!", {
-      description: `Your short will go live on ${schedulePlatform} at ${scheduleTime}.`
+      description: `Your short will go live on ${schedulePlatform} at ${scheduleTime}.`,
     });
   };
 
@@ -338,7 +406,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const handleDownload = (clipTitle: string) => {
     toast("Downloading MP4 video...", {
-      description: `${clipTitle} (Rendered 9:16 HD with subtitles) is saving to your device.`
+      description: `${clipTitle} (Rendered 9:16 HD with subtitles) is saving to your device.`,
     });
   };
 
@@ -386,7 +454,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         handleScheduleSubmit,
         triggerScheduleDialog,
         triggerInspectDialog,
-        handleDownload
+        handleDownload,
       }}
     >
       {children}

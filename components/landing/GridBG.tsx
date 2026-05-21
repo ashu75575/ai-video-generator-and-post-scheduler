@@ -8,7 +8,12 @@ export function GridBG() {
       {/* Dot/grid pattern */}
       <svg className="absolute inset-0 h-full w-full" aria-hidden>
         <defs>
-          <pattern id="forge-grid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <pattern
+            id="forge-grid"
+            width="48"
+            height="48"
+            patternUnits="userSpaceOnUse"
+          >
             <path
               d="M 48 0 L 0 0 0 48"
               fill="none"
@@ -26,7 +31,13 @@ export function GridBG() {
             <rect width="100%" height="100%" fill="url(#grid-fade)" />
           </mask>
         </defs>
-        <rect width="100%" height="100%" fill="url(#forge-grid)" mask="url(#grid-mask)" opacity="0.5" />
+        <rect
+          width="100%"
+          height="100%"
+          fill="url(#forge-grid)"
+          mask="url(#grid-mask)"
+          opacity="0.5"
+        />
       </svg>
 
       {/* Animated ambient blobs — use will-change for GPU layer */}

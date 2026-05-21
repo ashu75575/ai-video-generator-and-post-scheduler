@@ -12,7 +12,7 @@ export default function ClipsPage() {
     clips,
     setIsUploadOpen,
     triggerInspectDialog,
-    triggerScheduleDialog
+    triggerScheduleDialog,
   } = useDashboard();
 
   return (
@@ -29,7 +29,8 @@ export default function ClipsPage() {
             AI Clips Workspace
           </h1>
           <p className="text-sm text-white/40 mt-1">
-            View, edit, inspect, and export your high-scoring viral video snippets.
+            View, edit, inspect, and export your high-scoring viral video
+            snippets.
           </p>
         </div>
         <Button
@@ -46,9 +47,12 @@ export default function ClipsPage() {
           {clips.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center text-white/20 border border-dashed border-white/5 bg-white/[0.005] rounded-2xl p-6 min-h-[350px]">
               <Video size={36} className="stroke-[1.5] mb-3 text-white/10" />
-              <span className="text-sm font-semibold text-white/40">Your clips library is empty</span>
+              <span className="text-sm font-semibold text-white/40">
+                Your clips library is empty
+              </span>
               <span className="text-xs mt-1 max-w-xs mx-auto leading-relaxed">
-                Upload a raw video or paste a YouTube URL to let the AI isolation engine forge dynamic viral shorts.
+                Upload a raw video or paste a YouTube URL to let the AI
+                isolation engine forge dynamic viral shorts.
               </span>
               <Button
                 onClick={() => setIsUploadOpen(true)}
@@ -154,19 +158,39 @@ export default function ClipsPage() {
 
             <div className="space-y-3">
               {[
-                { name: "Devin-Glass Style", tags: "Pop, Neon, Fast", example: "THE #1 RULE" },
-                { name: "Hermonzi Impact", tags: "Bold, Yellow/Red, Dynamic", example: "NEVER WRITE" },
-                { name: "Minimalist Sans", tags: "Clean, Bottom-centered", example: "building a saas" },
-                { name: "Karaoke Highlighter", tags: "Word-by-word active glow", example: "a single line" },
+                {
+                  name: "Devin-Glass Style",
+                  tags: "Pop, Neon, Fast",
+                  example: "THE #1 RULE",
+                },
+                {
+                  name: "Hermonzi Impact",
+                  tags: "Bold, Yellow/Red, Dynamic",
+                  example: "NEVER WRITE",
+                },
+                {
+                  name: "Minimalist Sans",
+                  tags: "Clean, Bottom-centered",
+                  example: "building a saas",
+                },
+                {
+                  name: "Karaoke Highlighter",
+                  tags: "Word-by-word active glow",
+                  example: "a single line",
+                },
               ].map((style, i) => (
                 <div
                   key={i}
                   className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-300 hover:bg-white/[0.03] ${
-                    i === 0 ? "border-forge-accent bg-forge-accent/5" : "border-white/5 bg-white/[0.01]"
+                    i === 0
+                      ? "border-forge-accent bg-forge-accent/5"
+                      : "border-white/5 bg-white/[0.01]"
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1.5">
-                    <span className="font-semibold text-xs text-white">{style.name}</span>
+                    <span className="font-semibold text-xs text-white">
+                      {style.name}
+                    </span>
                     <Badge className="bg-white/5 text-white/40 hover:bg-white/5 font-mono text-[8px] uppercase tracking-wide px-1">
                       {style.tags}
                     </Badge>

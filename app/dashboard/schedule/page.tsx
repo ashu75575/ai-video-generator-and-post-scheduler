@@ -40,15 +40,19 @@ export default function SchedulePage() {
 
             {scheduledPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center text-white/20 border border-dashed border-white/5 rounded-2xl bg-white/[0.005]">
-                <Calendar size={32} className="stroke-[1.5] mb-2.5 text-white/10" />
-                <span className="text-sm font-semibold text-white/40">Delivery Queue is empty</span>
+                <Calendar
+                  size={32}
+                  className="stroke-[1.5] mb-2.5 text-white/10"
+                />
+                <span className="text-sm font-semibold text-white/40">
+                  Delivery Queue is empty
+                </span>
                 <span className="text-xs mt-1 max-w-xs mx-auto leading-relaxed">
-                  No social posts have been scheduled yet. Forge a clip and schedule it to see your timeline here.
+                  No social posts have been scheduled yet. Forge a clip and
+                  schedule it to see your timeline here.
                 </span>
                 <Link href="/dashboard/clips">
-                  <Button
-                    className="mt-4 h-8 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-4 text-xs font-bold text-white cursor-pointer"
-                  >
+                  <Button className="mt-4 h-8 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-4 text-xs font-bold text-white cursor-pointer">
                     Go to Clips Workspace
                   </Button>
                 </Link>
@@ -75,7 +79,9 @@ export default function SchedulePage() {
                           {post.status}
                         </Badge>
                       </div>
-                      <h3 className="font-semibold text-sm text-white mb-1.5">{post.title}</h3>
+                      <h3 className="font-semibold text-sm text-white mb-1.5">
+                        {post.title}
+                      </h3>
                       <p className="text-xs text-white/50 italic leading-relaxed font-[family-name:var(--font-dm-sans)]">
                         "{post.caption}"
                       </p>
@@ -96,18 +102,51 @@ export default function SchedulePage() {
 
             <div className="space-y-3">
               {[
-                { name: "TikTok Account", handle: "@devin_creations", status: "Connected", action: "Manage", active: true },
-                { name: "YouTube Shorts", handle: "Devin Innovations", status: "Connected", action: "Manage", active: true },
-                { name: "Instagram Reels", handle: "@devin_tech", status: "Connected", action: "Manage", active: true },
-                { name: "X / Twitter Videos", handle: "Not linked", status: "Disconnected", action: "Link", active: false }
+                {
+                  name: "TikTok Account",
+                  handle: "@devin_creations",
+                  status: "Connected",
+                  action: "Manage",
+                  active: true,
+                },
+                {
+                  name: "YouTube Shorts",
+                  handle: "Devin Innovations",
+                  status: "Connected",
+                  action: "Manage",
+                  active: true,
+                },
+                {
+                  name: "Instagram Reels",
+                  handle: "@devin_tech",
+                  status: "Connected",
+                  action: "Manage",
+                  active: true,
+                },
+                {
+                  name: "X / Twitter Videos",
+                  handle: "Not linked",
+                  status: "Disconnected",
+                  action: "Link",
+                  active: false,
+                },
               ].map((acc, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-white/[0.015] border border-white/5 flex items-center justify-between gap-3">
+                <div
+                  key={i}
+                  className="p-3.5 rounded-xl bg-white/[0.015] border border-white/5 flex items-center justify-between gap-3"
+                >
                   <div className="min-w-0 space-y-0.5">
-                    <span className="block font-semibold text-xs text-white">{acc.name}</span>
-                    <span className="block font-mono text-[10px] text-white/35 truncate">{acc.handle}</span>
+                    <span className="block font-semibold text-xs text-white">
+                      {acc.name}
+                    </span>
+                    <span className="block font-mono text-[10px] text-white/35 truncate">
+                      {acc.handle}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${acc.active ? "bg-emerald-400 shadow-[0_0_6px_#34d399]" : "bg-white/10"}`} />
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${acc.active ? "bg-emerald-400 shadow-[0_0_6px_#34d399]" : "bg-white/10"}`}
+                    />
                     <button className="font-mono text-[10px] font-bold text-white/50 hover:text-white cursor-pointer hover:underline">
                       {acc.action}
                     </button>

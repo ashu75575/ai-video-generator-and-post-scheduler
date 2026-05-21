@@ -59,8 +59,7 @@ export function Features() {
           <h2 className="max-w-[560px] font-[family-name:var(--font-space-grotesk)] text-[clamp(30px,4vw,48px)] leading-tight font-extrabold tracking-[-1.5px] text-white">
             Everything you need
             <br />
-            to go viral,{" "}
-            <span className="text-gradient-forge">automated.</span>
+            to go viral, <span className="text-gradient-forge">automated.</span>
           </h2>
         </motion.div>
 
@@ -73,16 +72,18 @@ export function Features() {
             desc="GPT-4o Vision scans every frame, identifying moments with the highest engagement potential using social psychology signals."
           >
             <div className="mt-3.5 flex flex-wrap gap-1.5">
-              {["Hook score", "Energy spike", "Sentiment", "Pacing"].map((tag) => (
-                <motion.span
-                  key={tag}
-                  whileHover={{ scale: 1.05, y: -1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                  className="rounded-md border border-[#FF6B6B]/20 bg-[#FF6B6B]/10 px-2 py-0.5 font-mono text-[11px] text-[#FF6B6B] cursor-default"
-                >
-                  {tag}
-                </motion.span>
-              ))}
+              {["Hook score", "Energy spike", "Sentiment", "Pacing"].map(
+                (tag) => (
+                  <motion.span
+                    key={tag}
+                    whileHover={{ scale: 1.05, y: -1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    className="rounded-md border border-[#FF6B6B]/20 bg-[#FF6B6B]/10 px-2 py-0.5 font-mono text-[11px] text-[#FF6B6B] cursor-default"
+                  >
+                    {tag}
+                  </motion.span>
+                ),
+              )}
             </div>
           </BentoCard>
 
@@ -103,7 +104,11 @@ export function Features() {
           >
             <motion.div
               animate={{ width: ["0%", "100%", "0%"] }}
-              transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+              transition={{
+                repeat: Infinity,
+                duration: 3.5,
+                ease: "easeInOut",
+              }}
               style={{ willChange: "transform" }}
               className="mt-4 h-0.5 rounded-sm bg-gradient-to-r from-transparent via-forge-accent-2 to-transparent"
             />

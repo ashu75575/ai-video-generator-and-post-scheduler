@@ -4,7 +4,11 @@ import { projects, shortVideos } from "../db/schema";
 import { eq } from "drizzle-orm";
 import fs from "fs/promises";
 import { existsSync, createReadStream } from "fs";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config } from "../config";
 import crypto from "crypto";
@@ -44,7 +48,7 @@ export const processVideoUpload = inngest.createFunction(
       if (!bucketName || !accessKeyId || !secretAccessKey) {
         throw new Error(
           "AWS S3 environment variables are not fully configured. " +
-          "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY."
+            "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY.",
         );
       }
 
@@ -67,7 +71,7 @@ export const processVideoUpload = inngest.createFunction(
           Bucket: bucketName,
           Key: s3Key,
           Body: fileStream,
-        })
+        }),
       );
 
       // Generate a presigned URL to allow Deepgram (and the frontend player) to access the private S3 file securely
@@ -75,7 +79,9 @@ export const processVideoUpload = inngest.createFunction(
         Bucket: bucketName,
         Key: s3Key,
       });
-      const actualUrl = await getSignedUrl(s3, getCommand, { expiresIn: 604800 }); // Valid for 7 days
+      const actualUrl = await getSignedUrl(s3, getCommand, {
+        expiresIn: 604800,
+      }); // Valid for 7 days
 
       if (db) {
         await db
@@ -111,11 +117,13 @@ export const processVideoUpload = inngest.createFunction(
           })
           .where(eq(projects.id, projectId));
       }
-      console.log(`Successfully completed upload process for project: ${projectId}`);
+      console.log(
+        `Successfully completed upload process for project: ${projectId}`,
+      );
     });
 
     return { success: true, url: videoUrl };
-  }
+  },
 );
 
 interface Word {
@@ -134,19 +142,22 @@ interface Sentence {
 
 function groupWordsIntoSentences(words: Word[]): Sentence[] {
   if (!Array.isArray(words) || words.length === 0) return [];
-  
+
   const sentences: Sentence[] = [];
   let currentWords: string[] = [];
   let currentStart = words[0].start;
-  
+
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
     const wordText = w.punctuated_word || w.word;
     currentWords.push(wordText);
-    
+
     // Check if the word ends with sentence-ending punctuation or if it has been 15 words
-    const isEnding = /[.!?]$/.test(wordText) || currentWords.length >= 15 || i === words.length - 1;
-    
+    const isEnding =
+      /[.!?]$/.test(wordText) ||
+      currentWords.length >= 15 ||
+      i === words.length - 1;
+
     if (isEnding) {
       sentences.push({
         text: currentWords.join(" "),
@@ -159,7 +170,7 @@ function groupWordsIntoSentences(words: Word[]): Sentence[] {
       currentWords = [];
     }
   }
-  
+
   return sentences;
 }
 
@@ -191,7 +202,9 @@ export const analyzeProjectVideo = inngest.createFunction(
       const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
 
       if (!deepgramApiKey) {
-        throw new Error("DEEPGRAM_API_KEY environment variable is not configured.");
+        throw new Error(
+          "DEEPGRAM_API_KEY environment variable is not configured.",
+        );
       }
 
       const response = await fetch(
@@ -199,21 +212,25 @@ export const analyzeProjectVideo = inngest.createFunction(
         {
           method: "POST",
           headers: {
-            "Authorization": `Token ${deepgramApiKey}`,
+            Authorization: `Token ${deepgramApiKey}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ url: videoUrl }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`Deepgram API failed with code ${response.status}: ${errText}`);
+        throw new Error(
+          `Deepgram API failed with code ${response.status}: ${errText}`,
+        );
       }
 
       const data = await response.json();
-      const transcript = data.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
-      const captions = data.results?.channels?.[0]?.alternatives?.[0]?.words || [];
+      const transcript =
+        data.results?.channels?.[0]?.alternatives?.[0]?.transcript || "";
+      const captions =
+        data.results?.channels?.[0]?.alternatives?.[0]?.words || [];
 
       return { transcript, captions };
     });
@@ -223,58 +240,77 @@ export const analyzeProjectVideo = inngest.createFunction(
       if (db) {
         await db
           .update(projects)
-          .set({ status: "generating_shorts", progress: 70, updatedAt: new Date() })
+          .set({
+            status: "generating_shorts",
+            progress: 70,
+            updatedAt: new Date(),
+          })
           .where(eq(projects.id, projectId));
       }
     });
 
     // Step 4: Use Gemini AI model to find the best engaging moments
-    const shortVideoSegments = await step.run("generate-short-videos", async () => {
-      const geminiApiKey = process.env.GEMINI_API_KEY;
-      if (!geminiApiKey) {
-        console.warn("⚠️ GEMINI_API_KEY is not set. Skipping short video generation.");
-        return [];
-      }
-
-      const sentences = groupWordsIntoSentences(result.captions);
-      if (sentences.length === 0) {
-        console.warn("No sentences found in transcription. Skipping short video generation.");
-        return [];
-      }
-
-      // Check for prompt injection attacks in the transcript before calling Gemini API
-      try {
-        const decision = await contentScanner.protect(null as any, {
-          detectPromptInjectionMessage: result.transcript || "",
-        });
-
-        if (decision.isDenied()) {
-          console.error(`❌ Prompt injection detected in transcript for project ${projectId}. Blocking Gemini API call.`);
-          throw new Error("Analysis failed: Prompt injection detected in video content.");
+    const shortVideoSegments = await step.run(
+      "generate-short-videos",
+      async () => {
+        const geminiApiKey = process.env.GEMINI_API_KEY;
+        if (!geminiApiKey) {
+          console.warn(
+            "⚠️ GEMINI_API_KEY is not set. Skipping short video generation.",
+          );
+          return [];
         }
-      } catch (scanError: any) {
-        if (scanError.message?.includes("Prompt injection detected")) {
-          throw scanError;
+
+        const sentences = groupWordsIntoSentences(result.captions);
+        if (sentences.length === 0) {
+          console.warn(
+            "No sentences found in transcription. Skipping short video generation.",
+          );
+          return [];
         }
-        console.error("⚠️ Arcjet prompt injection scan encountered an error:", scanError);
-      }
 
-      console.log(`Sending ${sentences.length} sentences to Gemini to find best engaging moments.`);
+        // Check for prompt injection attacks in the transcript before calling Gemini API
+        try {
+          const decision = await contentScanner.protect(null as any, {
+            detectPromptInjectionMessage: result.transcript || "",
+          });
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${geminiApiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    text: `You are an expert viral video editor and content strategist.
+          if (decision.isDenied()) {
+            console.error(
+              `❌ Prompt injection detected in transcript for project ${projectId}. Blocking Gemini API call.`,
+            );
+            throw new Error(
+              "Analysis failed: Prompt injection detected in video content.",
+            );
+          }
+        } catch (scanError: any) {
+          if (scanError.message?.includes("Prompt injection detected")) {
+            throw scanError;
+          }
+          console.error(
+            "⚠️ Arcjet prompt injection scan encountered an error:",
+            scanError,
+          );
+        }
+
+        console.log(
+          `Sending ${sentences.length} sentences to Gemini to find best engaging moments.`,
+        );
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${geminiApiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [
+                    {
+                      text: `You are an expert viral video editor and content strategist.
 Analyze the following transcript of a long video, which is split into sentences with start and end times (in seconds).
 Identify the top ${config.shortVideoCount} most engaging, viral, and coherent segments suitable for short videos (TikTok, Reels, YouTube Shorts).
 
@@ -283,56 +319,66 @@ Each segment MUST:
 2. Have a strong hook at the beginning.
 3. Be self-contained and make sense to the viewer.
 4. Align exactly with the sentence boundaries (use the start time of the first sentence and the end time of the last sentence in the segment).
+5. Add SEO ranking from 1 to 10 for each short video, 1 is best and 10 is worst, this SEO ranking is for youtube shorts.
 
 Here is the sentence list:
 ${JSON.stringify(sentences, null, 2)}
 
 Return the output as a JSON object matching the requested schema.`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: "OBJECT",
-                properties: {
-                  shortVideos: {
-                    type: "ARRAY",
-                    items: {
-                      type: "OBJECT",
-                      properties: {
-                        title: { type: "STRING" },
-                        startTime: { type: "NUMBER" },
-                        endTime: { type: "NUMBER" },
-                        whyBest: { type: "STRING" },
-                        seoRanking: { type: "INTEGER" },
+                    },
+                  ],
+                },
+              ],
+              generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    shortVideos: {
+                      type: "ARRAY",
+                      items: {
+                        type: "OBJECT",
+                        properties: {
+                          title: { type: "STRING" },
+                          startTime: { type: "NUMBER" },
+                          endTime: { type: "NUMBER" },
+                          whyBest: { type: "STRING" },
+                          seoRanking: { type: "INTEGER" },
+                        },
+                        required: [
+                          "title",
+                          "startTime",
+                          "endTime",
+                          "whyBest",
+                          "seoRanking",
+                        ],
                       },
-                      required: ["title", "startTime", "endTime", "whyBest", "seoRanking"],
                     },
                   },
+                  required: ["shortVideos"],
                 },
-                required: ["shortVideos"],
               },
-            },
-          }),
+            }),
+          },
+        );
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(
+            `Gemini API failed with status ${response.status}: ${errText}`,
+          );
         }
-      );
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Gemini API failed with status ${response.status}: ${errText}`);
-      }
+        const data = await response.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!responseText) {
+          throw new Error("Empty response received from Gemini API");
+        }
 
-      const data = await response.json();
-      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!responseText) {
-        throw new Error("Empty response received from Gemini API");
-      }
-
-      const parsed = JSON.parse(responseText);
-      return parsed.shortVideos || [];
-    });
+        const parsed = JSON.parse(responseText);
+        return parsed.shortVideos || [];
+      },
+    );
 
     // Step 5: Save short videos and specific captions to the database
     await step.run("save-short-videos", async () => {
@@ -344,7 +390,7 @@ Return the output as a JSON object matching the requested schema.`,
       for (const segment of shortVideoSegments) {
         // Filter the captions array for words that fall within this segment's duration
         const segmentCaptions = result.captions.filter(
-          (w: any) => w.start >= segment.startTime && w.end <= segment.endTime
+          (w: any) => w.start >= segment.startTime && w.end <= segment.endTime,
         );
 
         await db.insert(shortVideos).values({
@@ -358,7 +404,9 @@ Return the output as a JSON object matching the requested schema.`,
           captions: segmentCaptions,
         });
       }
-      console.log(`Successfully saved ${shortVideoSegments.length} short videos for project: ${projectId}`);
+      console.log(
+        `Successfully saved ${shortVideoSegments.length} short videos for project: ${projectId}`,
+      );
     });
 
     // Step 6: Save transcription results and finalize project status
@@ -375,9 +423,15 @@ Return the output as a JSON object matching the requested schema.`,
           })
           .where(eq(projects.id, projectId));
       }
-      console.log(`Successfully transcribed and analyzed video for project: ${projectId}`);
+      console.log(
+        `Successfully transcribed and analyzed video for project: ${projectId}`,
+      );
     });
 
-    return { success: true, result, shortVideosCount: shortVideoSegments.length };
-  }
+    return {
+      success: true,
+      result,
+      shortVideosCount: shortVideoSegments.length,
+    };
+  },
 );
