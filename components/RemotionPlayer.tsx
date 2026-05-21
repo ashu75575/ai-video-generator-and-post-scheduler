@@ -62,6 +62,7 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
       <Video
         src={videoUrl}
         startFrom={startFrame}
+        pauseWhenBuffering={true}
         style={{
           width: "100%",
           height: "100%",
