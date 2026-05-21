@@ -5,6 +5,7 @@ import { projects } from "@/lib/db/schema";
 import { inngest } from "@/lib/inngest/client";
 import { promises as fs } from "fs";
 import path from "path";
+import { uploadApiProtector } from "@/lib/arcjet";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,6 +30,44 @@ export async function POST(req: NextRequest) {
     }
 
     const fileName = name || file.name;
+
+    // 3. Arcjet Security and Rate Limit check
+    const decision = await uploadApiProtector.protect(req, {
+      userId,
+      detectPromptInjectionMessage: fileName,
+    });
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        return NextResponse.json(
+          { error: "Daily upload limit reached. You can only upload 3 videos per day." },
+          { status: 429 }
+        );
+      }
+      if (decision.reason.isPromptInjection()) {
+        return NextResponse.json(
+          { error: "Suspicious file name detected. Request blocked by prompt injection filter." },
+          { status: 400 }
+        );
+      }
+      if (decision.reason.isBot()) {
+        return NextResponse.json(
+          { error: "Access denied. Bot activity detected." },
+          { status: 403 }
+        );
+      }
+      if (decision.reason.isShield()) {
+        return NextResponse.json(
+          { error: "Access denied. Suspicious activity blocked by Shield." },
+          { status: 403 }
+        );
+      }
+      return NextResponse.json(
+        { error: "Request blocked by security policies." },
+        { status: 403 }
+      );
+    }
+
     const projectId = `proj-${Date.now()}`;
 
     // 3. Save file locally inside public/uploads workspace directory

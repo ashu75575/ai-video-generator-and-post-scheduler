@@ -8,6 +8,7 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config } from "../config";
 import crypto from "crypto";
+import { contentScanner } from "../arcjet";
 
 export const processVideoUpload = inngest.createFunction(
   { id: "process-video-upload" },
@@ -239,6 +240,23 @@ export const analyzeProjectVideo = inngest.createFunction(
       if (sentences.length === 0) {
         console.warn("No sentences found in transcription. Skipping short video generation.");
         return [];
+      }
+
+      // Check for prompt injection attacks in the transcript before calling Gemini API
+      try {
+        const decision = await contentScanner.protect(null as any, {
+          detectPromptInjectionMessage: result.transcript || "",
+        });
+
+        if (decision.isDenied()) {
+          console.error(`❌ Prompt injection detected in transcript for project ${projectId}. Blocking Gemini API call.`);
+          throw new Error("Analysis failed: Prompt injection detected in video content.");
+        }
+      } catch (scanError: any) {
+        if (scanError.message?.includes("Prompt injection detected")) {
+          throw scanError;
+        }
+        console.error("⚠️ Arcjet prompt injection scan encountered an error:", scanError);
       }
 
       console.log(`Sending ${sentences.length} sentences to Gemini to find best engaging moments.`);
