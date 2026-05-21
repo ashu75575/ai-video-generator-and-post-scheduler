@@ -24,6 +24,16 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useDashboard } from "@/hooks/use-dashboard";
 import RemotionPlayer from "@/components/RemotionPlayer";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { CAPTION_STYLES, CaptionStyle, getStyleById } from "@/lib/caption-styles";
+import { Paintbrush } from "lucide-react";
 
 interface CaptionWord {
   word: string;
@@ -41,6 +51,7 @@ interface ShortVideo {
   whyBest: string;
   seoRanking: number;
   captions: CaptionWord[] | null;
+  captionStyle: CaptionStyle | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -82,6 +93,59 @@ export default function ProjectAnalysisPage() {
   // Accordion state for technical details (transcript and raw captions)
   const [showTechnicalDetails, setShowTechnicalDetails] =
     useState<boolean>(false);
+
+  // Caption style editor state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingClip, setEditingClip] = useState<ShortVideo | null>(null);
+  const [customStyle, setCustomStyle] = useState<CaptionStyle | null>(null);
+  const [isSavingStyle, setIsSavingStyle] = useState(false);
+
+  const handleEditClick = (clip: ShortVideo) => {
+    setEditingClip(clip);
+    // Use the clip's existing style, or fall back to the first preset template
+    const baseStyle = clip.captionStyle || CAPTION_STYLES[0];
+    setCustomStyle({ ...baseStyle });
+    setIsEditModalOpen(true);
+  };
+
+  const handleApplyStyle = async () => {
+    if (!editingClip || !customStyle) return;
+    setIsSavingStyle(true);
+    try {
+      const response = await fetch(`/api/projects/clips/${editingClip.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ captionStyle: customStyle }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save style to database");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Caption style updated successfully!");
+        // Update local state
+        setProject((prev) => {
+          if (!prev || !prev.shortVideos) return prev;
+          return {
+            ...prev,
+            shortVideos: prev.shortVideos.map((c) =>
+              c.id === editingClip.id ? { ...c, captionStyle: customStyle } : c,
+            ),
+          };
+        });
+        setIsEditModalOpen(false);
+      }
+    } catch (err: any) {
+      console.error("Error saving style:", err);
+      toast.error(err.message || "Failed to update caption style.");
+    } finally {
+      setIsSavingStyle(false);
+    }
+  };
 
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
@@ -383,9 +447,7 @@ export default function ProjectAnalysisPage() {
           </Card>
         )}
 
-        {/* ==========================================
-            RESULTS SHOWCASE VIEW (Grid of Short Videos)
-            ========================================== */}
+        {/* RESULTS SHOWCASE VIEW */}
         <AnimatePresence mode="wait">
           {project.status === "ready" &&
             project.shortVideos &&
@@ -424,6 +486,7 @@ export default function ProjectAnalysisPage() {
                             startTime={clip.startTime}
                             endTime={clip.endTime}
                             captions={clip.captions || []}
+                            captionStyle={clip.captionStyle || undefined}
                           />
 
                           {isCurrentPlaying && (
@@ -467,19 +530,26 @@ export default function ProjectAnalysisPage() {
                         </div>
 
                         {/* Bottom: Action Buttons */}
-                        <div className="flex gap-3 pt-2 border-t border-white/[0.04]">
+                        <div className="flex gap-2 pt-2 border-t border-white/[0.04]">
+                          <Button
+                            onClick={() => handleEditClick(clip)}
+                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <Paintbrush size={11} className="text-violet-400" />{" "}
+                            Edit Style
+                          </Button>
                           <Button
                             onClick={() => handleDownload(clip.title)}
-                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-3 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                           >
-                            <Download size={12} className="text-white/60" />{" "}
+                            <Download size={11} className="text-white/60" />{" "}
                             Download
                           </Button>
                           <Button
                             onClick={() => handleScheduleClick(clip)}
-                            className="bg-gradient-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-3 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(124,106,250,0.3)] hover:shadow-[0_0_20px_rgba(124,106,250,0.45)] transition-all"
+                            className="bg-gradient-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
                           >
-                            <Calendar size={12} /> Schedule
+                            <Calendar size={11} /> Schedule
                           </Button>
                         </div>
                       </Card>
@@ -575,6 +645,290 @@ export default function ProjectAnalysisPage() {
               </motion.div>
             )}
         </AnimatePresence>
+
+        {/* DIALOG: EDIT CAPTION STYLE*/}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="!max-w-[90vw] !w-[90vw] h-[85vh] max-h-[800px] rounded-3xl border border-white/10 bg-black/90 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80 flex flex-col overflow-hidden">
+            <DialogHeader className="shrink-0 mb-4">
+              <DialogTitle className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-white flex items-center gap-2">
+                <Paintbrush size={18} className="text-violet-500" />
+                Customize Caption Design
+              </DialogTitle>
+              <DialogDescription className="text-xs text-white/40">
+                Customize fonts, colors, and layout styles for captions in real-time. Changes will be saved to your video.
+              </DialogDescription>
+            </DialogHeader>
+
+            {editingClip && customStyle && (
+              <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-5 gap-6">
+                {/* Left Side: Caption Style Editor Controls */}
+                <div className="md:col-span-3 flex flex-col gap-5 overflow-y-auto pr-2 custom-scrollbar">
+                  {/* Preset Templates */}
+                  <div className="space-y-2.5">
+                    <label className="text-xs font-bold text-white/50 uppercase tracking-wider block font-mono">
+                      Caption Style Presets
+                    </label>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {CAPTION_STYLES.map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => setCustomStyle({ ...preset })}
+                          className={`p-3 rounded-xl border text-left cursor-pointer transition-all duration-200 ${
+                            customStyle.id === preset.id
+                              ? "border-violet-500 bg-violet-500/10 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                              : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
+                          }`}
+                        >
+                          <span className="block font-semibold text-xs text-white">
+                            {preset.name}
+                          </span>
+                          <span className="block text-[9px] text-white/40 font-mono mt-0.5 truncate" style={{ fontFamily: preset.fontFamily }}>
+                            {preset.fontFamily.split(",")[0].replace(/'/g, "")}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Font Customization */}
+                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                      Typography & Alignment
+                    </span>
+
+                    {/* Font Family Selection */}
+                    <div className="space-y-2">
+                      <label className="text-xs text-white/60 block">Font Family</label>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { label: "Impact", value: "Impact, Arial Black, sans-serif" },
+                          { label: "Outfit", value: "'Outfit', 'Inter', sans-serif" },
+                          { label: "Inter", value: "'Inter', sans-serif" },
+                          { label: "Courier New", value: "'Courier New', Courier, monospace" },
+                          { label: "Space Grotesk", value: "'Space Grotesk', sans-serif" },
+                        ].map((f) => (
+                          <button
+                            key={f.label}
+                            onClick={() => setCustomStyle(prev => prev ? { ...prev, fontFamily: f.value } : null)}
+                            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+                              customStyle.fontFamily === f.value
+                                ? "border-violet-500 bg-violet-500/20 text-white"
+                                : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white"
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Case Transformation */}
+                    <div className="space-y-2 pt-2">
+                      <label className="text-xs text-white/60 block">Letter Case</label>
+                      <div className="flex gap-2">
+                        {[
+                          { label: "ALL CAPS", value: "uppercase" as const },
+                          { label: "Normal Case", value: "none" as const },
+                          { label: "lowercase", value: "lowercase" as const },
+                        ].map((c) => (
+                          <button
+                            key={c.label}
+                            onClick={() => setCustomStyle(prev => prev ? { ...prev, textTransform: c.value } : null)}
+                            className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-center ${
+                              customStyle.textTransform === c.value
+                                ? "border-violet-500 bg-violet-500/20 text-white"
+                                : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/[0.04] hover:text-white"
+                            }`}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Colors Customization */}
+                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                      Subtitles Styling & Colors
+                    </span>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-white/60">Active Word Color</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-2 rounded-xl">
+                          <input
+                            type="color"
+                            value={customStyle.colorActive.startsWith("#") ? customStyle.colorActive : "#facc15"}
+                            onChange={(e) => setCustomStyle(prev => prev ? { ...prev, colorActive: e.target.value } : null)}
+                            className="w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer shrink-0"
+                          />
+                          <span className="text-xs font-mono text-white/70 uppercase">
+                            {customStyle.colorActive}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-white/60">Inactive Word Color</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-2 rounded-xl">
+                          <input
+                            type="color"
+                            value={customStyle.colorInactive.startsWith("#") ? customStyle.colorInactive : "#ffffff"}
+                            onChange={(e) => setCustomStyle(prev => prev ? { ...prev, colorInactive: e.target.value } : null)}
+                            className="w-8 h-8 rounded-lg border-none bg-transparent cursor-pointer shrink-0"
+                          />
+                          <span className="text-xs font-mono text-white/70 uppercase">
+                            {customStyle.colorInactive}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sizes Customization */}
+                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                      Caption Sizes
+                    </span>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-white/60">Active Font Size</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1 rounded-xl justify-between">
+                          <button
+                            onClick={() => {
+                              const val = parseFloat(customStyle.fontSizeActive) - 0.2;
+                              setCustomStyle(prev => prev ? { ...prev, fontSizeActive: `${val.toFixed(1)}rem` } : null);
+                            }}
+                            className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-mono font-bold text-white">
+                            {customStyle.fontSizeActive}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const val = parseFloat(customStyle.fontSizeActive) + 0.2;
+                              setCustomStyle(prev => prev ? { ...prev, fontSizeActive: `${val.toFixed(1)}rem` } : null);
+                            }}
+                            className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs text-white/60">Inactive Font Size</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 p-1 rounded-xl justify-between">
+                          <button
+                            onClick={() => {
+                              const val = parseFloat(customStyle.fontSizeInactive) - 0.2;
+                              setCustomStyle(prev => prev ? { ...prev, fontSizeInactive: `${val.toFixed(1)}rem` } : null);
+                            }}
+                            className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="text-xs font-mono font-bold text-white">
+                            {customStyle.fontSizeInactive}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const val = parseFloat(customStyle.fontSizeInactive) + 0.2;
+                              setCustomStyle(prev => prev ? { ...prev, fontSizeInactive: `${val.toFixed(1)}rem` } : null);
+                            }}
+                            className="px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Background Box Opacity */}
+                  <div className="space-y-3 bg-white/[0.01] border border-white/5 p-4 rounded-2xl">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block">
+                        Background Overlay Opacity
+                      </span>
+                      <span className="text-xs font-mono font-bold text-white/80">
+                        {Math.round(
+                          (customStyle.backgroundColor.includes("rgba")
+                            ? parseFloat(customStyle.backgroundColor.split(",")[3])
+                            : 0.9) * 100
+                        )}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={
+                          customStyle.backgroundColor.includes("rgba")
+                            ? parseFloat(customStyle.backgroundColor.split(",")[3])
+                            : 0.9
+                        }
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setCustomStyle(prev => {
+                            if (!prev) return null;
+                            const base = prev.backgroundColor.startsWith("rgba")
+                              ? prev.backgroundColor.substring(0, prev.backgroundColor.lastIndexOf(","))
+                              : "rgba(5, 5, 10";
+                            return {
+                              ...prev,
+                              backgroundColor: `${base}, ${val})`,
+                            };
+                          });
+                        }}
+                        className="flex-1 accent-violet-500 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Live Remotion Player Preview */}
+                <div className="md:col-span-2 flex flex-col items-center justify-center bg-black/40 rounded-3xl border border-white/5 p-4 relative group">
+                  <div className="w-full h-full max-h-[460px] flex items-center justify-center">
+                    <RemotionPlayer
+                      videoUrl={project.videoUrl || ""}
+                      startTime={editingClip.startTime}
+                      endTime={editingClip.endTime}
+                      captions={editingClip.captions || []}
+                      captionStyle={customStyle}
+                    />
+                  </div>
+                  <div className="text-[10px] font-mono text-white/30 uppercase tracking-wider mt-3">
+                    Live Preview Engine
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="shrink-0 mt-6 pt-4 border-t border-white/5 gap-3">
+              <Button
+                onClick={() => setIsEditModalOpen(false)}
+                variant="ghost"
+                className="rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-xs font-semibold text-white/70 cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={isSavingStyle}
+                onClick={handleApplyStyle}
+                className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-5 text-xs font-bold text-white shadow-md shadow-violet-900/30 hover:shadow-violet-900/50 hover:from-violet-500 hover:to-indigo-400 cursor-pointer"
+              >
+                {isSavingStyle ? "Saving Style..." : "Apply Style"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

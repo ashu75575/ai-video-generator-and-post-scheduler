@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
 import { Video, useCurrentFrame, useVideoConfig } from "remotion";
+import { CaptionStyle } from "@/lib/caption-styles";
 
 interface Word {
   word: string;
@@ -16,6 +17,7 @@ interface RemotionPlayerProps {
   startTime: number;
   endTime: number;
   captions: Word[];
+  captionStyle?: CaptionStyle;
 }
 
 // Composition Component rendered inside Remotion Player
@@ -24,6 +26,7 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
   startTime,
   endTime,
   captions,
+  captionStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -88,14 +91,15 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
         >
           <div
             style={{
-              backgroundColor: "rgba(5, 5, 10, 0.88)",
-              padding: "24px 44px",
-              borderRadius: "32px",
+              backgroundColor: captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)",
+              padding: captionStyle?.padding || "24px 44px",
+              borderRadius: captionStyle?.borderRadius || "32px",
+              border: captionStyle?.border || "none",
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
               alignItems: "center",
-              gap: "24px",
+              gap: captionStyle?.gap || "24px",
               maxWidth: "92%",
               wordBreak: "break-word",
             }}
@@ -108,15 +112,20 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
                 <span
                   key={globalIdx}
                   style={{
-                    color: isCurrent ? "#facc15" : "#ffffff", // Neon yellow for current, white for others
-                    fontSize: isCurrent ? "5.4rem" : "4.8rem", // Highlight speaking word with larger font size
+                    fontFamily: captionStyle?.fontFamily || "Impact, Arial Black, sans-serif",
+                    color: isCurrent 
+                      ? (captionStyle?.colorActive || "#facc15") 
+                      : (captionStyle?.colorInactive || "#ffffff"),
+                    fontSize: isCurrent 
+                      ? (captionStyle?.fontSizeActive || "5.4rem") 
+                      : (captionStyle?.fontSizeInactive || "4.8rem"),
                     fontWeight: 900,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
+                    textTransform: captionStyle?.textTransform || "uppercase",
+                    letterSpacing: captionStyle?.letterSpacing || "0.04em",
                     transform: isCurrent ? "scale(1.1)" : "scale(1.0)",
                     transition: "transform 0.05s ease-out, color 0.05s ease-out",
                     display: "inline-block",
-                    textShadow: `
+                    textShadow: captionStyle?.textShadow || `
                       -4px -4px 0 #000,
                        4px -4px 0 #000,
                       -4px  4px 0 #000,
@@ -142,6 +151,7 @@ export default function RemotionPlayer({
   startTime,
   endTime,
   captions,
+  captionStyle,
 }: RemotionPlayerProps) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -168,7 +178,7 @@ export default function RemotionPlayer({
     <div className="relative aspect-[9/16] w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.15)] bg-black">
       <Player
         component={ShortVideoComposition}
-        inputProps={{ videoUrl, startTime, endTime, captions }}
+        inputProps={{ videoUrl, startTime, endTime, captions, captionStyle }}
         durationInFrames={durationInFrames}
         fps={fps}
         compositionWidth={1080}

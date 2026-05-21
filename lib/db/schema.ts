@@ -51,6 +51,7 @@ export const shortVideos = pgTable("short_videos", {
   whyBest: text("why_best").notNull(),
   seoRanking: integer("seo_ranking").notNull(),
   captions: jsonb("captions"),
+  captionStyle: jsonb("caption_style"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
