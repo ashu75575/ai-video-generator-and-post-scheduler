@@ -83,7 +83,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <path
                 d="M 40 0 L 0 0 0 40"
                 fill="none"
-                stroke="rgba(124, 106, 250, 0.15)"
+                stroke="rgba(152, 61, 22, 0.12)"
                 strokeWidth="0.5"
               />
             </pattern>
@@ -105,8 +105,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </svg>
 
         {/* Glowing Blobs */}
-        <div className="absolute left-[20%] top-[10%] h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(124,106,250,0.12)_0%,transparent_70%)] blur-[60px]" />
-        <div className="absolute right-[5%] top-[30%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(62,207,207,0.07)_0%,transparent_70%)] blur-[50px]" />
+        <div className="absolute left-[20%] top-[10%] h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(152, 61, 22,0.12)_0%,transparent_70%)] blur-[60px]" />
+        <div className="absolute right-[5%] top-[30%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(161,136,125,0.08)_0%,transparent_70%)] blur-[50px]" />
       </div>
 
       {/* Main Layout Grid */}
@@ -136,7 +136,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           }
         }}
       >
-        <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#0d0d18]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
+        <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#1A1A1A]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
           <DialogHeader>
             <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2">
               <Sparkles size={16} className="text-forge-accent" />
@@ -210,7 +210,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <div className="w-full border-t border-white/5"></div>
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase font-mono tracking-widest text-white/20">
-                  <span className="bg-[#0d0d18] px-2">OR IMPORT URL</span>
+                  <span className="bg-[#1A1A1A] px-2">OR IMPORT URL</span>
                 </div>
               </div>
 
@@ -258,7 +258,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
                   <div
-                    className="absolute left-0 top-0 h-full bg-gradient-forge shadow-[0_0_8px_rgba(124,106,250,0.6)] transition-all duration-100 rounded-full"
+                    className="absolute left-0 top-0 h-full bg-gradient-forge shadow-[0_0_8px_rgba(152, 61, 22,0.6)] transition-all duration-100 rounded-full"
                     style={{ width: `${forgeProgress}%` }}
                   />
                 </div>
@@ -292,7 +292,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           DIALOG: INSPECT CLIP DETAILS & TRANSCRIPT
           ======================================================== */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="max-w-2xl rounded-2xl border border-white/10 bg-[#0d0d18]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
+        <DialogContent className="max-w-2xl rounded-2xl border border-white/10 bg-[#1A1A1A]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
           {selectedClip && (
             <div className="space-y-6">
               <DialogHeader>
@@ -390,7 +390,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           DIALOG: SCHEDULE POST CONFIGURATION
           ======================================================== */}
       <Dialog open={isScheduleOpen} onOpenChange={setIsScheduleOpen}>
-        <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#0d0d18]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
+        <DialogContent className="max-w-md rounded-2xl border border-white/10 bg-[#1A1A1A]/95 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80">
           {clipToSchedule && (
             <div className="space-y-5">
               <DialogHeader>

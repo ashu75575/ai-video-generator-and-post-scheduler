@@ -97,8 +97,8 @@ export default function AnalyticsPage() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#7c6afa" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#7c6afa" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#983d16" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#983d16" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient
                       id="colorShorts"
@@ -107,8 +107,8 @@ export default function AnalyticsPage() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#3ecfcf" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3ecfcf" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#A1887D" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#A1887D" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
@@ -136,7 +136,7 @@ export default function AnalyticsPage() {
                   <Area
                     type="monotone"
                     dataKey="tiktok"
-                    stroke="#7c6afa"
+                    stroke="#983d16"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorTikTok)"
@@ -144,7 +144,7 @@ export default function AnalyticsPage() {
                   <Area
                     type="monotone"
                     dataKey="shorts"
-                    stroke="#3ecfcf"
+                    stroke="#A1887D"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorShorts)"
@@ -201,7 +201,7 @@ export default function AnalyticsPage() {
                     {viralityIndexData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={index % 2 === 0 ? "#7c6afa" : "#3ecfcf"}
+                        fill={index % 2 === 0 ? "#983d16" : "#A1887D"}
                       />
                     ))}
                   </Bar>

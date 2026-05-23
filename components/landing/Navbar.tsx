@@ -56,7 +56,7 @@ export function Navbar() {
         className={cn(
           "fixed top-0 right-0 left-0 z-100 transition-[background,backdrop-filter,border-color,box-shadow] duration-500",
           scrolled
-            ? "border-b border-white/6 bg-forge-bg/85 backdrop-blur-2xl shadow-[0_1px_0_rgba(124,106,250,0.08)]"
+            ? "border-b border-white/6 bg-forge-bg/85 backdrop-blur-2xl shadow-[0_1px_0_rgba(152, 61, 22,0.08)]"
             : "border-b border-transparent bg-transparent",
         )}
       >
@@ -68,10 +68,10 @@ export function Navbar() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="relative flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gradient-forge shadow-[0_0_12px_rgba(124,106,250,0.4)]">
-              <Scissors size={15} className="text-white" />
+            <div className="relative flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-gradient-forge shadow-[0_0_12px_rgba(152, 61, 22,0.4)]">
+              <Scissors size={15} className="text-forge-bg" />
             </div>
-            <span className="font-heading text-[17px] font-bold tracking-tight text-white">
+            <span className="font-heading text-[17px] font-bold tracking-tight text-forge-accent-2">
               ClipForge<span className="text-forge-accent">AI</span>
             </span>
           </motion.a>

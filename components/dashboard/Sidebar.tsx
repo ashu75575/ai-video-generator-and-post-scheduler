@@ -51,11 +51,11 @@ export function Sidebar() {
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-forge shadow-[0_0_15px_rgba(124,106,250,0.5)]"
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-forge shadow-[0_0_15px_rgba(152, 61, 22,0.5)]"
         >
-          <Scissors size={14} className="text-white" />
+          <Scissors size={14} className="text-forge-bg" />
         </motion.div>
-        <span className="font-heading text-lg font-bold tracking-tight text-white">
+        <span className="font-heading text-lg font-bold tracking-tight text-forge-accent-2">
           ClipForge
           <span className="text-gradient-forge font-extrabold">AI</span>
         </span>
@@ -88,7 +88,7 @@ export function Sidebar() {
 
               {/* Sidebar Active Left Glow Line */}
               {isActive && (
-                <span className="absolute -left-1 top-1/4 h-1/2 w-1 rounded-r bg-forge-accent shadow-[0_0_8px_#7c6afa]" />
+                <span className="absolute -left-1 top-1/4 h-1/2 w-1 rounded-r bg-forge-accent shadow-[0_0_8px_#983d16]" />
               )}
 
               <Icon

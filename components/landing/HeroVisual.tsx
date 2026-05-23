@@ -144,7 +144,7 @@ export function HeroVisual() {
           </svg>
           {mounted && (
             <motion.div
-              className="absolute top-9 bottom-3.5 w-0.5 rounded-sm bg-linear-to-b from-transparent via-forge-accent-2 to-transparent shadow-[0_0_8px_#3ECFCF]"
+              className="absolute top-9 bottom-3.5 w-0.5 rounded-sm bg-linear-to-b from-transparent via-forge-accent-2 to-transparent shadow-[0_0_8px_#A1887D]"
               style={{ left: `${scanPos}%` }}
             />
           )}
@@ -223,7 +223,7 @@ export function HeroVisual() {
         initial={mounted ? { opacity: 0, x: 30 } : false}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 1.2 }}
-        className="absolute right-[-50px] bottom-[30px] rounded-[14px] border border-white/10 bg-[rgba(5,5,15,0.9)] px-4 py-3 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+        className="absolute right-[-50px] bottom-[30px] rounded-[14px] border border-white/10 bg-[#1A1A1A]/95 px-4 py-3 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
       >
         <motion.div
           animate={mounted ? { y: [-4, 4, -4] } : undefined}
@@ -258,7 +258,7 @@ export function HeroVisual() {
         <motion.div
           animate={mounted ? { y: [-5, 5, -5] } : undefined}
           transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-          className="rounded-[10px] border border-forge-accent-2/30 bg-[rgba(5,5,15,0.9)] px-3.5 py-2 shadow-[0_0_20px_rgba(62,207,207,0.15)] backdrop-blur-xl"
+          className="rounded-[10px] border border-forge-accent-2/30 bg-[#1A1A1A]/95 px-3.5 py-2 shadow-[0_0_20px_rgba(161,136,125,0.15)] backdrop-blur-xl"
         >
           <p className="mb-0.5 font-mono text-[11px] text-forge-accent-2">
             ✦ AUTO CAPTIONS

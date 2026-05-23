@@ -24,13 +24,17 @@ interface ProjectItem {
   name: string;
   status:
     | "pending"
-    | "uploading"
-    | "completed"
+    | "uploaded"
+    | "validating"
+    | "processing"
+    | "ready"
     | "failed"
     | "transcribing"
-    | "ready";
+    | "generating_shorts";
   progress: number;
   videoUrl: string | null;
+  originalUrl: string | null;
+  processedUrl: string | null;
   transcript: string | null;
   captions: any;
   createdAt: string;
@@ -131,7 +135,7 @@ export default function MyVideosPage() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
-          <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
+          <RefreshCw className="h-8 w-8 text-primary animate-spin" />
           <p className="text-xs text-white/30 font-mono tracking-widest uppercase">
             FETCHING VIDEO LIBRARY
           </p>
@@ -156,8 +160,17 @@ export default function MyVideosPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => {
-            const isAnalyzed = project.status === "ready";
-            const isProcessing = project.status === "transcribing";
+            const isAnalyzed =
+              project.status === "ready" && !!project.transcript;
+            const isPreprocessing = [
+              "uploaded",
+              "validating",
+              "processing",
+            ].includes(project.status);
+            const isProcessing =
+              project.status === "transcribing" ||
+              project.status === "generating_shorts" ||
+              isPreprocessing;
 
             return (
               <Card
@@ -166,9 +179,9 @@ export default function MyVideosPage() {
               >
                 {/* Visual Preview Box */}
                 <div className="relative aspect-video bg-black overflow-hidden border-b border-white/5 flex items-center justify-center">
-                  {project.videoUrl ? (
+                  {project.processedUrl || project.videoUrl ? (
                     <video
-                      src={project.videoUrl}
+                      src={project.processedUrl || project.videoUrl || ""}
                       className="h-full w-full object-cover opacity-60 group-hover:scale-102 transition-transform duration-500"
                       muted
                       playsInline
@@ -184,14 +197,16 @@ export default function MyVideosPage() {
                         isAnalyzed
                           ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                           : isProcessing
-                            ? "bg-violet-500/10 text-violet-400 border-violet-500/20 animate-pulse"
+                            ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
                             : project.status === "failed"
                               ? "bg-red-500/10 text-red-400 border-red-500/20"
                               : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                       }`}
                     >
-                      {project.status === "completed"
-                        ? "uploaded"
+                      {project.status === "ready"
+                        ? isAnalyzed
+                          ? "analyzed"
+                          : "preprocessed"
                         : project.status}
                     </span>
                   </div>
@@ -239,9 +254,11 @@ export default function MyVideosPage() {
                       </>
                     ) : isProcessing ? (
                       <>
-                        <span className="font-mono text-[9px] text-violet-400 flex items-center gap-1 animate-pulse">
+                        <span className="font-mono text-[9px] text-primary flex items-center gap-1 animate-pulse">
                           <RefreshCw size={11} className="animate-spin" />
-                          Transcribing...
+                          {isPreprocessing
+                            ? "Preprocessing..."
+                            : "Transcribing..."}
                         </span>
 
                         <Button

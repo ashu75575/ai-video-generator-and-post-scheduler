@@ -96,16 +96,6 @@ export async function POST(req: NextRequest) {
 
     console.log(`Saved file locally to ${filePath}`);
 
-    // 4. Register project in the Neon Database
-    await db.insert(projects).values({
-      id: projectId,
-      userId,
-      name: fileName,
-      status: "uploading",
-      progress: 10,
-    });
-    console.log(`Database record created for project: ${projectId}`);
-
     // 5. Trigger the background Inngest event
     try {
       await inngest.send({
@@ -114,6 +104,7 @@ export async function POST(req: NextRequest) {
           projectId,
           filePath,
           fileName,
+          userId,
         },
       });
       console.log(

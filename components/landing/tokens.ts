@@ -1,3 +1,3 @@
-export const FORGE_ACCENT = "#7C6AFA";
-export const FORGE_ACCENT_2 = "#3ECFCF";
-export const FORGE_GLOW = "rgba(124,106,250,0.35)";
+export const FORGE_ACCENT = "#983d16";
+export const FORGE_ACCENT_2 = "#A1887D";
+export const FORGE_GLOW = "rgba(152, 61, 22,0.35)";

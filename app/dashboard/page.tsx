@@ -171,7 +171,7 @@ export default function DashboardHome() {
             } else {
               setUploadStatusText("Acquiring viewer signed URL...");
             }
-          } else if (status === "completed") {
+          } else if (status === "ready") {
             clearInterval(pollInterval);
             (window as any)._activeUploadPoll = null;
             setUploadStatus("success");
@@ -416,7 +416,7 @@ export default function DashboardHome() {
                   onClick={() => fileInputRef.current?.click()}
                   className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-500 min-h-[300px] flex flex-col items-center justify-center gap-4 ${
                     dragActive
-                      ? "border-forge-accent bg-forge-accent/10 shadow-[0_0_20px_rgba(124,106,250,0.25)]"
+                      ? "border-forge-accent bg-forge-accent/10 shadow-[0_0_20px_rgba(152, 61, 22,0.25)]"
                       : "border-white/10 hover:border-white/20 bg-white/1 hover:bg-white/3"
                   }`}
                 >
@@ -594,7 +594,7 @@ export default function DashboardHome() {
                   {/* Glowing Linear Progress Bar */}
                   <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
                     <div
-                      className="absolute left-0 top-0 h-full bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.6)] transition-all duration-100 rounded-full"
+                      className="absolute left-0 top-0 h-full bg-gradient-forge shadow-[0_0_10px_rgba(152, 61, 22,0.6)] transition-all duration-100 rounded-full"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>

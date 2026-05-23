@@ -1,5 +1,4 @@
-import React from "react";
-import { Video, useCurrentFrame, useVideoConfig } from "remotion";
+import { OffthreadVideo, useCurrentFrame, useVideoConfig } from "remotion";
 
 // ---- Types ----
 export interface CaptionStyleProps {
@@ -70,7 +69,7 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
   const activeIndex =
     captions && captions.length > 0
       ? captions.findIndex(
-          (w) => currentTime >= w.start && currentTime <= w.end
+          (w) => currentTime >= w.start && currentTime <= w.end,
         )
       : -1;
 
@@ -94,8 +93,7 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
     "uppercase";
   const colorActive = captionStyle?.colorActive || "#facc15";
   const colorInactive = captionStyle?.colorInactive || "#ffffff";
-  const bgColor =
-    captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)";
+  const bgColor = captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)";
   const borderRadius = parsePxOrRem(captionStyle?.borderRadius, 32);
   const border = captionStyle?.border || "none";
   const letterSpacing = captionStyle?.letterSpacing || "0.04em";
@@ -131,7 +129,7 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
         overflow: "hidden",
       }}
     >
-      <Video
+      <OffthreadVideo
         src={videoUrl}
         startFrom={startFrame}
         pauseWhenBuffering={true}
