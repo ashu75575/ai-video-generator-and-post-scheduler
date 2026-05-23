@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,6 +18,9 @@ import {
   Volume2,
   Sparkles,
   Trophy,
+  Clapperboard,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -56,6 +59,8 @@ interface ShortVideo {
   seoRanking: number;
   captions: CaptionWord[] | null;
   captionStyle: CaptionStyle | null;
+  exportUrl: string | null;
+  renderStatus: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -85,7 +90,7 @@ export default function ProjectAnalysisPage() {
   const router = useRouter();
   const projectId = params.id as string;
 
-  const { triggerScheduleDialog, handleDownload } = useDashboard();
+  const { triggerScheduleDialog } = useDashboard();
 
   const [project, setProject] = useState<ProjectStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,6 +108,160 @@ export default function ProjectAnalysisPage() {
   const [editingClip, setEditingClip] = useState<ShortVideo | null>(null);
   const [customStyle, setCustomStyle] = useState<CaptionStyle | null>(null);
   const [isSavingStyle, setIsSavingStyle] = useState(false);
+
+  // ── Render Dialog State ──────────────────────────────────
+  const [isRenderDialogOpen, setIsRenderDialogOpen] = useState(false);
+  const [renderingClip, setRenderingClip] = useState<ShortVideo | null>(null);
+  const [renderPhase, setRenderPhase] = useState<string>("Initializing...");
+  const [renderPct, setRenderPct] = useState<number>(0);
+  const [renderError, setRenderError] = useState<string | null>(null);
+  const renderPollRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stopRenderPoll = useCallback(() => {
+    if (renderPollRef.current) {
+      clearInterval(renderPollRef.current);
+      renderPollRef.current = null;
+    }
+  }, []);
+
+  // Poll render status from DB and update dialog
+  const startRenderPoll = useCallback(
+    (clipId: string, clipTitle: string) => {
+      stopRenderPoll();
+      renderPollRef.current = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/projects/clips/${clipId}/render`);
+          if (!res.ok) return;
+          const data = await res.json();
+          const status: string = data.renderStatus || "pending";
+
+          if (status.startsWith("rendering:")) {
+            const pct = parseInt(status.split(":")[1] || "0", 10);
+            setRenderPct(pct);
+            setRenderPhase(
+              pct < 20
+                ? "Preparing Remotion Lambda environment..."
+                : pct < 50
+                  ? "Rendering frames on AWS Lambda..."
+                  : pct < 80
+                    ? "Encoding video stream with captions..."
+                    : "Finalizing and uploading output...",
+            );
+          } else if (status === "rendering") {
+            setRenderPct((p) => Math.min(p + 2, 18));
+            setRenderPhase("Starting Remotion Lambda render...");
+          } else if (status === "done" && data.exportUrl) {
+            stopRenderPoll();
+            setRenderPct(100);
+            setRenderPhase("Render complete! Downloading...");
+
+            // Update local project state so Download button reflects the new exportUrl
+            setProject((prev) => {
+              if (!prev || !prev.shortVideos) return prev;
+              return {
+                ...prev,
+                shortVideos: prev.shortVideos.map((c) =>
+                  c.id === clipId
+                    ? { ...c, exportUrl: data.exportUrl, renderStatus: "done" }
+                    : c,
+                ),
+              };
+            });
+
+            // Auto-download after short delay
+            setTimeout(() => {
+              const a = document.createElement("a");
+              a.href = data.exportUrl;
+              a.download = `${clipTitle}.mp4`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setIsRenderDialogOpen(false);
+              toast.success("Download started!", {
+                description: `${clipTitle} has been rendered and is downloading.`,
+              });
+            }, 1200);
+          } else if (status === "failed") {
+            stopRenderPoll();
+            setRenderError(
+              "Render failed on Lambda. Check Inngest dashboard for details.",
+            );
+            // Update local state
+            setProject((prev) => {
+              if (!prev || !prev.shortVideos) return prev;
+              return {
+                ...prev,
+                shortVideos: prev.shortVideos.map((c) =>
+                  c.id === clipId ? { ...c, renderStatus: "failed" } : c,
+                ),
+              };
+            });
+          }
+        } catch (e) {
+          console.error("Render poll error:", e);
+        }
+      }, 2000);
+    },
+    [stopRenderPoll],
+  );
+
+  // Cleanup poll on unmount
+  useEffect(() => {
+    return () => stopRenderPoll();
+  }, [stopRenderPoll]);
+
+  // Handle download button click
+  const handleDownloadClick = useCallback(
+    async (clip: ShortVideo) => {
+      // If exportUrl is already present, download directly
+      if (clip.exportUrl && clip.renderStatus === "done") {
+        const a = document.createElement("a");
+        a.href = clip.exportUrl;
+        a.download = `${clip.title}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast.success("Downloading video!", {
+          description: `${clip.title} is downloading from S3.`,
+        });
+        return;
+      }
+
+      // Otherwise trigger a new render
+      setRenderingClip(clip);
+      setRenderPhase("Queuing render job...");
+      setRenderPct(0);
+      setRenderError(null);
+      setIsRenderDialogOpen(true);
+
+      try {
+        const res = await fetch(`/api/projects/clips/${clip.id}/render`, {
+          method: "POST",
+        });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Failed to start render");
+        }
+        // Update local state to reflect rendering
+        setProject((prev) => {
+          if (!prev || !prev.shortVideos) return prev;
+          return {
+            ...prev,
+            shortVideos: prev.shortVideos.map((c) =>
+              c.id === clip.id
+                ? { ...c, renderStatus: "rendering", exportUrl: null }
+                : c,
+            ),
+          };
+        });
+        setRenderPhase("Render job started. Waiting for Lambda...");
+        startRenderPoll(clip.id, clip.title);
+      } catch (err: any) {
+        setRenderError(err.message || "Unknown error starting render.");
+      }
+    },
+    [startRenderPoll],
+  );
 
   const handleEditClick = (clip: ShortVideo) => {
     setEditingClip(clip);
@@ -130,14 +289,24 @@ export default function ProjectAnalysisPage() {
 
       const data = await response.json();
       if (data.success) {
-        toast.success("Caption style updated successfully!");
-        // Update local state
+        toast.success("Caption style updated!", {
+          description:
+            "Export URL has been cleared. Re-render to download with the new style.",
+        });
+        // Update local state — also reset exportUrl/renderStatus since the clip was edited
         setProject((prev) => {
           if (!prev || !prev.shortVideos) return prev;
           return {
             ...prev,
             shortVideos: prev.shortVideos.map((c) =>
-              c.id === editingClip.id ? { ...c, captionStyle: customStyle } : c,
+              c.id === editingClip.id
+                ? {
+                    ...c,
+                    captionStyle: customStyle,
+                    exportUrl: null,
+                    renderStatus: "pending",
+                  }
+                : c,
             ),
           };
         });
@@ -543,11 +712,26 @@ export default function ProjectAnalysisPage() {
                             Edit Style
                           </Button>
                           <Button
-                            onClick={() => handleDownload(clip.title)}
-                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                            onClick={() => handleDownloadClick(clip)}
+                            disabled={clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:")}
+                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            <Download size={11} className="text-white/60" />{" "}
-                            Download
+                            {clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:") ? (
+                              <>
+                                <Loader2 size={11} className="animate-spin text-violet-400" />
+                                Rendering...
+                              </>
+                            ) : clip.exportUrl && clip.renderStatus === "done" ? (
+                              <>
+                                <Download size={11} className="text-emerald-400" />
+                                Download
+                              </>
+                            ) : (
+                              <>
+                                <Clapperboard size={11} className="text-violet-400" />
+                                Render &amp; Download
+                              </>
+                            )}
                           </Button>
                           <Button
                             onClick={() => handleScheduleClick(clip)}
@@ -649,6 +833,126 @@ export default function ProjectAnalysisPage() {
               </motion.div>
             )}
         </AnimatePresence>
+
+        {/* ─────────────────────────────────────────────────────────────
+            DIALOG: RENDER PROGRESS
+            ───────────────────────────────────────────────────────────── */}
+        <Dialog
+          open={isRenderDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              // Only allow closing if render is done or errored
+              if (renderPct === 100 || renderError) {
+                setIsRenderDialogOpen(false);
+                stopRenderPoll();
+              }
+              // If still rendering, block close (user must wait)
+            }
+          }}
+        >
+          <DialogContent className="max-w-md rounded-3xl border border-white/10 bg-[#0a0814]/95 backdrop-blur-2xl p-7 text-white shadow-2xl shadow-black/80">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2.5">
+                <Clapperboard size={18} className="text-violet-400" />
+                {renderError ? "Render Failed" : renderPct === 100 ? "Render Complete!" : "Rendering Video..."}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-white/40">
+                {renderError
+                  ? "An error occurred during rendering."
+                  : "Your video is being rendered via Remotion Lambda on AWS. Do not close this dialog."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-3">
+              {renderError ? (
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <div className="h-14 w-14 rounded-full bg-red-500/10 border border-red-500/25 flex items-center justify-center">
+                    <AlertCircle size={28} className="text-red-400" />
+                  </div>
+                  <p className="text-sm text-red-300 text-center leading-relaxed">
+                    {renderError}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Progress bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider animate-pulse">
+                        {renderPhase}
+                      </span>
+                      <span className="font-mono font-bold text-violet-400 tabular-nums">
+                        {renderPct}%
+                      </span>
+                    </div>
+                    <div className="relative h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-400 shadow-[0_0_12px_rgba(124,106,250,0.6)]"
+                        animate={{ width: `${renderPct}%` }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pipeline steps */}
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "Inngest job queued", done: renderPct > 0 },
+                      { label: "Lambda environment booted", done: renderPct > 10 },
+                      { label: "Frames rendered (AWS Lambda)", done: renderPct > 50 },
+                      { label: "Video encoded (H.264)", done: renderPct > 80 },
+                      { label: "Output uploaded to S3", done: renderPct >= 100 },
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div
+                          className={`h-5 w-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
+                            step.done
+                              ? "bg-emerald-500/20 border border-emerald-500/40"
+                              : "bg-white/5 border border-white/10"
+                          }`}
+                        >
+                          {step.done ? (
+                            <Check size={11} className="text-emerald-400 stroke-[2.5]" />
+                          ) : (
+                            <div className="h-1.5 w-1.5 rounded-full bg-white/20" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs font-mono transition-colors ${
+                            step.done ? "text-white/80" : "text-white/25"
+                          }`}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {renderPct === 100 && (
+                    <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/20 rounded-xl p-3.5 animate-in fade-in duration-300">
+                      <Check size={16} className="text-emerald-400 shrink-0" />
+                      <p className="text-xs text-emerald-300">Video rendered successfully. Download starting...</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <DialogFooter>
+              {(renderError || renderPct === 100) && (
+                <Button
+                  onClick={() => {
+                    setIsRenderDialogOpen(false);
+                    stopRenderPoll();
+                  }}
+                  className="rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white cursor-pointer"
+                >
+                  Close
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* DIALOG: EDIT CAPTION STYLE*/}
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>

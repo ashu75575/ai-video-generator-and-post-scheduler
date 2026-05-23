@@ -13,6 +13,10 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config } from "../config";
 import crypto from "crypto";
 import { contentScanner } from "../arcjet";
+import {
+  renderMediaOnLambda,
+  getRenderProgress,
+} from "@remotion/lambda/client";
 
 export const processVideoUpload = inngest.createFunction(
   { id: "process-video-upload" },
@@ -433,5 +437,193 @@ Return the output as a JSON object matching the requested schema.`,
       result,
       shortVideosCount: shortVideoSegments.length,
     };
+  },
+);
+
+// ─────────────────────────────────────────────────────────
+// FUNCTION: renderShortVideoClip
+// Triggered when a user clicks Download on a clip that has
+// no exportUrl (or has been edited since last render).
+// ─────────────────────────────────────────────────────────
+export const renderShortVideoClip = inngest.createFunction(
+  { id: "render-short-video-clip", concurrency: { limit: 3 } },
+  { event: "clip/render.started" },
+  async ({ event, step }) => {
+    const { clipId, videoUrl, startTime, endTime, captions, captionStyle } =
+      event.data;
+
+    const region = process.env.AWS_REGION || "eu-north-1";
+    const serveUrl = process.env.REMOTION_SERVE_URL;
+    const functionName = process.env.REMOTION_FUNCTION_NAME;
+
+    if (!serveUrl || !functionName) {
+      throw new Error(
+        "REMOTION_SERVE_URL or REMOTION_FUNCTION_NAME is not set in environment variables.",
+      );
+    }
+
+    // Step 1: Mark clip as rendering in the database
+    await step.run("mark-clip-rendering", async () => {
+      if (!db) return;
+      await db
+        .update(shortVideos)
+        .set({
+          renderStatus: "rendering",
+          exportUrl: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(shortVideos.id, clipId));
+    });
+
+    // Step 2: Generate a clean presigned URL without x-amz-checksum-mode=ENABLED
+    // The stored videoUrl is a presigned URL from the user-facing upload flow.
+    // Newer AWS SDK versions add x-amz-checksum-mode=ENABLED which Remotion's
+    // headless Chrome cannot handle (causes delayRender timeout).
+    // We re-sign the URL using an S3 client with checksum calculation disabled.
+    const cleanVideoUrl = await step.run(
+      "generate-clean-presigned-url",
+      async () => {
+        const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+        const bucketName = process.env.AWS_BUCKET_NAME;
+
+        if (!accessKeyId || !secretAccessKey || !bucketName) {
+          // Fallback to stored URL if credentials not available
+          console.warn(
+            "AWS credentials not available for URL re-signing, using stored URL.",
+          );
+          return videoUrl;
+        }
+
+        try {
+          // Parse the S3 key from the stored presigned URL
+          // URL format: https://{bucket}.s3.{region}.amazonaws.com/{key}?...
+          const urlObj = new URL(videoUrl);
+          // pathname starts with '/', remove leading slash to get the key
+          const s3Key = decodeURIComponent(urlObj.pathname.slice(1));
+
+          // Create S3 client with checksum validation disabled
+          // This prevents x-amz-checksum-mode=ENABLED from being added to presigned URLs
+          const s3Clean = new S3Client({
+            region,
+            credentials: { accessKeyId, secretAccessKey },
+            // @ts-ignore — valid in AWS SDK v3.622+
+            requestChecksumCalculation: "WHEN_REQUIRED",
+            // @ts-ignore
+            responseChecksumValidation: "WHEN_REQUIRED",
+          });
+
+          const getCommand = new GetObjectCommand({
+            Bucket: bucketName,
+            Key: s3Key,
+          });
+
+          // Generate a 12-hour presigned URL — Lambda render can take minutes
+          const freshUrl = await getSignedUrl(s3Clean, getCommand, {
+            expiresIn: 43200,
+          });
+
+          console.log(
+            `✅ Generated clean presigned URL for clip ${clipId} (no checksum mode)`,
+          );
+          return freshUrl;
+        } catch (urlErr) {
+          console.error(
+            "Failed to re-sign URL, falling back to stored URL:",
+            urlErr,
+          );
+          return videoUrl;
+        }
+      },
+    );
+
+    // Step 3: Start the Remotion Lambda render with the clean URL
+    const renderResult = await step.run("start-lambda-render", async () => {
+      const { renderId, bucketName } = await renderMediaOnLambda({
+        region: region as any,
+        functionName,
+        serveUrl,
+        composition: "ShortVideo",
+        inputProps: {
+          videoUrl: cleanVideoUrl,
+          startTime,
+          endTime,
+          captions: captions || [],
+          captionStyle: captionStyle || null,
+        },
+        codec: "h264",
+        imageFormat: "jpeg",
+        maxRetries: 1,
+        // Fewer frames per lambda chunk = more reliable loading per invocation
+        framesPerLambda: 20,
+        privacy: "public",
+        outName: `clip-${clipId}-${Date.now()}.mp4`,
+        // Give each Lambda invocation 2 minutes to load and render its chunk
+        timeoutInMilliseconds: 120000,
+      });
+
+      return { renderId, bucketName };
+    });
+
+    const { renderId, bucketName } = renderResult;
+
+    // Step 4: Poll for completion (max 20 minutes)
+    const exportUrl = await step.run("poll-render-progress", async () => {
+      const maxAttempts = 240; // 240 × 5s = 20 min
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const progress = await getRenderProgress({
+          renderId,
+          bucketName,
+          functionName,
+          region: region as any,
+        });
+
+        // Update progress in DB every 5 attempts (~25s)
+        if (attempt % 5 === 0 && db) {
+          const pct = Math.round((progress.overallProgress || 0) * 100);
+          await db
+            .update(shortVideos)
+            .set({
+              renderStatus: `rendering:${pct}`,
+              updatedAt: new Date(),
+            })
+            .where(eq(shortVideos.id, clipId));
+        }
+
+        if (progress.done) {
+          if (progress.outputFile) {
+            return progress.outputFile;
+          }
+          throw new Error(
+            `Render completed but no output file. Errors: ${JSON.stringify(progress.errors)}`,
+          );
+        }
+
+        if (progress.fatalErrorEncountered) {
+          throw new Error(
+            `Remotion Lambda render failed: ${JSON.stringify(progress.errors)}`,
+          );
+        }
+
+        // Wait 5 seconds before next poll
+        await new Promise((r) => setTimeout(r, 5000));
+      }
+      throw new Error("Remotion Lambda render timed out after 20 minutes.");
+    });
+
+    // Step 5: Save the export URL to the database
+    await step.run("save-export-url", async () => {
+      if (!db) return;
+      await db
+        .update(shortVideos)
+        .set({
+          exportUrl,
+          renderStatus: "done",
+          updatedAt: new Date(),
+        })
+        .where(eq(shortVideos.id, clipId));
+    });
+
+    return { success: true, clipId, exportUrl };
   },
 );

@@ -22,6 +22,9 @@ export async function PATCH(
       .update(shortVideos)
       .set({
         captionStyle: captionStyle,
+        // Reset export URL — user must re-render after editing caption style
+        exportUrl: null,
+        renderStatus: "pending",
         updatedAt: new Date(),
       })
       .where(eq(shortVideos.id, clipId))

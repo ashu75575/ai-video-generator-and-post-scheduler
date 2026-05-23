@@ -52,6 +52,9 @@ export const shortVideos = pgTable("short_videos", {
   seoRanking: integer("seo_ranking").notNull(),
   captions: jsonb("captions"),
   captionStyle: jsonb("caption_style"),
+  exportUrl: text("export_url"),
+  renderJobId: text("render_job_id"),
+  renderStatus: text("render_status").default("pending"), // "pending" | "rendering" | "done" | "failed"
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
