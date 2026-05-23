@@ -41,7 +41,7 @@ export function Hero() {
         className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[700px] w-[700px] rounded-full opacity-40"
         style={{
           background:
-            "radial-gradient(circle, rgba(152, 61, 22,0.18) 0%, rgba(161,136,125,0.06) 50%, transparent 75%)",
+            "radial-gradient(circle, rgba(124,106,250,0.18) 0%, rgba(62,207,207,0.06) 50%, transparent 75%)",
           filter: "blur(60px)",
         }}
       />
@@ -94,7 +94,7 @@ export function Hero() {
               whileHover={{ scale: 1.04, boxShadow: `0 0 50px ${FORGE_GLOW}` }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2 rounded-[10px] bg-gradient-forge px-[26px] py-3.5 font-sans text-[15px] font-bold text-[#e5dad4] shadow-[0_0_24px_rgba(152, 61, 22,0.3)] transition-shadow duration-300"
+              className="flex cursor-pointer items-center gap-2 rounded-[10px] bg-gradient-forge px-[26px] py-3.5 font-sans text-[15px] font-bold text-white shadow-[0_0_24px_rgba(124,106,250,0.3)] transition-shadow duration-300"
             >
               Start clipping free <ArrowRight size={16} />
             </motion.button>

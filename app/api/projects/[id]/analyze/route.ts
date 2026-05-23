@@ -30,11 +30,11 @@ export async function POST(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    videoUrl = result[0].processedUrl || "";
+    videoUrl = result[0].videoUrl || "";
 
     if (!videoUrl) {
       return NextResponse.json(
-        { error: "Project does not have a processed video URL yet." },
+        { error: "Project does not have an uploaded video URL yet." },
         { status: 400 },
       );
     }

@@ -27,17 +27,9 @@ export const projects = pgTable("projects", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   name: text("name").notNull(),
-  status: text("status").default("pending").notNull(), // "pending", "uploaded", "validating", "processing", "ready", "failed", "transcribing", "generating_shorts"
+  status: text("status").default("pending").notNull(), // "pending", "uploading", "completed", "failed", "transcribing", "ready"
   progress: integer("progress").default(0).notNull(),
-  videoUrl: text("video_url"), // keep for backward compatibility
-  originalUrl: text("original_url"),
-  processedUrl: text("processed_url"),
-  processingError: text("processing_error"),
-  duration: real("duration"),
-  fps: real("fps"),
-  codec: text("codec"),
-  width: integer("width"),
-  height: integer("height"),
+  videoUrl: text("video_url"),
   transcript: text("transcript"),
   captions: jsonb("captions"),
   createdAt: timestamp("created_at", { withTimezone: true })

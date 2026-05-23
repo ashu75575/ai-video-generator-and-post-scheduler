@@ -21,7 +21,7 @@ export function ShortVideoRoot() {
         calculateMetadata={({ props }: { props: any }) => {
           const durationInFrames = Math.max(
             30,
-            Math.round((props.endTime - props.startTime) * 30),
+            Math.round((props.endTime - props.startTime) * 30)
           );
           return { durationInFrames };
         }}

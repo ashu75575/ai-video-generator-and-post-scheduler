@@ -48,7 +48,7 @@ export function HowItWorks() {
           className="h-px w-full"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(161,136,125,0.12), rgba(152, 61, 22,0.1), transparent)",
+              "linear-gradient(90deg, transparent, rgba(62,207,207,0.12), rgba(124,106,250,0.1), transparent)",
           }}
         />
       </div>
@@ -64,7 +64,7 @@ export function HowItWorks() {
           <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-forge-accent/20 bg-forge-accent/8 px-3.5 py-1.5">
             <div
               className="h-1.5 w-1.5 rounded-full bg-forge-accent"
-              style={{ boxShadow: "0 0 6px #983d16" }}
+              style={{ boxShadow: "0 0 6px #7C6AFA" }}
             />
             <span className="font-sans text-xs font-medium text-forge-accent">
               Process

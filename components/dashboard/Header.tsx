@@ -90,10 +90,10 @@ export function Header() {
         </Sheet>
 
         <div className="flex items-center gap-1.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-forge shadow-[0_0_10px_rgba(152, 61, 22,0.4)]">
-            <Scissors size={12} className="text-forge-bg" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.4)]">
+            <Scissors size={12} className="text-white" />
           </div>
-          <span className="font-heading text-sm font-bold tracking-tight text-forge-accent-2">
+          <span className="font-heading text-sm font-bold tracking-tight text-white">
             ClipForge
           </span>
         </div>
@@ -148,7 +148,7 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-80 rounded-2xl border border-white/8 bg-forge-surface-1/95 backdrop-blur-2xl p-2 text-white shadow-xl shadow-black/60"
+            className="w-80 rounded-2xl border border-white/8 bg-[#0d0d18]/95 backdrop-blur-2xl p-2 text-white shadow-xl shadow-black/60"
           >
             <div className="flex items-center justify-between px-3 py-2">
               <span className="font-heading text-xs font-bold text-white">
