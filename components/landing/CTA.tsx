@@ -24,7 +24,7 @@ export function CTA() {
           className="h-px w-full"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(124,106,250,0.2), rgba(62,207,207,0.12), transparent)",
+              "linear-gradient(90deg, transparent, rgba(152, 61, 22,0.2), rgba(161,136,125,0.12), transparent)",
           }}
         />
       </div>
@@ -34,7 +34,7 @@ export function CTA() {
         className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[900px] rounded-full opacity-60"
         style={{
           background:
-            "radial-gradient(ellipse, rgba(124,106,250,0.18) 0%, rgba(62,207,207,0.06) 50%, transparent 75%)",
+            "radial-gradient(ellipse, rgba(152, 61, 22,0.18) 0%, rgba(161,136,125,0.06) 50%, transparent 75%)",
           filter: "blur(40px)",
         }}
       />
@@ -93,7 +93,7 @@ export function CTA() {
               whileHover={{ scale: 1.05, boxShadow: `0 0 70px ${FORGE_GLOW}` }}
               whileTap={{ scale: 0.97 }}
               style={{ willChange: "transform" }}
-              className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-gradient-forge px-8 py-4 font-sans text-base font-bold text-white shadow-[0_0_30px_rgba(124,106,250,0.3)] transition-shadow duration-300"
+              className="flex cursor-pointer items-center gap-2.5 rounded-xl bg-gradient-forge px-8 py-4 font-sans text-base font-bold text-[#e5dad4] shadow-[0_0_30px_rgba(152, 61, 22,0.3)] transition-shadow duration-300"
             >
               Get started free <ArrowRight size={18} />
             </motion.button>
@@ -122,7 +122,7 @@ export function CTA() {
               <div key={f} className="flex items-center gap-1.5">
                 <div
                   className="flex h-4 w-4 items-center justify-center rounded-full"
-                  style={{ background: "rgba(62,207,207,0.15)" }}
+                  style={{ background: "rgba(161,136,125,0.15)" }}
                 >
                   <Check size={10} className="text-forge-accent-2" />
                 </div>

@@ -4,7 +4,10 @@ import { spawn } from "child_process";
  * Normalizes a video file using FFmpeg.
  * Resolves with the execution duration in milliseconds if successful, otherwise rejects.
  */
-export async function normalizeVideo(inputPath: string, outputPath: string): Promise<number> {
+export async function normalizeVideo(
+  inputPath: string,
+  outputPath: string,
+): Promise<number> {
   const startTime = Date.now();
   console.log(`[FFmpeg] Normalizing video from ${inputPath} to ${outputPath}`);
 
@@ -53,7 +56,10 @@ export async function normalizeVideo(inputPath: string, outputPath: string): Pro
       // Split by newline and log each line prefixed by [FFmpeg Progress]
       const lines = logLine.split("\n");
       for (const line of lines) {
-        if (line.trim().startsWith("frame=") || line.trim().startsWith("size=")) {
+        if (
+          line.trim().startsWith("frame=") ||
+          line.trim().startsWith("size=")
+        ) {
           // Log progress lines compactly
           process.stdout.write(`\r[FFmpeg Progress] ${line.trim()}`);
         } else if (line.trim().length > 0) {
@@ -65,23 +71,25 @@ export async function normalizeVideo(inputPath: string, outputPath: string): Pro
     ffmpegProcess.on("close", (code) => {
       // Ensure we clean up the carriage return carriage from stdout writing
       process.stdout.write("\n");
-      
+
       const durationMs = Date.now() - startTime;
 
       if (code === 0) {
         console.log(
           `[FFmpeg] Normalization completed successfully. ` +
-            `Duration: ${(durationMs / 1000).toFixed(2)} seconds.`
+            `Duration: ${(durationMs / 1000).toFixed(2)} seconds.`,
         );
         resolve(durationMs);
       } else {
-        console.error(`[FFmpeg] Process exited with non-zero exit code: ${code}`);
+        console.error(
+          `[FFmpeg] Process exited with non-zero exit code: ${code}`,
+        );
         const logTail = stderrBuffer.split("\n").slice(-15).join("\n");
         reject(
           new Error(
             `FFmpeg processing failed with exit code ${code}.\n` +
-              `Tail of FFmpeg log:\n${logTail}`
-          )
+              `Tail of FFmpeg log:\n${logTail}`,
+          ),
         );
       }
     });

@@ -347,7 +347,10 @@ export default function ProjectAnalysisPage() {
         setLoading(false);
 
         // Stop polling if completed successfully or failed
-        if ((data.status === "ready" && data.transcript) || data.status === "failed") {
+        if (
+          (data.status === "ready" && data.transcript) ||
+          data.status === "failed"
+        ) {
           clearInterval(pollInterval);
         }
       } catch (err: any) {
@@ -366,9 +369,9 @@ export default function ProjectAnalysisPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#07050f] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-background text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
+          <RefreshCw className="h-8 w-8 text-primary animate-spin" />
           <p className="text-xs text-white/40 font-mono uppercase tracking-widest">
             Loading Pipeline...
           </p>
@@ -379,7 +382,7 @@ export default function ProjectAnalysisPage() {
 
   if (error || !project) {
     return (
-      <div className="min-h-screen bg-[#07050f] text-white flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-background text-white flex flex-col items-center justify-center p-4">
         <div className="text-center space-y-4 max-w-md">
           <p className="text-red-400 font-mono text-sm">
             ❌ Error: {error || "Project not found"}
@@ -396,7 +399,9 @@ export default function ProjectAnalysisPage() {
   }
 
   // Determine current active pipeline stage for non-ready states
-  const getStageStatus = (stage: "upload" | "preprocessing" | "transcription" | "complete") => {
+  const getStageStatus = (
+    stage: "upload" | "preprocessing" | "transcription" | "complete",
+  ) => {
     const status = project.status;
 
     if (stage === "upload") {
@@ -410,8 +415,7 @@ export default function ProjectAnalysisPage() {
     }
 
     if (stage === "transcription") {
-      if (isFullyAnalyzed || status === "generating_shorts")
-        return "completed";
+      if (isFullyAnalyzed || status === "generating_shorts") return "completed";
       if (status === "transcribing") return "active";
       return "pending";
     }
@@ -451,7 +455,7 @@ export default function ProjectAnalysisPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07050f] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-background text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background radial overlays */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-[15%] top-[5%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.08)_0%,transparent_70%)] blur-[50px]" />
@@ -486,7 +490,7 @@ export default function ProjectAnalysisPage() {
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                   : project.status === "failed"
                     ? "bg-red-500/10 text-red-400 border-red-500/20"
-                    : "bg-violet-500/10 text-violet-400 border-violet-500/20 animate-pulse"
+                    : "bg-primary/10 text-primary border-primary/20 animate-pulse"
               }`}
             >
               {project.status.replace("_", " ")}
@@ -504,9 +508,9 @@ export default function ProjectAnalysisPage() {
             PIPELINE STATUS VIEW (Active during processing)
             ========================================== */}
         {!isFullyAnalyzed && (
-          <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-violet-950/20">
+          <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-primary/20">
             <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-violet-500 animate-pulse" />
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
               ClipForge Processing Pipeline
             </h2>
 
@@ -537,10 +541,10 @@ export default function ProjectAnalysisPage() {
                       <Check size={14} className="stroke-[2.5]" />
                     </div>
                   ) : getStageStatus("preprocessing") === "active" ? (
-                    <div className="h-7 w-7 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center text-xs">
+                    <div className="h-7 w-7 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center text-xs">
                       <RefreshCw
                         size={12}
-                        className="animate-spin text-violet-400"
+                        className="animate-spin text-primary"
                       />
                     </div>
                   ) : (
@@ -570,16 +574,22 @@ export default function ProjectAnalysisPage() {
                           : "Awaiting start signal."}
                   </p>
 
-                  {(project.status === "validating" || project.status === "processing") && (
+                  {(project.status === "validating" ||
+                    project.status === "processing") && (
                     <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono text-violet-400">
+                      <div className="flex justify-between items-center text-[10px] font-mono text-primary">
                         <span>Preprocessing status</span>
-                        <span>{project.status === "validating" ? "30%" : "60%"}</span>
+                        <span>
+                          {project.status === "validating" ? "30%" : "60%"}
+                        </span>
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-linear-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
-                          style={{ width: project.status === "validating" ? "30%" : "60%" }}
+                          className="h-full bg-linear-to-r from-primary to-forge-accent-2 rounded-full transition-all duration-300"
+                          style={{
+                            width:
+                              project.status === "validating" ? "30%" : "60%",
+                          }}
                         />
                       </div>
                     </div>
@@ -595,10 +605,10 @@ export default function ProjectAnalysisPage() {
                       <Check size={14} className="stroke-[2.5]" />
                     </div>
                   ) : getStageStatus("transcription") === "active" ? (
-                    <div className="h-7 w-7 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center text-xs">
+                    <div className="h-7 w-7 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center text-xs">
                       <RefreshCw
                         size={12}
-                        className="animate-spin text-violet-400"
+                        className="animate-spin text-primary"
                       />
                     </div>
                   ) : (
@@ -621,20 +631,21 @@ export default function ProjectAnalysisPage() {
                   >
                     {project.status === "transcribing"
                       ? "Transcribing voice vectors and converting to text..."
-                      : project.status === "generating_shorts" || isFullyAnalyzed
+                      : project.status === "generating_shorts" ||
+                          isFullyAnalyzed
                         ? "Completed converting voice segments to text."
                         : "Awaiting start signal."}
                   </p>
 
                   {project.status === "transcribing" && (
                     <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono text-violet-400">
+                      <div className="flex justify-between items-center text-[10px] font-mono text-primary">
                         <span>Transcribing progress</span>
                         <span>{project.progress}%</span>
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-linear-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
+                          className="h-full bg-linear-to-r from-primary to-forge-accent-2 rounded-full transition-all duration-300"
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
@@ -651,10 +662,10 @@ export default function ProjectAnalysisPage() {
                       <Check size={14} className="stroke-[2.5]" />
                     </div>
                   ) : getStageStatus("complete") === "active" ? (
-                    <div className="h-7 w-7 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center text-xs">
+                    <div className="h-7 w-7 rounded-full bg-primary/20 text-primary border border-primary/30 flex items-center justify-center text-xs">
                       <RefreshCw
                         size={12}
-                        className="animate-spin text-violet-400"
+                        className="animate-spin text-primary"
                       />
                     </div>
                   ) : (
@@ -685,7 +696,7 @@ export default function ProjectAnalysisPage() {
                       </div>
                       <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-linear-to-r from-violet-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 animate-pulse"
+                          className="h-full bg-linear-to-r from-primary via-primary/80 to-forge-accent-2 rounded-full transition-all duration-300 animate-pulse"
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
@@ -710,7 +721,7 @@ export default function ProjectAnalysisPage() {
                 className="space-y-10"
               >
                 <div className="flex items-center gap-2 border-b border-white/5 pb-4">
-                  <Flame className="h-5 w-5 text-violet-500" />
+                  <Flame className="h-5 w-5 text-primary" />
                   <h2 className="font-heading text-lg font-bold text-white uppercase tracking-wider">
                     Isolated AI Clips Grid ({project.shortVideos.length})
                   </h2>
@@ -732,7 +743,9 @@ export default function ProjectAnalysisPage() {
                         {/* Top: Video Player Panel */}
                         <div className="w-full aspect-9/16 relative rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
                           <RemotionPlayer
-                            videoUrl={project.processedUrl || project.videoUrl || ""}
+                            videoUrl={
+                              project.processedUrl || project.videoUrl || ""
+                            }
                             startTime={clip.startTime}
                             endTime={clip.endTime}
                             captions={clip.captions || []}
@@ -758,21 +771,21 @@ export default function ProjectAnalysisPage() {
                               </h3>
 
                               {/* SEO ranking indicator */}
-                              <div className="flex items-center gap-1 text-[11px] font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full shrink-0">
-                                <Trophy size={11} className="text-violet-400" />
+                              <div className="flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full shrink-0">
+                                <Trophy size={11} className="text-primary" />
                                 {clip.seoRanking}%
                               </div>
                             </div>
 
                             <div className="flex items-center gap-1.5 text-[10px] text-white/35 font-mono">
-                              <Volume2 size={10} className="text-violet-400" />
+                              <Volume2 size={10} className="text-primary" />
                               <span>Auto-aligned transcript</span>
                             </div>
                           </div>
 
                           {/* Why Best explanation */}
-                          <div className="bg-violet-950/10 border border-violet-900/25 p-3.5 rounded-xl text-[11px] text-white/70 leading-relaxed font-sans select-text">
-                            <span className="font-mono text-[9px] font-bold text-violet-400 uppercase tracking-wide block mb-1">
+                          <div className="bg-primary/5 border border-primary/15 p-3.5 rounded-xl text-[11px] text-white/70 leading-relaxed font-sans select-text">
+                            <span className="font-mono text-[9px] font-bold text-primary uppercase tracking-wide block mb-1">
                               AI Explanation:
                             </span>
                             {clip.whyBest}
@@ -785,34 +798,48 @@ export default function ProjectAnalysisPage() {
                             onClick={() => handleEditClick(clip)}
                             className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1 cursor-pointer transition-colors"
                           >
-                            <Paintbrush size={11} className="text-violet-400" />{" "}
+                            <Paintbrush size={11} className="text-primary" />{" "}
                             Edit Style
                           </Button>
                           <Button
                             onClick={() => handleDownloadClick(clip)}
-                            disabled={clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:")}
+                            disabled={
+                              clip.renderStatus === "rendering" ||
+                              clip.renderStatus?.startsWith("rendering:")
+                            }
                             className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:") ? (
+                            {clip.renderStatus === "rendering" ||
+                            clip.renderStatus?.startsWith("rendering:") ? (
                               <>
-                                <Loader2 size={11} className="animate-spin text-violet-400" />
+                                <Loader2
+                                  size={11}
+                                  className="animate-spin text-primary"
+                                />
                                 Rendering...
                               </>
-                            ) : clip.exportUrl && clip.renderStatus === "done" ? (
+                            ) : clip.exportUrl &&
+                              clip.renderStatus === "done" ? (
                               <>
-                                <Download size={11} className="text-emerald-400" />
+                                <Download
+                                  size={11}
+                                  className="text-emerald-400"
+                                />
                                 Download
                               </>
                             ) : (
                               <>
-                                <Clapperboard size={11} className="text-violet-400" />
+                                <Clapperboard
+                                  size={11}
+                                  className="text-primary"
+                                />
                                 Render &amp; Download
                               </>
                             )}
                           </Button>
                           <Button
                             onClick={() => handleScheduleClick(clip)}
-                            className="bg-linear-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
+                            className="bg-linear-to-r from-primary to-forge-accent-2 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(152, 61, 22,0.2)] hover:shadow-[0_0_15px_rgba(152, 61, 22,0.35)] transition-all"
                           >
                             <Calendar size={11} /> Schedule
                           </Button>
@@ -831,7 +858,7 @@ export default function ProjectAnalysisPage() {
                     className="w-full flex justify-between items-center p-4 bg-white/1 hover:bg-white/2 border border-white/5 rounded-2xl transition-colors font-mono text-xs font-bold text-white/60 uppercase tracking-wider"
                   >
                     <span className="flex items-center gap-2">
-                      <FileText size={14} className="text-violet-400" />
+                      <FileText size={14} className="text-primary" />
                       Deepgram Speech Metadata & Full Transcript
                     </span>
                     {showTechnicalDetails ? (
@@ -889,7 +916,7 @@ export default function ProjectAnalysisPage() {
                                       <span className="text-white font-bold">
                                         {w.word}
                                       </span>
-                                      <span className="text-[8px] text-violet-400/80">
+                                      <span className="text-[8px] text-primary/80">
                                         {w.start.toFixed(2)}s
                                       </span>
                                     </div>
@@ -927,11 +954,15 @@ export default function ProjectAnalysisPage() {
             }
           }}
         >
-          <DialogContent className="max-w-md rounded-3xl border border-white/10 bg-[#0a0814]/95 backdrop-blur-2xl p-7 text-white shadow-2xl shadow-black/80">
+          <DialogContent className="max-w-md rounded-3xl border border-white/10 bg-[#1A1A1A]/95 backdrop-blur-2xl p-7 text-white shadow-2xl shadow-black/80">
             <DialogHeader>
               <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2.5">
-                <Clapperboard size={18} className="text-violet-400" />
-                {renderError ? "Render Failed" : renderPct === 100 ? "Render Complete!" : "Rendering Video..."}
+                <Clapperboard size={18} className="text-primary" />
+                {renderError
+                  ? "Render Failed"
+                  : renderPct === 100
+                    ? "Render Complete!"
+                    : "Rendering Video..."}
               </DialogTitle>
               <DialogDescription className="text-xs text-white/40">
                 {renderError
@@ -958,13 +989,13 @@ export default function ProjectAnalysisPage() {
                       <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider animate-pulse">
                         {renderPhase}
                       </span>
-                      <span className="font-mono font-bold text-violet-400 tabular-nums">
+                      <span className="font-mono font-bold text-primary tabular-nums">
                         {renderPct}%
                       </span>
                     </div>
                     <div className="relative h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
                       <motion.div
-                        className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-400 shadow-[0_0_12px_rgba(124,106,250,0.6)]"
+                        className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-primary to-forge-accent-2 shadow-[0_0_12px_rgba(152, 61, 22,0.6)]"
                         animate={{ width: `${renderPct}%` }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
                       />
@@ -975,10 +1006,19 @@ export default function ProjectAnalysisPage() {
                   <div className="space-y-2.5">
                     {[
                       { label: "Inngest job queued", done: renderPct > 0 },
-                      { label: "Lambda environment booted", done: renderPct > 10 },
-                      { label: "Frames rendered (AWS Lambda)", done: renderPct > 50 },
+                      {
+                        label: "Lambda environment booted",
+                        done: renderPct > 10,
+                      },
+                      {
+                        label: "Frames rendered (AWS Lambda)",
+                        done: renderPct > 50,
+                      },
                       { label: "Video encoded (H.264)", done: renderPct > 80 },
-                      { label: "Output uploaded to S3", done: renderPct >= 100 },
+                      {
+                        label: "Output uploaded to S3",
+                        done: renderPct >= 100,
+                      },
                     ].map((step, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <div
@@ -989,7 +1029,10 @@ export default function ProjectAnalysisPage() {
                           }`}
                         >
                           {step.done ? (
-                            <Check size={11} className="text-emerald-400 stroke-[2.5]" />
+                            <Check
+                              size={11}
+                              className="text-emerald-400 stroke-[2.5]"
+                            />
                           ) : (
                             <div className="h-1.5 w-1.5 rounded-full bg-white/20" />
                           )}
@@ -1008,7 +1051,9 @@ export default function ProjectAnalysisPage() {
                   {renderPct === 100 && (
                     <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/20 rounded-xl p-3.5 animate-in fade-in duration-300">
                       <Check size={16} className="text-emerald-400 shrink-0" />
-                      <p className="text-xs text-emerald-300">Video rendered successfully. Download starting...</p>
+                      <p className="text-xs text-emerald-300">
+                        Video rendered successfully. Download starting...
+                      </p>
                     </div>
                   )}
                 </>
@@ -1036,7 +1081,7 @@ export default function ProjectAnalysisPage() {
           <DialogContent className="max-w-[90vw]! w-[90vw] h-[85vh] max-h-[800px] rounded-3xl border border-white/10 bg-black/90 backdrop-blur-2xl p-6 text-white shadow-xl shadow-black/80 flex flex-col overflow-hidden">
             <DialogHeader className="shrink-0 mb-4">
               <DialogTitle className="font-heading text-xl font-bold text-white flex items-center gap-2">
-                <Paintbrush size={18} className="text-violet-500" />
+                <Paintbrush size={18} className="text-primary" />
                 Customize Caption Design
               </DialogTitle>
               <DialogDescription className="text-xs text-white/40">
@@ -1061,7 +1106,7 @@ export default function ProjectAnalysisPage() {
                           onClick={() => setCustomStyle({ ...preset })}
                           className={`p-3 rounded-xl border text-left cursor-pointer transition-all duration-200 ${
                             customStyle.id === preset.id
-                              ? "border-violet-500 bg-violet-500/10 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
+                              ? "border-primary bg-primary/10 shadow-[0_0_15px_rgba(152, 61, 22,0.15)]"
                               : "border-white/5 bg-white/2 hover:bg-white/4 hover:border-white/10"
                           }`}
                         >
@@ -1081,7 +1126,7 @@ export default function ProjectAnalysisPage() {
 
                   {/* Font Customization */}
                   <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
-                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                    <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest block mb-2">
                       Typography & Alignment
                     </span>
 
@@ -1119,7 +1164,7 @@ export default function ProjectAnalysisPage() {
                             }
                             className={`px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                               customStyle.fontFamily === f.value
-                                ? "border-violet-500 bg-violet-500/20 text-white"
+                                ? "border-primary bg-primary/20 text-white"
                                 : "border-white/5 bg-white/2 text-white/60 hover:bg-white/4 hover:text-white"
                             }`}
                           >
@@ -1151,7 +1196,7 @@ export default function ProjectAnalysisPage() {
                             }
                             className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer text-center ${
                               customStyle.textTransform === c.value
-                                ? "border-violet-500 bg-violet-500/20 text-white"
+                                ? "border-primary bg-primary/20 text-white"
                                 : "border-white/5 bg-white/2 text-white/60 hover:bg-white/4 hover:text-white"
                             }`}
                           >
@@ -1164,7 +1209,7 @@ export default function ProjectAnalysisPage() {
 
                   {/* Colors Customization */}
                   <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
-                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                    <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest block mb-2">
                       Subtitles Styling & Colors
                     </span>
 
@@ -1227,7 +1272,7 @@ export default function ProjectAnalysisPage() {
 
                   {/* Sizes Customization */}
                   <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
-                    <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block mb-2">
+                    <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest block mb-2">
                       Caption Sizes
                     </span>
 
@@ -1327,7 +1372,7 @@ export default function ProjectAnalysisPage() {
                   {/* Background Box Opacity */}
                   <div className="space-y-3 bg-white/1 border border-white/5 p-4 rounded-2xl">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-mono font-bold text-violet-400 uppercase tracking-widest block">
+                      <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest block">
                         Background Overlay Opacity
                       </span>
                       <span className="text-xs font-mono font-bold text-white/80">
@@ -1370,7 +1415,7 @@ export default function ProjectAnalysisPage() {
                             };
                           });
                         }}
-                        className="flex-1 accent-violet-500 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                        className="flex-1 accent-primary h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
                   </div>
@@ -1405,7 +1450,7 @@ export default function ProjectAnalysisPage() {
               <Button
                 disabled={isSavingStyle}
                 onClick={handleApplyStyle}
-                className="rounded-xl bg-linear-to-r from-violet-600 to-indigo-500 px-5 text-xs font-bold text-white shadow-md shadow-violet-900/30 hover:shadow-violet-900/50 hover:from-violet-500 hover:to-indigo-400 cursor-pointer"
+                className="rounded-xl bg-linear-to-r from-primary to-forge-accent-2 px-5 text-xs font-bold text-white shadow-md shadow-primary/30 hover:shadow-primary/50 hover:from-primary hover:to-forge-accent-2 cursor-pointer"
               >
                 {isSavingStyle ? "Saving Style..." : "Apply Style"}
               </Button>

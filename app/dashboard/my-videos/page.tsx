@@ -135,7 +135,7 @@ export default function MyVideosPage() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
-          <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
+          <RefreshCw className="h-8 w-8 text-primary animate-spin" />
           <p className="text-xs text-white/30 font-mono tracking-widest uppercase">
             FETCHING VIDEO LIBRARY
           </p>
@@ -160,9 +160,17 @@ export default function MyVideosPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => {
-            const isAnalyzed = project.status === "ready" && !!project.transcript;
-            const isPreprocessing = ["uploaded", "validating", "processing"].includes(project.status);
-            const isProcessing = project.status === "transcribing" || project.status === "generating_shorts" || isPreprocessing;
+            const isAnalyzed =
+              project.status === "ready" && !!project.transcript;
+            const isPreprocessing = [
+              "uploaded",
+              "validating",
+              "processing",
+            ].includes(project.status);
+            const isProcessing =
+              project.status === "transcribing" ||
+              project.status === "generating_shorts" ||
+              isPreprocessing;
 
             return (
               <Card
@@ -189,7 +197,7 @@ export default function MyVideosPage() {
                         isAnalyzed
                           ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                           : isProcessing
-                            ? "bg-violet-500/10 text-violet-400 border-violet-500/20 animate-pulse"
+                            ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
                             : project.status === "failed"
                               ? "bg-red-500/10 text-red-400 border-red-500/20"
                               : "bg-amber-500/10 text-amber-400 border-amber-500/20"
@@ -246,9 +254,11 @@ export default function MyVideosPage() {
                       </>
                     ) : isProcessing ? (
                       <>
-                        <span className="font-mono text-[9px] text-violet-400 flex items-center gap-1 animate-pulse">
+                        <span className="font-mono text-[9px] text-primary flex items-center gap-1 animate-pulse">
                           <RefreshCw size={11} className="animate-spin" />
-                          {isPreprocessing ? "Preprocessing..." : "Transcribing..."}
+                          {isPreprocessing
+                            ? "Preprocessing..."
+                            : "Transcribing..."}
                         </span>
 
                         <Button

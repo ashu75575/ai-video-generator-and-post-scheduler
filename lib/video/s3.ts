@@ -1,4 +1,8 @@
-import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createWriteStream } from "fs";
 import fs from "fs/promises";
@@ -14,7 +18,7 @@ function getS3Client() {
   if (!bucketName || !accessKeyId || !secretAccessKey) {
     throw new Error(
       "AWS S3 environment variables are not fully configured. " +
-        "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY."
+        "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY.",
     );
   }
 
@@ -37,15 +41,20 @@ function getS3Client() {
 /**
  * Downloads a file from S3 to a local disk path.
  */
-export async function downloadFromS3(s3Key: string, localFilePath: string): Promise<void> {
+export async function downloadFromS3(
+  s3Key: string,
+  localFilePath: string,
+): Promise<void> {
   const { s3, bucketName } = getS3Client();
-  console.log(`[S3] Downloading s3://${bucketName}/${s3Key} to ${localFilePath}`);
-  
+  console.log(
+    `[S3] Downloading s3://${bucketName}/${s3Key} to ${localFilePath}`,
+  );
+
   const response = await s3.send(
     new GetObjectCommand({
       Bucket: bucketName,
       Key: s3Key,
-    })
+    }),
   );
 
   if (!response.Body) {
@@ -63,7 +72,7 @@ export async function downloadFromS3(s3Key: string, localFilePath: string): Prom
 export async function uploadToS3(
   localFilePath: string,
   s3Key: string,
-  contentType: string = "video/mp4"
+  contentType: string = "video/mp4",
 ): Promise<{ presignedUrl: string; s3Key: string }> {
   const { s3, bucketName } = getS3Client();
   console.log(`[S3] Uploading ${localFilePath} to s3://${bucketName}/${s3Key}`);
@@ -76,7 +85,7 @@ export async function uploadToS3(
       Key: s3Key,
       Body: fileBuffer,
       ContentType: contentType,
-    })
+    }),
   );
 
   // Generate a presigned URL to allow downstream services (Deepgram, Lambda) to access it

@@ -10,7 +10,7 @@ export async function createProjectRow(
   projectId: string,
   userId: string,
   fileName: string,
-  originalUrl: string
+  originalUrl: string,
 ): Promise<void> {
   if (!db) return;
   console.log(`[DB] Creating database record for project: ${projectId}`);
@@ -45,10 +45,12 @@ export async function createProjectRow(
 export async function updateProjectStatus(
   projectId: string,
   status: "uploaded" | "validating" | "processing" | "ready" | "failed",
-  progress: number
+  progress: number,
 ): Promise<void> {
   if (!db) return;
-  console.log(`[DB] Updating project ${projectId} status to "${status}" (progress: ${progress}%)`);
+  console.log(
+    `[DB] Updating project ${projectId} status to "${status}" (progress: ${progress}%)`,
+  );
   await db
     .update(projects)
     .set({
@@ -64,11 +66,11 @@ export async function updateProjectStatus(
  */
 export async function updateProjectMetadata(
   projectId: string,
-  metadata: VideoMetadata
+  metadata: VideoMetadata,
 ): Promise<void> {
   if (!db) return;
   console.log(
-    `[DB] Saving metadata for project ${projectId}: duration=${metadata.duration}s, fps=${metadata.fps}`
+    `[DB] Saving metadata for project ${projectId}: duration=${metadata.duration}s, fps=${metadata.fps}`,
   );
   await db
     .update(projects)
@@ -88,7 +90,7 @@ export async function updateProjectMetadata(
  */
 export async function updateProjectProcessed(
   projectId: string,
-  processedUrl: string
+  processedUrl: string,
 ): Promise<void> {
   if (!db) return;
   console.log(`[DB] Saving processed URL for project ${projectId}`);
@@ -107,9 +109,14 @@ export async function updateProjectProcessed(
 /**
  * Sets project status to failed and saves the error message.
  */
-export async function updateProjectError(projectId: string, errorMessage: string): Promise<void> {
+export async function updateProjectError(
+  projectId: string,
+  errorMessage: string,
+): Promise<void> {
   if (!db) return;
-  console.log(`[DB] Marking project ${projectId} as failed. Error: ${errorMessage}`);
+  console.log(
+    `[DB] Marking project ${projectId} as failed. Error: ${errorMessage}`,
+  );
   await db
     .update(projects)
     .set({
