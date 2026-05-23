@@ -7,7 +7,7 @@ import { Navbar } from "@/components/landing/Navbar";
 
 export default function ClipForgeLanding() {
   return (
-    <div className="min-h-screen font-body text-white bg-background">
+    <div className="min-h-screen font-body text-white bg-stone-950">
       <Navbar />
       <main>
         <Hero />

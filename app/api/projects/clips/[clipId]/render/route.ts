@@ -88,9 +88,9 @@ export async function POST(
 
     const project = projectResult[0];
 
-    if (!project.processedUrl) {
+    if (!project.videoUrl) {
       return NextResponse.json(
-        { error: "Project processed video URL is not available." },
+        { error: "Project video URL is not available." },
         { status: 400 },
       );
     }
@@ -110,7 +110,7 @@ export async function POST(
       name: "clip/render.started",
       data: {
         clipId,
-        videoUrl: project.processedUrl,
+        videoUrl: project.videoUrl,
         startTime: clip.startTime,
         endTime: clip.endTime,
         captions: clip.captions || [],

@@ -38,7 +38,7 @@ export function Footer() {
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-px w-[600px]"
         style={{
           background:
-            "linear-gradient(90deg, transparent, rgba(152, 61, 22,0.25), transparent)",
+            "linear-gradient(90deg, transparent, rgba(124,106,250,0.25), transparent)",
         }}
       />
 
@@ -51,10 +51,10 @@ export function Footer() {
               whileHover={{ x: 2 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-gradient-forge shadow-[0_0_10px_rgba(152, 61, 22,0.3)]">
-                <Scissors size={13} className="text-forge-bg" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.3)]">
+                <Scissors size={13} className="text-white" />
               </div>
-              <span className="font-heading text-base font-bold text-forge-accent-2">
+              <span className="font-heading text-base font-bold text-white">
                 ClipForge<span className="text-forge-accent">AI</span>
               </span>
             </motion.div>
