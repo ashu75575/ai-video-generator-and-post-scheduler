@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { Video, useCurrentFrame, useVideoConfig } from "remotion";
+import { OffthreadVideo, useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionStyle } from "@/lib/caption-styles";
 
 interface Word {
@@ -62,7 +62,7 @@ const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
         overflow: "hidden",
       }}
     >
-      <Video
+      <OffthreadVideo
         src={videoUrl}
         startFrom={startFrame}
         pauseWhenBuffering={true}

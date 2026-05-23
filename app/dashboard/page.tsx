@@ -171,7 +171,7 @@ export default function DashboardHome() {
             } else {
               setUploadStatusText("Acquiring viewer signed URL...");
             }
-          } else if (status === "completed") {
+          } else if (status === "ready") {
             clearInterval(pollInterval);
             (window as any)._activeUploadPoll = null;
             setUploadStatus("success");

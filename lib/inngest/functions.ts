@@ -17,33 +17,29 @@ import {
   renderMediaOnLambda,
   getRenderProgress,
 } from "@remotion/lambda/client";
+import os from "os";
+import path from "path";
+import { downloadFromS3, uploadToS3 } from "../video/s3";
+import { validateVideo } from "../video/validation";
+import { normalizeVideo } from "../video/ffmpeg";
+import {
+  createProjectRow,
+  updateProjectStatus,
+  updateProjectMetadata,
+  updateProjectProcessed,
+  updateProjectError,
+} from "../video/db";
 
 export const processVideoUpload = inngest.createFunction(
   { id: "process-video-upload" },
   { event: "video/upload.started" },
   async ({ event, step }) => {
-    const { projectId, filePath, fileName } = event.data;
+    const { projectId, filePath, fileName, userId } = event.data;
 
-    // Step 1: Initialize status in Database
-    await step.run("initialize-db-status", async () => {
-      console.log(`Starting upload process for project: ${projectId}`);
-      if (db) {
-        await db
-          .update(projects)
-          .set({ status: "uploading", progress: 20, updatedAt: new Date() })
-          .where(eq(projects.id, projectId));
-      }
-    });
-
-    // Step 2: Upload to AWS S3
-    const videoUrl = await step.run("upload-to-s3", async () => {
-      if (db) {
-        await db
-          .update(projects)
-          .set({ status: "uploading", progress: 50, updatedAt: new Date() })
-          .where(eq(projects.id, projectId));
-      }
-
+    // Step 1: Upload to AWS S3 under /raw
+    const uploadResult = await step.run("upload-to-s3-raw", async () => {
+      console.log(`Starting raw upload process for project: ${projectId}`);
+      
       const bucketName = process.env.AWS_BUCKET_NAME;
       const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
       const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -52,7 +48,7 @@ export const processVideoUpload = inngest.createFunction(
       if (!bucketName || !accessKeyId || !secretAccessKey) {
         throw new Error(
           "AWS S3 environment variables are not fully configured. " +
-            "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY.",
+            "Please check AWS_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY."
         );
       }
 
@@ -67,7 +63,7 @@ export const processVideoUpload = inngest.createFunction(
 
       // Stream the local file contents
       const fileStream = createReadStream(filePath);
-      const s3Key = `projects/${projectId}/${Date.now()}-${fileName}`;
+      const s3Key = `raw/${projectId}/${Date.now()}-${fileName}`;
 
       // Upload file directly to S3
       await s3.send(
@@ -75,10 +71,10 @@ export const processVideoUpload = inngest.createFunction(
           Bucket: bucketName,
           Key: s3Key,
           Body: fileStream,
-        }),
+        })
       );
 
-      // Generate a presigned URL to allow Deepgram (and the frontend player) to access the private S3 file securely
+      // Generate a presigned URL to allow temporary read access to the raw file
       const getCommand = new GetObjectCommand({
         Bucket: bucketName,
         Key: s3Key,
@@ -87,16 +83,31 @@ export const processVideoUpload = inngest.createFunction(
         expiresIn: 604800,
       }); // Valid for 7 days
 
-      if (db) {
-        await db
-          .update(projects)
-          .set({ status: "uploading", progress: 85, updatedAt: new Date() })
-          .where(eq(projects.id, projectId));
-      }
-      return actualUrl;
+      return { url: actualUrl, s3Key };
     });
 
-    // Step 3: Clean up local file
+    const { url: videoUrl, s3Key } = uploadResult;
+
+    // Step 2: Create DB row
+    await step.run("create-db-row", async () => {
+      await createProjectRow(projectId, userId, fileName, videoUrl);
+    });
+
+    // Step 3: Trigger Inngest event: video/uploaded
+    await step.run("trigger-video-uploaded-event", async () => {
+      await inngest.send({
+        name: "video/uploaded",
+        data: {
+          projectId,
+          originalUrl: videoUrl,
+          s3Key,
+          fileName,
+        },
+      });
+      console.log(`Triggered Inngest event video/uploaded for project ${projectId}`);
+    });
+
+    // Step 4: Clean up local uploaded file
     await step.run("cleanup-local-file", async () => {
       try {
         if (existsSync(filePath)) {
@@ -108,26 +119,104 @@ export const processVideoUpload = inngest.createFunction(
       }
     });
 
-    // Step 4: Finalize database status
-    await step.run("finalize-db-status", async () => {
-      if (db) {
-        await db
-          .update(projects)
-          .set({
-            status: "completed",
-            progress: 100,
-            videoUrl: videoUrl,
-            updatedAt: new Date(),
-          })
-          .where(eq(projects.id, projectId));
-      }
-      console.log(
-        `Successfully completed upload process for project: ${projectId}`,
-      );
-    });
+    return { success: true, url: videoUrl, s3Key };
+  }
+);
 
-    return { success: true, url: videoUrl };
-  },
+export const processVideoPipeline = inngest.createFunction(
+  { id: "process-video-pipeline" },
+  { event: "video/uploaded" },
+  async ({ event, step, attempt }) => {
+    const { projectId, originalUrl, s3Key, fileName } = event.data;
+
+    console.log(`[Worker] Starting normalization pipeline for ${projectId}. Attempt: ${attempt}`);
+
+    const tempRawPath = path.join(os.tmpdir(), `${projectId}-raw-${Date.now()}.mp4`);
+    const tempProcessedPath = path.join(os.tmpdir(), `${projectId}-processed-${Date.now()}.mp4`);
+
+    try {
+      // Step 1: Update status to validating
+      await step.run("status-validating", async () => {
+        await updateProjectStatus(projectId, "validating", 30);
+      });
+
+      // Step 2: Download raw video locally to temp directory
+      await step.run("download-raw-video", async () => {
+        await downloadFromS3(s3Key, tempRawPath);
+      });
+
+      // Step 3: Validate media using ffprobe and extract metadata
+      const metadata = await step.run("validate-and-metadata", async () => {
+        try {
+          const meta = await validateVideo(tempRawPath);
+          await updateProjectMetadata(projectId, meta);
+          return meta;
+        } catch (err: any) {
+          // Update database with failure details
+          await updateProjectError(projectId, err.message);
+          throw err; // fail step and trigger retry/failure
+        }
+      });
+
+      // Step 4: Update status to processing
+      await step.run("status-processing", async () => {
+        await updateProjectStatus(projectId, "processing", 60);
+      });
+
+      // Step 5: Normalize video using FFmpeg
+      await step.run("normalize-with-ffmpeg", async () => {
+        try {
+          await normalizeVideo(tempRawPath, tempProcessedPath);
+        } catch (err: any) {
+          await updateProjectError(projectId, err.message);
+          throw err; // fail step
+        }
+      });
+
+      // Step 6: Upload processed output to S3 under /processed
+      const processedS3Key = `processed/${projectId}/${fileName.replace(/\.[^/.]+$/, "")}.mp4`; // normalize output ext to .mp4
+      const processedUrl = await step.run("upload-processed-video", async () => {
+        try {
+          const { presignedUrl } = await uploadToS3(tempProcessedPath, processedS3Key, "video/mp4");
+          return presignedUrl;
+        } catch (err: any) {
+          await updateProjectError(projectId, `Failed to upload processed video to S3: ${err.message}`);
+          throw err;
+        }
+      });
+
+      // Step 7: Update DB to ready
+      await step.run("finalize-ready-status", async () => {
+        await updateProjectProcessed(projectId, processedUrl);
+      });
+
+      console.log(`[Worker] Preprocessing pipeline succeeded for project ${projectId}`);
+      return { success: true, processedUrl };
+
+    } catch (err: any) {
+      console.error(`[Worker] Preprocessing pipeline failed for project ${projectId}:`, err);
+      // Fail status in DB if not already written
+      await step.run("status-failed", async () => {
+        await updateProjectError(projectId, err.message || "An unexpected error occurred during video processing.");
+      });
+      throw err; // fail worker execution
+    } finally {
+      // Step 8: Cleanup temp files
+      await step.run("cleanup-temp-files", async () => {
+        console.log(`[Worker] Cleaning up temporary local files for project ${projectId}...`);
+        for (const f of [tempRawPath, tempProcessedPath]) {
+          try {
+            if (existsSync(f)) {
+              await fs.unlink(f);
+              console.log(`[Worker] Cleaned up: ${f}`);
+            }
+          } catch (cleanupErr) {
+            console.error(`[Worker] Cleanup error for file ${f}:`, cleanupErr);
+          }
+        }
+      });
+    }
+  }
 );
 
 interface Word {

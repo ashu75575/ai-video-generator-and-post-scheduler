@@ -70,6 +70,9 @@ interface ProjectStatus {
   name: string;
   status:
     | "pending"
+    | "uploaded"
+    | "validating"
+    | "processing"
     | "uploading"
     | "completed"
     | "failed"
@@ -78,6 +81,14 @@ interface ProjectStatus {
     | "ready";
   progress: number;
   videoUrl: string | null;
+  originalUrl?: string | null;
+  processedUrl?: string | null;
+  processingError?: string | null;
+  duration?: number | null;
+  fps?: number | null;
+  codec?: string | null;
+  width?: number | null;
+  height?: number | null;
   transcript: string | null;
   captions: CaptionWord[] | null;
   shortVideos?: ShortVideo[] | null;
@@ -320,6 +331,8 @@ export default function ProjectAnalysisPage() {
     }
   };
 
+  const isFullyAnalyzed = project?.status === "ready" && !!project?.transcript;
+
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
 
@@ -334,7 +347,7 @@ export default function ProjectAnalysisPage() {
         setLoading(false);
 
         // Stop polling if completed successfully or failed
-        if (data.status === "ready" || data.status === "failed") {
+        if ((data.status === "ready" && data.transcript) || data.status === "failed") {
           clearInterval(pollInterval);
         }
       } catch (err: any) {
@@ -383,22 +396,28 @@ export default function ProjectAnalysisPage() {
   }
 
   // Determine current active pipeline stage for non-ready states
-  const getStageStatus = (stage: "upload" | "transcription" | "complete") => {
+  const getStageStatus = (stage: "upload" | "preprocessing" | "transcription" | "complete") => {
     const status = project.status;
 
     if (stage === "upload") {
       return "completed";
     }
 
+    if (stage === "preprocessing") {
+      if (status === "validating" || status === "processing") return "active";
+      if (status === "uploaded") return "pending";
+      return "completed";
+    }
+
     if (stage === "transcription") {
-      if (status === "ready" || status === "generating_shorts")
+      if (isFullyAnalyzed || status === "generating_shorts")
         return "completed";
       if (status === "transcribing") return "active";
       return "pending";
     }
 
     if (stage === "complete") {
-      if (status === "ready") return "completed";
+      if (isFullyAnalyzed) return "completed";
       if (status === "generating_shorts") return "active";
       return "pending";
     }
@@ -475,7 +494,7 @@ export default function ProjectAnalysisPage() {
           </div>
           <p className="text-xs text-white/40 font-mono">
             Original Source:{" "}
-            {project.videoUrl
+            {project.processedUrl || project.videoUrl
               ? "AWS S3 Cloud Storage"
               : "Local Workspace Cache"}
           </p>
@@ -484,7 +503,7 @@ export default function ProjectAnalysisPage() {
         {/* ==========================================
             PIPELINE STATUS VIEW (Active during processing)
             ========================================== */}
-        {project.status !== "ready" && (
+        {!isFullyAnalyzed && (
           <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-violet-950/20">
             <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-violet-500 animate-pulse" />
@@ -510,7 +529,65 @@ export default function ProjectAnalysisPage() {
                 </div>
               </div>
 
-              {/* Step 2: Audio Transcription */}
+              {/* Step 2: Media Validation & Normalization */}
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  {getStageStatus("preprocessing") === "completed" ? (
+                    <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
+                      <Check size={14} className="stroke-[2.5]" />
+                    </div>
+                  ) : getStageStatus("preprocessing") === "active" ? (
+                    <div className="h-7 w-7 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30 flex items-center justify-center text-xs">
+                      <RefreshCw
+                        size={12}
+                        className="animate-spin text-violet-400"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
+                      2
+                    </div>
+                  )}
+                  <div
+                    className={`w-0.5 h-12 ${getStageStatus("preprocessing") === "completed" ? "bg-emerald-500/30" : "bg-white/5"}`}
+                  />
+                </div>
+                <div className="space-y-1.5 mt-0.5 flex-1">
+                  <h3
+                    className={`text-xs font-bold ${getStageStatus("preprocessing") !== "pending" ? "text-white/90" : "text-white/30"}`}
+                  >
+                    Video Validation & Normalization
+                  </h3>
+                  <p
+                    className={`text-[11px] font-mono ${getStageStatus("preprocessing") !== "pending" ? "text-white/45" : "text-white/20"}`}
+                  >
+                    {project.status === "validating"
+                      ? "Verifying codec and checking streams with ffprobe..."
+                      : project.status === "processing"
+                        ? "Normalizing to 1080p, H.264 profile, and 30fps with FFmpeg..."
+                        : getStageStatus("preprocessing") === "completed"
+                          ? "Video normalized and saved to S3."
+                          : "Awaiting start signal."}
+                  </p>
+
+                  {(project.status === "validating" || project.status === "processing") && (
+                    <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
+                      <div className="flex justify-between items-center text-[10px] font-mono text-violet-400">
+                        <span>Preprocessing status</span>
+                        <span>{project.status === "validating" ? "30%" : "60%"}</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-linear-to-r from-violet-600 to-indigo-500 rounded-full transition-all duration-300"
+                          style={{ width: project.status === "validating" ? "30%" : "60%" }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Step 3: Audio Transcription */}
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
                   {getStageStatus("transcription") === "completed" ? (
@@ -526,7 +603,7 @@ export default function ProjectAnalysisPage() {
                     </div>
                   ) : (
                     <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
-                      2
+                      3
                     </div>
                   )}
                   <div
@@ -544,7 +621,7 @@ export default function ProjectAnalysisPage() {
                   >
                     {project.status === "transcribing"
                       ? "Transcribing voice vectors and converting to text..."
-                      : project.status === "generating_shorts"
+                      : project.status === "generating_shorts" || isFullyAnalyzed
                         ? "Completed converting voice segments to text."
                         : "Awaiting start signal."}
                   </p>
@@ -566,7 +643,7 @@ export default function ProjectAnalysisPage() {
                 </div>
               </div>
 
-              {/* Step 3: Clip Isolation */}
+              {/* Step 4: Clip Isolation */}
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
                   {getStageStatus("complete") === "completed" ? (
@@ -582,7 +659,7 @@ export default function ProjectAnalysisPage() {
                     </div>
                   ) : (
                     <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
-                      3
+                      4
                     </div>
                   )}
                 </div>
@@ -622,7 +699,7 @@ export default function ProjectAnalysisPage() {
 
         {/* RESULTS SHOWCASE VIEW */}
         <AnimatePresence mode="wait">
-          {project.status === "ready" &&
+          {isFullyAnalyzed &&
             project.shortVideos &&
             project.shortVideos.length > 0 && (
               <motion.div
@@ -655,7 +732,7 @@ export default function ProjectAnalysisPage() {
                         {/* Top: Video Player Panel */}
                         <div className="w-full aspect-9/16 relative rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
                           <RemotionPlayer
-                            videoUrl={project.videoUrl || ""}
+                            videoUrl={project.processedUrl || project.videoUrl || ""}
                             startTime={clip.startTime}
                             endTime={clip.endTime}
                             captions={clip.captions || []}
@@ -1303,7 +1380,7 @@ export default function ProjectAnalysisPage() {
                 <div className="md:col-span-2 flex flex-col items-center justify-center bg-black/40 rounded-3xl border border-white/5 p-4 relative group">
                   <div className="w-full h-full max-h-[460px] flex items-center justify-center">
                     <RemotionPlayer
-                      videoUrl={project.videoUrl || ""}
+                      videoUrl={project.processedUrl || project.videoUrl || ""}
                       startTime={editingClip.startTime}
                       endTime={editingClip.endTime}
                       captions={editingClip.captions || []}

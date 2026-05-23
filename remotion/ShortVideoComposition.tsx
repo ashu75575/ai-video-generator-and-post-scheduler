@@ -1,5 +1,4 @@
-import React from "react";
-import { Video, useCurrentFrame, useVideoConfig } from "remotion";
+import { OffthreadVideo, useCurrentFrame, useVideoConfig } from "remotion";
 
 // ---- Types ----
 export interface CaptionStyleProps {
@@ -131,7 +130,7 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
         overflow: "hidden",
       }}
     >
-      <Video
+      <OffthreadVideo
         src={videoUrl}
         startFrom={startFrame}
         pauseWhenBuffering={true}
