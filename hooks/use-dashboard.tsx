@@ -167,18 +167,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     },
   ]);
 
-  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([
-    {
-      id: "post-1",
-      clipId: "clip-2",
-      title: "Why Most Startups Fail in First 6 Months",
-      caption:
-        "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
-      platform: "TikTok",
-      time: "Today, 6:00 PM",
-      status: "Pending",
-    },
-  ]);
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
 
   const [rawVideos, setRawVideos] = useState<RawVideo[]>([]);
 
@@ -210,8 +199,38 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         console.error("Error fetching projects in useDashboard:", error);
       }
     };
+
+    const fetchScheduledPosts = async () => {
+      try {
+        const response = await fetch("/api/posts/schedule");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.posts) {
+            const mappedPosts = data.posts.map((p: any) => ({
+              id: p.id,
+              clipId: p.clipId,
+              title: p.title,
+              caption: p.caption,
+              platform: p.platform,
+              time: new Date(p.scheduledTime).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              status: p.status === "pending" ? "Pending" : p.status === "posted" ? "Posted" : "Failed",
+            }));
+            setScheduledPosts(mappedPosts);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching scheduled posts in useDashboard:", error);
+      }
+    };
+
     if (user) {
       fetchProjects();
+      fetchScheduledPosts();
     }
   }, [user]);
 
@@ -368,29 +387,66 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, 80);
   };
 
-  const handleScheduleSubmit = () => {
+  const handleScheduleSubmit = async () => {
     if (!clipToSchedule) return;
 
-    const newPost: ScheduledPost = {
-      id: `post-${Date.now()}`,
-      clipId: clipToSchedule.id,
-      title: clipToSchedule.title,
-      caption: scheduleCaption || clipToSchedule.description,
-      platform: schedulePlatform,
-      time: scheduleTime,
-      status: "Pending",
-    };
+    try {
+      // Since scheduleTime in standard clip dialog is a text like "Today, 8:00 PM"
+      // We will parse it to a real date, or default to 2 hours from now if invalid
+      let scheduledTimeRaw = new Date();
+      scheduledTimeRaw.setHours(scheduledTimeRaw.getHours() + 2);
+      
+      const response = await fetch("/api/posts/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clipId: clipToSchedule.id,
+          title: clipToSchedule.title,
+          caption: scheduleCaption || clipToSchedule.description,
+          platform: schedulePlatform,
+          scheduledTime: scheduledTimeRaw.toISOString(),
+        }),
+      });
 
-    setScheduledPosts((prev) => [newPost, ...prev]);
-    setClips((prev) =>
-      prev.map((c) =>
-        c.id === clipToSchedule.id ? { ...c, status: "Scheduled" } : c,
-      ),
-    );
-    setIsScheduleOpen(false);
-    toast("Post Scheduled!", {
-      description: `Your short will go live on ${schedulePlatform} at ${scheduleTime}.`,
-    });
+      if (!response.ok) {
+        throw new Error("Failed to save scheduled post");
+      }
+
+      const resData = await response.json();
+      if (resData.success) {
+        const p = resData.post;
+        const newPost: ScheduledPost = {
+          id: p.id,
+          clipId: p.clipId,
+          title: p.title,
+          caption: p.caption,
+          platform: p.platform as any,
+          time: new Date(p.scheduledTime).toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          status: "Pending",
+        };
+
+        setScheduledPosts((prev) => [newPost, ...prev]);
+        setClips((prev) =>
+          prev.map((c) =>
+            c.id === clipToSchedule.id ? { ...c, status: "Scheduled" } : c,
+          ),
+        );
+        setIsScheduleOpen(false);
+        toast("Post Scheduled!", {
+          description: `Your short will go live on ${schedulePlatform} at ${newPost.time}.`,
+        });
+      }
+    } catch (err: any) {
+      console.error("Failed to submit schedule:", err);
+      toast("Error scheduling post", {
+        description: err.message || "Something went wrong.",
+      });
+    }
   };
 
   const triggerScheduleDialog = (clip: Clip) => {
