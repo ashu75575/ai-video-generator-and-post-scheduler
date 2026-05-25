@@ -1,0 +1,110 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { config } from "@/lib/config";
+
+export async function POST(req: NextRequest) {
+  try {
+    const authResult = await auth();
+    const userId = authResult?.userId;
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please log in first." },
+        { status: 401 },
+      );
+    }
+
+    const { clipTitle, transcript, platform } = await req.json();
+
+    if (!clipTitle || !transcript || !platform) {
+      return NextResponse.json(
+        { error: "Missing required fields: clipTitle, transcript, platform" },
+        { status: 400 },
+      );
+    }
+
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      return NextResponse.json(
+        { error: "AI service is currently unavailable." },
+        { status: 500 },
+      );
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${geminiApiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `You are an expert social media manager and content creator.
+Your job is to write a highly engaging social media post/caption with relevant hashtags for a short vertical video clip.
+The post is going to be published on the "${platform}" platform.
+
+Clip Title: ${clipTitle}
+Clip Transcript:
+${transcript}
+
+Write a post content that contains:
+1. An eye-catching, engaging headline or hook at the very beginning.
+2. A short, compelling description of the value or takeaway from the video.
+3. 3-5 highly relevant, high-impact hashtags matching the platform style.
+4. If the platform is "YouTube Shorts", also generate a clean YouTube Title (max 70 characters) that stands out. Otherwise, for TikTok or Instagram Reels, you can output a recommended video title.
+
+Output the result strictly as a JSON object matching this schema:
+{
+  "title": "A compelling title/headline",
+  "caption": "The complete post caption with emojis, spacing, and hashtags"
+}
+
+Do not include any markdown format blocks like \`\`\`json in the response, output raw JSON.`,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                title: { type: "STRING" },
+                caption: { type: "STRING" },
+              },
+              required: ["title", "caption"],
+            },
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Gemini API failed: ${response.status} ${errText}`);
+    }
+
+    const data = await response.json();
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!responseText) {
+      throw new Error("Empty response received from Gemini API");
+    }
+
+    const parsed = JSON.parse(responseText);
+    return NextResponse.json({
+      success: true,
+      title: parsed.title,
+      caption: parsed.caption,
+    });
+  } catch (err: any) {
+    console.error("❌ GET AI generated post error:", err);
+    return NextResponse.json(
+      { error: err.message || "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

@@ -63,6 +63,26 @@ export const shortVideos = pgTable("short_videos", {
     .notNull(),
 });
 
+export const scheduledPosts = pgTable("scheduled_posts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  clipId: text("clip_id")
+    .references(() => shortVideos.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  caption: text("caption").notNull(),
+  platform: text("platform").notNull(), // "TikTok" | "Instagram Reels" | "YouTube Shorts"
+  scheduledTime: timestamp("scheduled_time", { withTimezone: true }).notNull(),
+  status: text("status").default("pending").notNull(), // "pending" | "posted" | "failed"
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -71,3 +91,6 @@ export type NewProject = typeof projects.$inferInsert;
 
 export type ShortVideo = typeof shortVideos.$inferSelect;
 export type NewShortVideo = typeof shortVideos.$inferInsert;
+
+export type ScheduledPost = typeof scheduledPosts.$inferSelect;
+export type NewScheduledPost = typeof scheduledPosts.$inferInsert;
