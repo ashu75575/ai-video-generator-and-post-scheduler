@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   imageUrl: text("image_url"),
+  zernioProfileId: text("zernio_profile_id"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -83,6 +84,23 @@ export const scheduledPosts = pgTable("scheduled_posts", {
     .notNull(),
 });
 
+export const socialAccounts = pgTable("social_accounts", {
+  id: text("id").primaryKey(), // Zernio Account ID (e.g. acc_...)
+  userId: text("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  platform: text("platform").notNull(), // "tiktok", "youtube", "instagram", "twitter", "linkedin", "bluesky", "facebook"
+  handle: text("handle"),
+  name: text("name"),
+  profileId: text("profile_id").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -94,3 +112,7 @@ export type NewShortVideo = typeof shortVideos.$inferInsert;
 
 export type ScheduledPost = typeof scheduledPosts.$inferSelect;
 export type NewScheduledPost = typeof scheduledPosts.$inferInsert;
+
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+export type NewSocialAccount = typeof socialAccounts.$inferInsert;
+

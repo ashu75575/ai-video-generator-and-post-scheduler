@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar as CalendarIcon,
@@ -56,32 +57,63 @@ interface ScheduledPost {
   clipId: string | null;
   title: string;
   caption: string;
-  platform: "TikTok" | "Instagram Reels" | "YouTube Shorts";
+  platform: string;
   scheduledTime: string;
   status: "pending" | "posted" | "failed";
 }
 
-const SOCIAL_ACCOUNTS = [
-  { id: "tiktok", name: "TikTok Account", handle: "@devin_creations", platform: "TikTok", active: true },
-  { id: "youtube", name: "YouTube Shorts", handle: "Devin Innovations", platform: "YouTube Shorts", active: true },
-  { id: "instagram", name: "Instagram Reels", handle: "@devin_tech", platform: "Instagram Reels", active: true },
-] as const;
+interface SocialAccount {
+  _id: string;
+  platform: string;
+  name?: string;
+  handle?: string;
+  profileId: string;
+  createdAt: string;
+}
+
+const getPlatformBadgeStyle = (platform: string) => {
+  const p = platform.toLowerCase();
+  if (p === "tiktok") return "bg-white/5 border-white/10 text-white";
+  if (p === "youtube" || p === "youtube shorts") return "bg-red-500/10 border-red-500/20 text-red-400";
+  if (p === "instagram" || p === "instagram reels") return "bg-pink-500/10 border-pink-500/20 text-pink-400";
+  if (p === "twitter" || p === "x") return "bg-slate-400/10 border-slate-400/20 text-slate-300";
+  if (p === "linkedin") return "bg-blue-600/10 border-blue-600/20 text-blue-400";
+  if (p === "bluesky") return "bg-cyan-500/10 border-cyan-500/20 text-cyan-400";
+  if (p === "facebook" || p === "facebook reels") return "bg-blue-500/10 border-blue-500/20 text-blue-400";
+  return "bg-white/5 border-white/10 text-white";
+};
+
+const formatPlatformName = (platform: string) => {
+  const p = platform.toLowerCase();
+  if (p === "tiktok") return "TikTok";
+  if (p === "youtube" || p === "youtube shorts") return "YouTube Shorts";
+  if (p === "instagram" || p === "instagram reels") return "Instagram Reels";
+  if (p === "twitter" || p === "x") return "Twitter / X";
+  if (p === "linkedin") return "LinkedIn";
+  if (p === "bluesky") return "Bluesky";
+  if (p === "facebook" || p === "facebook reels") return "Facebook Reels";
+  return platform.charAt(0).toUpperCase() + platform.slice(1);
+};
 
 export default function SchedulePage() {
+  const router = useRouter();
+
   // Calendar states
   const [currentDate, setCurrentDate] = useState(() => new Date());
   
   // Database states
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [exportedClips, setExportedClips] = useState<ExportedClip[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingClips, setIsLoadingClips] = useState(true);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
 
   // Dialog & scheduling form states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedClipId, setSelectedClipId] = useState<string>("");
-  const [selectedAccount, setSelectedAccount] = useState<string>("tiktok");
+  const [selectedAccount, setSelectedAccount] = useState<string>("");
   const [postTitle, setPostTitle] = useState("");
   const [postCaption, setPostCaption] = useState("");
   const [postTime, setPostTime] = useState("18:00");
@@ -124,9 +156,31 @@ export default function SchedulePage() {
     }
   };
 
+  const fetchConnectedAccounts = async () => {
+    setIsLoadingAccounts(true);
+    try {
+      const response = await fetch("/api/social/accounts");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          const accounts = data.accounts || [];
+          setConnectedAccounts(accounts);
+          if (accounts.length > 0) {
+            setSelectedAccount(accounts[0]._id);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch social accounts:", error);
+    } finally {
+      setIsLoadingAccounts(false);
+    }
+  };
+
   useEffect(() => {
     fetchScheduledPosts();
     fetchExportedClips();
+    fetchConnectedAccounts();
   }, []);
 
   // Calendar math
@@ -204,7 +258,7 @@ export default function SchedulePage() {
     setSelectedDate(date);
     // Reset form states
     setSelectedClipId("");
-    setSelectedAccount("tiktok");
+    setSelectedAccount(connectedAccounts.length > 0 ? connectedAccounts[0]._id : "");
     setPostTitle("");
     setPostCaption("");
     setPostTime("18:00");
@@ -221,7 +275,7 @@ export default function SchedulePage() {
     if (!clip) return;
 
     // Get selected account platform
-    const account = SOCIAL_ACCOUNTS.find((a) => a.id === selectedAccount);
+    const account = connectedAccounts.find((a) => a._id === selectedAccount);
     const platform = account ? account.platform : "TikTok";
 
     setIsGeneratingAI(true);
@@ -269,7 +323,7 @@ export default function SchedulePage() {
       const clip = exportedClips.find((c) => c.id === selectedClipId);
       if (!clip) return;
 
-      const account = SOCIAL_ACCOUNTS.find((a) => a.id === accId);
+      const account = connectedAccounts.find((a) => a._id === accId);
       const platform = account ? account.platform : "TikTok";
 
       setIsGeneratingAI(true);
@@ -312,7 +366,7 @@ export default function SchedulePage() {
     const scheduledDateTime = new Date(selectedDate);
     scheduledDateTime.setHours(hours || 18, minutes || 0, 0, 0);
 
-    const account = SOCIAL_ACCOUNTS.find((a) => a.id === selectedAccount);
+    const account = connectedAccounts.find((a) => a._id === selectedAccount);
     const platform = account ? account.platform : "TikTok";
 
     setIsSaving(true);
@@ -489,19 +543,12 @@ export default function SchedulePage() {
                       {/* Display Scheduled Posts inside Cell */}
                       <div className="flex-1 space-y-1 mt-1.5 mb-6 max-h-[56px] overflow-y-auto scrollbar-none">
                         {dayPosts.map((post) => {
-                          const isTikTok = post.platform === "TikTok";
-                          const isYT = post.platform === "YouTube Shorts";
-                          const isIG = post.platform === "Instagram Reels";
-
-                          let platformBadgeStyle = "";
-                          if (isTikTok) platformBadgeStyle = "bg-white/5 border-white/10 text-white";
-                          else if (isYT) platformBadgeStyle = "bg-red-500/10 border-red-500/20 text-red-400";
-                          else if (isIG) platformBadgeStyle = "bg-pink-500/10 border-pink-500/20 text-pink-400";
+                          const platformBadgeStyle = getPlatformBadgeStyle(post.platform);
 
                           return (
                             <div
                               key={post.id}
-                              title={`${post.platform}: ${post.title}`}
+                              title={`${formatPlatformName(post.platform)}: ${post.title}`}
                               className={`text-[9px] px-1.5 py-0.5 rounded-md border truncate font-medium flex items-center gap-1 ${platformBadgeStyle}`}
                             >
                               <span className="w-1 h-1 rounded-full bg-current" />
@@ -546,14 +593,7 @@ export default function SchedulePage() {
             ) : (
               <div className="space-y-4 relative border-l border-white/10 pl-4 ml-2 max-h-[380px] overflow-y-auto scrollbar-thin">
                 {upcomingPosts.map((post) => {
-                  const isTikTok = post.platform === "TikTok";
-                  const isYT = post.platform === "YouTube Shorts";
-                  const isIG = post.platform === "Instagram Reels";
-
-                  let platformBadgeStyle = "";
-                  if (isTikTok) platformBadgeStyle = "bg-white/10 border-white/25 text-white";
-                  else if (isYT) platformBadgeStyle = "bg-red-500/10 border-red-500/20 text-red-400";
-                  else if (isIG) platformBadgeStyle = "bg-pink-500/10 border-pink-500/20 text-pink-400";
+                  const platformBadgeStyle = getPlatformBadgeStyle(post.platform);
 
                   const formattedTime = new Date(post.scheduledTime).toLocaleString("en-US", {
                     month: "short",
@@ -565,13 +605,13 @@ export default function SchedulePage() {
                   return (
                     <div key={post.id} className="relative space-y-1">
                       {/* Timeline Bullet */}
-                      <span className="absolute left-[-21px] top-1 h-2.5 w-2.5 rounded-full bg-forge-accent ring-4 ring-forge-bg" />
+                      <span className="absolute left-[-21px] top-1 h-2.5 w-2.5 rounded-full bg-[#7c6afa] ring-4 ring-[#0a0814]" />
 
                       <div className="p-3.5 rounded-xl bg-white/1.5 border border-white/5 hover:border-white/10 hover:bg-white/2.5 transition-all duration-300 flex items-start justify-between gap-2 group">
                         <div className="min-w-0 space-y-1.5 flex-1">
                           <div className="flex items-center gap-1.5">
                             <Badge className={`font-mono text-[8px] uppercase tracking-wide px-1.5 ${platformBadgeStyle}`}>
-                              {post.platform}
+                              {formatPlatformName(post.platform)}
                             </Badge>
                             <span className="font-mono text-[9px] text-white/40 flex items-center gap-0.5">
                               <Clock size={8} />
@@ -605,25 +645,43 @@ export default function SchedulePage() {
               Connected Channels
             </h3>
             <div className="space-y-3">
-              {SOCIAL_ACCOUNTS.map((acc, i) => (
-                <div
-                  key={i}
-                  className="p-3.5 rounded-xl bg-white/1.5 border border-white/5 flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    <span className="block font-semibold text-xs text-white">
-                      {acc.name}
-                    </span>
-                    <span className="block font-mono text-[10px] text-white/35 truncate">
-                      {acc.handle}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
-                    <span className="font-mono text-[9px] font-bold text-emerald-400/80">Active</span>
-                  </div>
+              {isLoadingAccounts ? (
+                <div className="flex items-center justify-center py-4 text-white/30 gap-2">
+                  <Loader2 className="animate-spin text-[#7c6afa]" size={16} />
+                  <span className="text-xs">Loading channels...</span>
                 </div>
-              ))}
+              ) : connectedAccounts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-6 text-center text-white/20 border border-dashed border-white/5 rounded-xl bg-white/0.5">
+                  <Share2 size={20} className="text-white/10 mb-2" />
+                  <span className="text-xs font-semibold text-white/40">No channels connected</span>
+                  <Button
+                    onClick={() => router.push("/dashboard/social-connections")}
+                    className="mt-3 text-[10px] h-7 bg-[#7c6afa] hover:bg-[#7c6afa]/80 cursor-pointer text-white font-bold"
+                  >
+                    Connect a Channel
+                  </Button>
+                </div>
+              ) : (
+                connectedAccounts.map((acc, i) => (
+                  <div
+                    key={i}
+                    className="p-3.5 rounded-xl bg-white/1.5 border border-white/5 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 space-y-0.5">
+                      <span className="block font-semibold text-xs text-white uppercase">
+                        {acc.platform}
+                      </span>
+                      <span className="block font-mono text-[10px] text-white/35 truncate">
+                        {acc.handle || acc.name || "Connected"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
+                      <span className="font-mono text-[9px] font-bold text-emerald-400/80">Active</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </Card>
         </div>
@@ -694,17 +752,43 @@ export default function SchedulePage() {
                 Select Social Account
               </label>
               <div className="w-full">
-                <NativeSelect
-                  value={selectedAccount}
-                  onChange={handleAccountChange}
-                  className="w-full! [&_select]:w-full! [&_select]:bg-[#0d0d18] [&_select]:border-white/10 [&_select]:rounded-xl [&_select]:h-10 text-white"
-                >
-                  {SOCIAL_ACCOUNTS.map((acc) => (
-                    <NativeSelectOption key={acc.id} value={acc.id}>
-                      {acc.name} ({acc.handle})
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                {isLoadingAccounts ? (
+                  <div className="flex items-center gap-2 text-white/40 py-2.5 px-3 border border-white/5 bg-white/1.5 rounded-xl text-xs">
+                    <Loader2 className="animate-spin text-[#7c6afa]" size={13} />
+                    <span>Loading channels...</span>
+                  </div>
+                ) : connectedAccounts.length === 0 ? (
+                  <div className="p-3 border border-dashed border-white/5 bg-white/1.5 rounded-xl text-xs text-white/40 flex items-start gap-2.5">
+                    <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                    <div className="flex-1">
+                      <span className="block font-semibold text-white/70">No connected channels</span>
+                      <span className="block text-[10px] mt-0.5 leading-relaxed">
+                        You need to link a channel first under "Social Connections" to publish.
+                      </span>
+                      <Button
+                        onClick={() => {
+                          setIsDialogOpen(false);
+                          router.push("/dashboard/social-connections");
+                        }}
+                        className="mt-2 text-[9px] h-6 bg-[#7c6afa] hover:bg-[#7c6afa]/80 cursor-pointer text-white font-bold"
+                      >
+                        Go to Social Connections
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <NativeSelect
+                    value={selectedAccount}
+                    onChange={handleAccountChange}
+                    className="w-full! [&_select]:w-full! [&_select]:bg-[#0d0d18] [&_select]:border-white/10 [&_select]:rounded-xl [&_select]:h-10 text-white"
+                  >
+                    {connectedAccounts.map((acc) => (
+                      <NativeSelectOption key={acc._id} value={acc._id}>
+                        {formatPlatformName(acc.platform)} ({acc.handle || acc.name || "Connected"})
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                )}
               </div>
             </div>
 
