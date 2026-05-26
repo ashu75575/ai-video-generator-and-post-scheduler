@@ -29,7 +29,11 @@ export function Sidebar() {
     { href: "/dashboard", label: "Home", icon: Home },
     { href: "/dashboard/clips", label: "AI Clips", icon: Sparkles },
     { href: "/dashboard/my-videos", label: "My Videos", icon: Film },
-    { href: "/dashboard/social-connections", label: "Social Connections", icon: Share2 },
+    {
+      href: "/dashboard/social-connections",
+      label: "Social Connections",
+      icon: Share2,
+    },
     { href: "/dashboard/schedule", label: "Schedule Posts", icon: Calendar },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   ] as const;

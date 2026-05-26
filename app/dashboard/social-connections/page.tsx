@@ -40,14 +40,16 @@ const SUPPORTED_PLATFORMS: PlatformConfig[] = [
     name: "TikTok",
     iconText: "T",
     brandColor: "#FE2C55",
-    description: "Publish engaging 9:16 short vertical videos directly to your feed.",
+    description:
+      "Publish engaging 9:16 short vertical videos directly to your feed.",
   },
   {
     id: "youtube",
     name: "YouTube Shorts",
     iconText: "Y",
     brandColor: "#FF0000",
-    description: "Broadcast shorts directly to your channel library and audience.",
+    description:
+      "Broadcast shorts directly to your channel library and audience.",
   },
   {
     id: "instagram",
@@ -61,35 +63,39 @@ const SUPPORTED_PLATFORMS: PlatformConfig[] = [
     name: "Twitter / X",
     iconText: "X",
     brandColor: "#FFFFFF",
-    description: "Share thoughts, high-impact loops, and viral vertical video threads.",
+    description:
+      "Share thoughts, high-impact loops, and viral vertical video threads.",
   },
   {
     id: "linkedin",
     name: "LinkedIn",
     iconText: "L",
     brandColor: "#0A66C2",
-    description: "Build your professional brand with thought leadership video loops.",
+    description:
+      "Build your professional brand with thought leadership video loops.",
   },
   {
     id: "bluesky",
     name: "Bluesky",
     iconText: "B",
     brandColor: "#0085FF",
-    description: "Publish post updates and vertical video segments directly to the AT Protocol feed.",
+    description:
+      "Publish post updates and vertical video segments directly to the AT Protocol feed.",
   },
   {
     id: "facebook",
     name: "Facebook Reels",
     iconText: "F",
     brandColor: "#1877F2",
-    description: "Syndicate video loops and short reels to your page timelines.",
+    description:
+      "Syndicate video loops and short reels to your page timelines.",
   },
 ];
 
 const PlatformIcon = ({ id, color }: { id: string; color: string }) => {
   const size = 18;
   const p = id.toLowerCase();
-  
+
   if (p === "tiktok") {
     return (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -106,7 +112,16 @@ const PlatformIcon = ({ id, color }: { id: string; color: string }) => {
   }
   if (p === "instagram") {
     return (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
         <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -147,8 +162,12 @@ const PlatformIcon = ({ id, color }: { id: string; color: string }) => {
 export default function SocialConnectionsPage() {
   const [connections, setConnections] = useState<SocialAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
-  const [disconnectingAccount, setDisconnectingAccount] = useState<string | null>(null);
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(
+    null,
+  );
+  const [disconnectingAccount, setDisconnectingAccount] = useState<
+    string | null
+  >(null);
 
   const fetchConnections = async () => {
     setIsLoading(true);
@@ -178,23 +197,34 @@ export default function SocialConnectionsPage() {
 
   const handleConnect = async (platformId: string) => {
     setConnectingPlatform(platformId);
-    toast.loading(`Initiating ${platformId} connection flow...`, { id: "connect-flow" });
+    toast.loading(`Initiating ${platformId} connection flow...`, {
+      id: "connect-flow",
+    });
     try {
-      const response = await fetch(`/api/social/connect?platform=${platformId}`);
+      const response = await fetch(
+        `/api/social/connect?platform=${platformId}`,
+      );
       const data = await response.json();
 
       if (response.ok && data.success && data.authUrl) {
-        toast.success("Connection URL ready. Redirecting...", { id: "connect-flow" });
+        toast.success("Connection URL ready. Redirecting...", {
+          id: "connect-flow",
+        });
         // Redirect browser to Zernio's platform auth url
         window.location.href = data.authUrl;
       } else {
-        toast.error(data.error || `Could not initiate connection for ${platformId}`, {
-          id: "connect-flow",
-        });
+        toast.error(
+          data.error || `Could not initiate connection for ${platformId}`,
+          {
+            id: "connect-flow",
+          },
+        );
       }
     } catch (error) {
       console.error("Connection failed:", error);
-      toast.error("Network failure initiating connection", { id: "connect-flow" });
+      toast.error("Network failure initiating connection", {
+        id: "connect-flow",
+      });
     } finally {
       setConnectingPlatform(null);
     }
@@ -202,7 +232,9 @@ export default function SocialConnectionsPage() {
 
   const handleDisconnect = async (accountId: string, platformName: string) => {
     setDisconnectingAccount(accountId);
-    toast.loading(`Disconnecting ${platformName}...`, { id: "disconnect-flow" });
+    toast.loading(`Disconnecting ${platformName}...`, {
+      id: "disconnect-flow",
+    });
     try {
       const response = await fetch(`/api/social/accounts/${accountId}`, {
         method: "DELETE",
@@ -221,7 +253,9 @@ export default function SocialConnectionsPage() {
       }
     } catch (error) {
       console.error("Disconnect error:", error);
-      toast.error("Network error disconnecting channel", { id: "disconnect-flow" });
+      toast.error("Network error disconnecting channel", {
+        id: "disconnect-flow",
+      });
     } finally {
       setDisconnectingAccount(null);
     }
@@ -256,19 +290,23 @@ export default function SocialConnectionsPage() {
           Social Connections
         </h1>
         <p className="text-sm text-white/40 mt-1">
-          Link and authorize social media channels to publish content automatically using the scheduling pipeline.
+          Link and authorize social media channels to publish content
+          automatically using the scheduling pipeline.
         </p>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-32 text-white/30 space-y-3">
           <Loader2 className="animate-spin text-forge-accent" size={32} />
-          <span className="text-sm font-semibold">Loading connected accounts...</span>
+          <span className="text-sm font-semibold">
+            Loading connected accounts...
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SUPPORTED_PLATFORMS.map((platform) => {
-            const platformConns = activeConnectionsByPlatform[platform.id] || [];
+            const platformConns =
+              activeConnectionsByPlatform[platform.id] || [];
             const isConnected = platformConns.length > 0;
 
             return (
@@ -289,7 +327,10 @@ export default function SocialConnectionsPage() {
                         className="flex h-10 w-10 items-center justify-center rounded-xl border text-[15px] font-extrabold cursor-default select-none"
                       >
                         <span style={{ color: platform.brandColor }}>
-                          <PlatformIcon id={platform.id} color={platform.brandColor} />
+                          <PlatformIcon
+                            id={platform.id}
+                            color={platform.brandColor}
+                          />
                         </span>
                       </div>
                       <h3 className="font-bold text-base text-white">
@@ -327,7 +368,9 @@ export default function SocialConnectionsPage() {
                         >
                           <div className="min-w-0 flex-1">
                             <span className="block font-mono text-[10px] text-white truncate">
-                              {conn.handle || conn.name || "Authenticated Account"}
+                              {conn.handle ||
+                                conn.name ||
+                                "Authenticated Account"}
                             </span>
                             <span className="block font-mono text-[8px] text-white/30 truncate mt-0.5">
                               ID: {conn._id}
@@ -335,7 +378,9 @@ export default function SocialConnectionsPage() {
                           </div>
                           <Button
                             disabled={disconnectingAccount === conn._id}
-                            onClick={() => handleDisconnect(conn._id, platform.name)}
+                            onClick={() =>
+                              handleDisconnect(conn._id, platform.name)
+                            }
                             variant="ghost"
                             size="icon-sm"
                             className="h-7 w-7 rounded-md hover:bg-red-500/10 text-white/30 hover:text-red-400 cursor-pointer"
@@ -375,7 +420,10 @@ export default function SocialConnectionsPage() {
                     ) : (
                       <>
                         <span>Connect Channel</span>
-                        <ArrowUpRight size={12} className="opacity-60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <ArrowUpRight
+                          size={12}
+                          className="opacity-60 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+                        />
                       </>
                     )}
                   </Button>

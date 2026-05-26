@@ -69,8 +69,9 @@ export const scheduledPosts = pgTable("scheduled_posts", {
   userId: text("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  clipId: text("clip_id")
-    .references(() => shortVideos.id, { onDelete: "cascade" }),
+  clipId: text("clip_id").references(() => shortVideos.id, {
+    onDelete: "cascade",
+  }),
   title: text("title").notNull(),
   caption: text("caption").notNull(),
   platform: text("platform").notNull(), // "TikTok" | "Instagram Reels" | "YouTube Shorts"
@@ -115,4 +116,3 @@ export type NewScheduledPost = typeof scheduledPosts.$inferInsert;
 
 export type SocialAccount = typeof socialAccounts.$inferSelect;
 export type NewSocialAccount = typeof socialAccounts.$inferInsert;
-

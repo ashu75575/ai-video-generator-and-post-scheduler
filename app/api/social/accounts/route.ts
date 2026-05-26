@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
 
     // Synchronize with our local social_accounts table in the database
     const activeIds = userAccounts.map((acc: any) => acc._id || acc.id);
-    
+
     if (activeIds.length > 0) {
       // Upsert current connections
       for (const acc of userAccounts) {

@@ -218,7 +218,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
                 hour: "2-digit",
                 minute: "2-digit",
               }),
-              status: p.status === "pending" ? "Pending" : p.status === "posted" ? "Posted" : "Failed",
+              status:
+                p.status === "pending"
+                  ? "Pending"
+                  : p.status === "posted"
+                    ? "Posted"
+                    : "Failed",
             }));
             setScheduledPosts(mappedPosts);
           }
@@ -395,7 +400,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       // We will parse it to a real date, or default to 2 hours from now if invalid
       let scheduledTimeRaw = new Date();
       scheduledTimeRaw.setHours(scheduledTimeRaw.getHours() + 2);
-      
+
       const response = await fetch("/api/posts/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

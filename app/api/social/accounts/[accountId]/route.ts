@@ -34,7 +34,11 @@ export async function DELETE(
       .where(eq(users.id, userId))
       .limit(1);
 
-    if (!userResult || userResult.length === 0 || !userResult[0].zernioProfileId) {
+    if (
+      !userResult ||
+      userResult.length === 0 ||
+      !userResult[0].zernioProfileId
+    ) {
       return NextResponse.json(
         { error: "Zernio connection profile not found for user." },
         { status: 400 },
@@ -51,16 +55,21 @@ export async function DELETE(
 
     console.log(`Deleting social account ${accountId} from Zernio`);
 
-    const response = await fetch(`https://zernio.com/api/v1/accounts/${accountId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${zernioApiKey}`,
+    const response = await fetch(
+      `https://zernio.com/api/v1/accounts/${accountId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${zernioApiKey}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Zernio Disconnect API failed: ${response.status} ${errText}`);
+      throw new Error(
+        `Zernio Disconnect API failed: ${response.status} ${errText}`,
+      );
     }
 
     // Delete social account from our local database

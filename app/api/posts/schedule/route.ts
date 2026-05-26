@@ -65,7 +65,10 @@ export async function POST(req: NextRequest) {
 
     if (!title || !caption || !platform || !scheduledTime) {
       return NextResponse.json(
-        { error: "Missing required fields: title, caption, platform, scheduledTime" },
+        {
+          error:
+            "Missing required fields: title, caption, platform, scheduledTime",
+        },
         { status: 400 },
       );
     }

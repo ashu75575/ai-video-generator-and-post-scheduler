@@ -24,7 +24,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import {
   Dialog,
   DialogContent,
@@ -74,12 +77,17 @@ interface SocialAccount {
 const getPlatformBadgeStyle = (platform: string) => {
   const p = platform.toLowerCase();
   if (p === "tiktok") return "bg-white/5 border-white/10 text-white";
-  if (p === "youtube" || p === "youtube shorts") return "bg-red-500/10 border-red-500/20 text-red-400";
-  if (p === "instagram" || p === "instagram reels") return "bg-pink-500/10 border-pink-500/20 text-pink-400";
-  if (p === "twitter" || p === "x") return "bg-slate-400/10 border-slate-400/20 text-slate-300";
-  if (p === "linkedin") return "bg-blue-600/10 border-blue-600/20 text-blue-400";
+  if (p === "youtube" || p === "youtube shorts")
+    return "bg-red-500/10 border-red-500/20 text-red-400";
+  if (p === "instagram" || p === "instagram reels")
+    return "bg-pink-500/10 border-pink-500/20 text-pink-400";
+  if (p === "twitter" || p === "x")
+    return "bg-slate-400/10 border-slate-400/20 text-slate-300";
+  if (p === "linkedin")
+    return "bg-blue-600/10 border-blue-600/20 text-blue-400";
   if (p === "bluesky") return "bg-cyan-500/10 border-cyan-500/20 text-cyan-400";
-  if (p === "facebook" || p === "facebook reels") return "bg-blue-500/10 border-blue-500/20 text-blue-400";
+  if (p === "facebook" || p === "facebook reels")
+    return "bg-blue-500/10 border-blue-500/20 text-blue-400";
   return "bg-white/5 border-white/10 text-white";
 };
 
@@ -100,11 +108,13 @@ export default function SchedulePage() {
 
   // Calendar states
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  
+
   // Database states
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [exportedClips, setExportedClips] = useState<ExportedClip[]>([]);
-  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>(
+    [],
+  );
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [isLoadingClips, setIsLoadingClips] = useState(true);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
@@ -258,7 +268,9 @@ export default function SchedulePage() {
     setSelectedDate(date);
     // Reset form states
     setSelectedClipId("");
-    setSelectedAccount(connectedAccounts.length > 0 ? connectedAccounts[0]._id : "");
+    setSelectedAccount(
+      connectedAccounts.length > 0 ? connectedAccounts[0]._id : "",
+    );
     setPostTitle("");
     setPostCaption("");
     setPostTime("18:00");
@@ -314,10 +326,12 @@ export default function SchedulePage() {
   };
 
   // Handle account change in dialog (optional trigger to regenerate)
-  const handleAccountChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleAccountChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const accId = e.target.value;
     setSelectedAccount(accId);
-    
+
     // If a clip is already selected, let's regenerate for the new platform
     if (selectedClipId) {
       const clip = exportedClips.find((c) => c.id === selectedClipId);
@@ -426,7 +440,11 @@ export default function SchedulePage() {
   const upcomingPosts = useMemo(() => {
     return scheduledPosts
       .filter((post) => new Date(post.scheduledTime) >= new Date())
-      .sort((a, b) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.scheduledTime).getTime() -
+          new Date(b.scheduledTime).getTime(),
+      );
   }, [scheduledPosts]);
 
   return (
@@ -490,85 +508,93 @@ export default function SchedulePage() {
 
             {/* Day of Week Headers */}
             <div className="grid grid-cols-7 gap-2 mb-2 text-center">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName) => (
-                <span
-                  key={dayName}
-                  className="font-mono text-[10px] font-bold text-white/35 uppercase tracking-wider py-1"
-                >
-                  {dayName}
-                </span>
-              ))}
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                (dayName) => (
+                  <span
+                    key={dayName}
+                    className="font-mono text-[10px] font-bold text-white/35 uppercase tracking-wider py-1"
+                  >
+                    {dayName}
+                  </span>
+                ),
+              )}
             </div>
 
             {/* Calendar Days Grid */}
             {isLoadingPosts ? (
               <div className="flex flex-col items-center justify-center py-32 text-white/30 space-y-3">
                 <Loader2 className="animate-spin text-forge-accent" size={24} />
-                <span className="text-xs font-semibold">Loading calendar queue...</span>
+                <span className="text-xs font-semibold">
+                  Loading calendar queue...
+                </span>
               </div>
             ) : (
               <div className="grid grid-cols-7 gap-2">
-                {calendarDays.map(({ dayNumber, date, isCurrentMonth }, idx) => {
-                  const dateKey = date.toDateString();
-                  const dayPosts = postsByDateString[dateKey] || [];
-                  const isToday = new Date().toDateString() === dateKey;
+                {calendarDays.map(
+                  ({ dayNumber, date, isCurrentMonth }, idx) => {
+                    const dateKey = date.toDateString();
+                    const dayPosts = postsByDateString[dateKey] || [];
+                    const isToday = new Date().toDateString() === dateKey;
 
-                  return (
-                    <div
-                      key={idx}
-                      className={`min-h-[110px] rounded-[14px] border p-2 flex flex-col justify-between group relative transition-all duration-300 ${
-                        isCurrentMonth
-                          ? "bg-white/1.5 border-white/5 hover:border-white/12 hover:bg-white/3.5"
-                          : "bg-white/0.5 border-white/2 opacity-35"
-                      } ${isToday ? "ring-1 ring-forge-accent/50 border-forge-accent/40 bg-forge-accent/5 hover:bg-forge-accent/8" : ""}`}
-                    >
-                      {/* Cell Header */}
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={`font-mono text-xs font-bold ${
-                            isToday
-                              ? "text-forge-accent"
-                              : isCurrentMonth
-                                ? "text-white/60"
-                                : "text-white/20"
-                          }`}
-                        >
-                          {dayNumber}
-                        </span>
-                        {isToday && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-forge-accent shadow-[0_0_8px_#7c6afa]" />
-                        )}
-                      </div>
-
-                      {/* Display Scheduled Posts inside Cell */}
-                      <div className="flex-1 space-y-1 mt-1.5 mb-6 max-h-[56px] overflow-y-auto scrollbar-none">
-                        {dayPosts.map((post) => {
-                          const platformBadgeStyle = getPlatformBadgeStyle(post.platform);
-
-                          return (
-                            <div
-                              key={post.id}
-                              title={`${formatPlatformName(post.platform)}: ${post.title}`}
-                              className={`text-[9px] px-1.5 py-0.5 rounded-md border truncate font-medium flex items-center gap-1 ${platformBadgeStyle}`}
-                            >
-                              <span className="w-1 h-1 rounded-full bg-current" />
-                              <span className="truncate">{post.title}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Hover Action Button */}
-                      <Button
-                        onClick={() => handleAddPostClick(date)}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-1.5 right-1.5 h-6 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-2 text-[9px] font-bold text-white flex items-center gap-0.5 shadow-md shadow-forge-glow/20 cursor-pointer"
+                    return (
+                      <div
+                        key={idx}
+                        className={`min-h-[110px] rounded-[14px] border p-2 flex flex-col justify-between group relative transition-all duration-300 ${
+                          isCurrentMonth
+                            ? "bg-white/1.5 border-white/5 hover:border-white/12 hover:bg-white/3.5"
+                            : "bg-white/0.5 border-white/2 opacity-35"
+                        } ${isToday ? "ring-1 ring-forge-accent/50 border-forge-accent/40 bg-forge-accent/5 hover:bg-forge-accent/8" : ""}`}
                       >
-                        <Plus size={10} />
-                        <span>Add</span>
-                      </Button>
-                    </div>
-                  );
-                })}
+                        {/* Cell Header */}
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`font-mono text-xs font-bold ${
+                              isToday
+                                ? "text-forge-accent"
+                                : isCurrentMonth
+                                  ? "text-white/60"
+                                  : "text-white/20"
+                            }`}
+                          >
+                            {dayNumber}
+                          </span>
+                          {isToday && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-forge-accent shadow-[0_0_8px_#7c6afa]" />
+                          )}
+                        </div>
+
+                        {/* Display Scheduled Posts inside Cell */}
+                        <div className="flex-1 space-y-1 mt-1.5 mb-6 max-h-[56px] overflow-y-auto scrollbar-none">
+                          {dayPosts.map((post) => {
+                            const platformBadgeStyle = getPlatformBadgeStyle(
+                              post.platform,
+                            );
+
+                            return (
+                              <div
+                                key={post.id}
+                                title={`${formatPlatformName(post.platform)}: ${post.title}`}
+                                className={`text-[9px] px-1.5 py-0.5 rounded-md border truncate font-medium flex items-center gap-1 ${platformBadgeStyle}`}
+                              >
+                                <span className="w-1 h-1 rounded-full bg-current" />
+                                <span className="truncate">{post.title}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Hover Action Button */}
+                        <Button
+                          onClick={() => handleAddPostClick(date)}
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-1.5 right-1.5 h-6 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-2 text-[9px] font-bold text-white flex items-center gap-0.5 shadow-md shadow-forge-glow/20 cursor-pointer"
+                        >
+                          <Plus size={10} />
+                          <span>Add</span>
+                        </Button>
+                      </div>
+                    );
+                  },
+                )}
               </div>
             )}
           </Card>
@@ -585,7 +611,9 @@ export default function SchedulePage() {
             {upcomingPosts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center text-white/20 border border-dashed border-white/5 rounded-xl bg-white/0.5">
                 <Clock size={20} className="text-white/10 mb-2" />
-                <span className="text-xs font-semibold text-white/40">Queue is empty</span>
+                <span className="text-xs font-semibold text-white/40">
+                  Queue is empty
+                </span>
                 <span className="text-[10px] mt-1 max-w-[180px] leading-relaxed">
                   Hover over a calendar day to schedule a clip publication.
                 </span>
@@ -593,9 +621,13 @@ export default function SchedulePage() {
             ) : (
               <div className="space-y-4 relative border-l border-white/10 pl-4 ml-2 max-h-[380px] overflow-y-auto scrollbar-thin">
                 {upcomingPosts.map((post) => {
-                  const platformBadgeStyle = getPlatformBadgeStyle(post.platform);
+                  const platformBadgeStyle = getPlatformBadgeStyle(
+                    post.platform,
+                  );
 
-                  const formattedTime = new Date(post.scheduledTime).toLocaleString("en-US", {
+                  const formattedTime = new Date(
+                    post.scheduledTime,
+                  ).toLocaleString("en-US", {
                     month: "short",
                     day: "numeric",
                     hour: "2-digit",
@@ -610,7 +642,9 @@ export default function SchedulePage() {
                       <div className="p-3.5 rounded-xl bg-white/1.5 border border-white/5 hover:border-white/10 hover:bg-white/2.5 transition-all duration-300 flex items-start justify-between gap-2 group">
                         <div className="min-w-0 space-y-1.5 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <Badge className={`font-mono text-[8px] uppercase tracking-wide px-1.5 ${platformBadgeStyle}`}>
+                            <Badge
+                              className={`font-mono text-[8px] uppercase tracking-wide px-1.5 ${platformBadgeStyle}`}
+                            >
                               {formatPlatformName(post.platform)}
                             </Badge>
                             <span className="font-mono text-[9px] text-white/40 flex items-center gap-0.5">
@@ -622,7 +656,7 @@ export default function SchedulePage() {
                             {post.title}
                           </h4>
                         </div>
-                        
+
                         <Button
                           onClick={() => handleDeletePost(post.id)}
                           variant="ghost"
@@ -653,7 +687,9 @@ export default function SchedulePage() {
               ) : connectedAccounts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-6 text-center text-white/20 border border-dashed border-white/5 rounded-xl bg-white/0.5">
                   <Share2 size={20} className="text-white/10 mb-2" />
-                  <span className="text-xs font-semibold text-white/40">No channels connected</span>
+                  <span className="text-xs font-semibold text-white/40">
+                    No channels connected
+                  </span>
                   <Button
                     onClick={() => router.push("/dashboard/social-connections")}
                     className="mt-3 text-[10px] h-7 bg-[#7c6afa] hover:bg-[#7c6afa]/80 cursor-pointer text-white font-bold"
@@ -677,7 +713,9 @@ export default function SchedulePage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
-                      <span className="font-mono text-[9px] font-bold text-emerald-400/80">Active</span>
+                      <span className="font-mono text-[9px] font-bold text-emerald-400/80">
+                        Active
+                      </span>
                     </div>
                   </div>
                 ))
@@ -696,14 +734,20 @@ export default function SchedulePage() {
               Schedule Social Post
             </DialogTitle>
             <DialogDescription className="text-white/40 text-xs mt-1">
-              Select an exported video clip, connect to a channel, and schedule your publication.
+              Select an exported video clip, connect to a channel, and schedule
+              your publication.
             </DialogDescription>
           </DialogHeader>
 
           {selectedDate && (
             <div className="flex items-center gap-2 py-2 px-3 bg-white/3 border border-white/5 rounded-xl text-xs font-medium text-white/70">
               <CalendarIcon size={13} className="text-forge-accent" />
-              <span>Target date: <span className="text-white font-semibold">{selectedDate.toDateString()}</span></span>
+              <span>
+                Target date:{" "}
+                <span className="text-white font-semibold">
+                  {selectedDate.toDateString()}
+                </span>
+              </span>
             </div>
           )}
 
@@ -715,16 +759,25 @@ export default function SchedulePage() {
               </label>
               {isLoadingClips ? (
                 <div className="flex items-center gap-2 text-white/40 py-2.5 px-3 border border-white/5 bg-white/1.5 rounded-xl text-xs">
-                  <Loader2 className="animate-spin text-forge-accent" size={13} />
+                  <Loader2
+                    className="animate-spin text-forge-accent"
+                    size={13}
+                  />
                   <span>Loading exported clips...</span>
                 </div>
               ) : exportedClips.length === 0 ? (
                 <div className="p-3 border border-dashed border-white/5 bg-white/1.5 rounded-xl text-xs text-white/40 flex items-start gap-2.5">
-                  <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                  <AlertTriangle
+                    className="text-amber-500 shrink-0 mt-0.5"
+                    size={14}
+                  />
                   <div>
-                    <span className="block font-semibold text-white/70">No exported clips found</span>
+                    <span className="block font-semibold text-white/70">
+                      No exported clips found
+                    </span>
                     <span className="block text-[10px] mt-0.5 leading-relaxed">
-                      You must export or render clips first under "AI Clips" to make them available here.
+                      You must export or render clips first under "AI Clips" to
+                      make them available here.
                     </span>
                   </div>
                 </div>
@@ -735,7 +788,9 @@ export default function SchedulePage() {
                     onChange={handleClipChange}
                     className="w-full! [&_select]:w-full! [&_select]:bg-[#0d0d18] [&_select]:border-white/10 [&_select]:rounded-xl [&_select]:h-10 text-white"
                   >
-                    <NativeSelectOption value="">Choose a generated clip...</NativeSelectOption>
+                    <NativeSelectOption value="">
+                      Choose a generated clip...
+                    </NativeSelectOption>
                     {exportedClips.map((clip) => (
                       <NativeSelectOption key={clip.id} value={clip.id}>
                         {clip.title} ({clip.projectName})
@@ -754,16 +809,25 @@ export default function SchedulePage() {
               <div className="w-full">
                 {isLoadingAccounts ? (
                   <div className="flex items-center gap-2 text-white/40 py-2.5 px-3 border border-white/5 bg-white/1.5 rounded-xl text-xs">
-                    <Loader2 className="animate-spin text-[#7c6afa]" size={13} />
+                    <Loader2
+                      className="animate-spin text-[#7c6afa]"
+                      size={13}
+                    />
                     <span>Loading channels...</span>
                   </div>
                 ) : connectedAccounts.length === 0 ? (
                   <div className="p-3 border border-dashed border-white/5 bg-white/1.5 rounded-xl text-xs text-white/40 flex items-start gap-2.5">
-                    <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={14} />
+                    <AlertTriangle
+                      className="text-amber-500 shrink-0 mt-0.5"
+                      size={14}
+                    />
                     <div className="flex-1">
-                      <span className="block font-semibold text-white/70">No connected channels</span>
+                      <span className="block font-semibold text-white/70">
+                        No connected channels
+                      </span>
                       <span className="block text-[10px] mt-0.5 leading-relaxed">
-                        You need to link a channel first under "Social Connections" to publish.
+                        You need to link a channel first under "Social
+                        Connections" to publish.
                       </span>
                       <Button
                         onClick={() => {
@@ -784,7 +848,8 @@ export default function SchedulePage() {
                   >
                     {connectedAccounts.map((acc) => (
                       <NativeSelectOption key={acc._id} value={acc._id}>
-                        {formatPlatformName(acc.platform)} ({acc.handle || acc.name || "Connected"})
+                        {formatPlatformName(acc.platform)} (
+                        {acc.handle || acc.name || "Connected"})
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
@@ -801,37 +866,40 @@ export default function SchedulePage() {
                   AI Writing Hook & Hashtags...
                 </span>
                 <span className="text-[10px] text-white/30 max-w-xs">
-                  We are analyzing this clip's transcript using Gemini to construct optimal visual hooks and hashtags for your platform.
+                  We are analyzing this clip's transcript using Gemini to
+                  construct optimal visual hooks and hashtags for your platform.
                 </span>
               </div>
-            ) : selectedClipId && (
-              <div className="space-y-4 animate-scale-in">
-                {/* Title */}
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">
-                    Post Title / Headline
-                  </label>
-                  <Input
-                    value={postTitle}
-                    onChange={(e) => setPostTitle(e.target.value)}
-                    placeholder="Enter an attention-grabbing headline"
-                    className="bg-[#0d0d18] border-white/10 rounded-xl h-10 text-white"
-                  />
-                </div>
+            ) : (
+              selectedClipId && (
+                <div className="space-y-4 animate-scale-in">
+                  {/* Title */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">
+                      Post Title / Headline
+                    </label>
+                    <Input
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
+                      placeholder="Enter an attention-grabbing headline"
+                      className="bg-[#0d0d18] border-white/10 rounded-xl h-10 text-white"
+                    />
+                  </div>
 
-                {/* Caption Description */}
-                <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">
-                    AI Generated Caption & Hashtags
-                  </label>
-                  <Textarea
-                    value={postCaption}
-                    onChange={(e) => setPostCaption(e.target.value)}
-                    placeholder="What should the post body say?"
-                    className="bg-[#0d0d18] border-white/10 rounded-xl min-h-24 text-white text-xs leading-relaxed"
-                  />
+                  {/* Caption Description */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-white/40 font-mono">
+                      AI Generated Caption & Hashtags
+                    </label>
+                    <Textarea
+                      value={postCaption}
+                      onChange={(e) => setPostCaption(e.target.value)}
+                      placeholder="What should the post body say?"
+                      className="bg-[#0d0d18] border-white/10 rounded-xl min-h-24 text-white text-xs leading-relaxed"
+                    />
+                  </div>
                 </div>
-              </div>
+              )
             )}
 
             {/* Date Time selection */}

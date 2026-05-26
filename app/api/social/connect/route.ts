@@ -56,7 +56,8 @@ export async function GET(req: NextRequest) {
           { status: 404 },
         );
       }
-      const email = clerkUser.emailAddresses[0]?.emailAddress || `${userId}@clipforge.ai`;
+      const email =
+        clerkUser.emailAddresses[0]?.emailAddress || `${userId}@clipforge.ai`;
       await db.insert(users).values({
         id: userId,
         email,
@@ -94,7 +95,9 @@ export async function GET(req: NextRequest) {
 
       if (!createResponse.ok) {
         const errText = await createResponse.text();
-        throw new Error(`Zernio Profile creation failed: ${createResponse.status} ${errText}`);
+        throw new Error(
+          `Zernio Profile creation failed: ${createResponse.status} ${errText}`,
+        );
       }
 
       const createData = await createResponse.json();
@@ -112,7 +115,9 @@ export async function GET(req: NextRequest) {
         .set({ zernioProfileId: profileId, updatedAt: new Date() })
         .where(eq(users.id, userId));
 
-      console.log(`Zernio profile ${profileId} saved to database for user: ${userId}`);
+      console.log(
+        `Zernio profile ${profileId} saved to database for user: ${userId}`,
+      );
     }
 
     // 3. Connect to the platform and retrieve Auth URL
@@ -130,7 +135,9 @@ export async function GET(req: NextRequest) {
 
     if (!connectResponse.ok) {
       const errText = await connectResponse.text();
-      throw new Error(`Zernio Connection URL request failed: ${connectResponse.status} ${errText}`);
+      throw new Error(
+        `Zernio Connection URL request failed: ${connectResponse.status} ${errText}`,
+      );
     }
 
     const connectData = await connectResponse.json();

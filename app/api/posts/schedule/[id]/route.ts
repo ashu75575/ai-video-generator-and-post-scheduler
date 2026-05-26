@@ -29,7 +29,9 @@ export async function DELETE(
 
     const deleted = await db
       .delete(scheduledPosts)
-      .where(and(eq(scheduledPosts.id, postId), eq(scheduledPosts.userId, userId)))
+      .where(
+        and(eq(scheduledPosts.id, postId), eq(scheduledPosts.userId, userId)),
+      )
       .returning();
 
     if (!deleted || deleted.length === 0) {

@@ -713,22 +713,36 @@ export default function ProjectAnalysisPage() {
                           </Button>
                           <Button
                             onClick={() => handleDownloadClick(clip)}
-                            disabled={clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:")}
+                            disabled={
+                              clip.renderStatus === "rendering" ||
+                              clip.renderStatus?.startsWith("rendering:")
+                            }
                             className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {clip.renderStatus === "rendering" || clip.renderStatus?.startsWith("rendering:") ? (
+                            {clip.renderStatus === "rendering" ||
+                            clip.renderStatus?.startsWith("rendering:") ? (
                               <>
-                                <Loader2 size={11} className="animate-spin text-violet-400" />
+                                <Loader2
+                                  size={11}
+                                  className="animate-spin text-violet-400"
+                                />
                                 Rendering...
                               </>
-                            ) : clip.exportUrl && clip.renderStatus === "done" ? (
+                            ) : clip.exportUrl &&
+                              clip.renderStatus === "done" ? (
                               <>
-                                <Download size={11} className="text-emerald-400" />
+                                <Download
+                                  size={11}
+                                  className="text-emerald-400"
+                                />
                                 Download
                               </>
                             ) : (
                               <>
-                                <Clapperboard size={11} className="text-violet-400" />
+                                <Clapperboard
+                                  size={11}
+                                  className="text-violet-400"
+                                />
                                 Render &amp; Download
                               </>
                             )}
@@ -854,7 +868,11 @@ export default function ProjectAnalysisPage() {
             <DialogHeader>
               <DialogTitle className="font-heading text-lg font-bold text-white flex items-center gap-2.5">
                 <Clapperboard size={18} className="text-violet-400" />
-                {renderError ? "Render Failed" : renderPct === 100 ? "Render Complete!" : "Rendering Video..."}
+                {renderError
+                  ? "Render Failed"
+                  : renderPct === 100
+                    ? "Render Complete!"
+                    : "Rendering Video..."}
               </DialogTitle>
               <DialogDescription className="text-xs text-white/40">
                 {renderError
@@ -898,10 +916,19 @@ export default function ProjectAnalysisPage() {
                   <div className="space-y-2.5">
                     {[
                       { label: "Inngest job queued", done: renderPct > 0 },
-                      { label: "Lambda environment booted", done: renderPct > 10 },
-                      { label: "Frames rendered (AWS Lambda)", done: renderPct > 50 },
+                      {
+                        label: "Lambda environment booted",
+                        done: renderPct > 10,
+                      },
+                      {
+                        label: "Frames rendered (AWS Lambda)",
+                        done: renderPct > 50,
+                      },
                       { label: "Video encoded (H.264)", done: renderPct > 80 },
-                      { label: "Output uploaded to S3", done: renderPct >= 100 },
+                      {
+                        label: "Output uploaded to S3",
+                        done: renderPct >= 100,
+                      },
                     ].map((step, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <div
@@ -912,7 +939,10 @@ export default function ProjectAnalysisPage() {
                           }`}
                         >
                           {step.done ? (
-                            <Check size={11} className="text-emerald-400 stroke-[2.5]" />
+                            <Check
+                              size={11}
+                              className="text-emerald-400 stroke-[2.5]"
+                            />
                           ) : (
                             <div className="h-1.5 w-1.5 rounded-full bg-white/20" />
                           )}
@@ -931,7 +961,9 @@ export default function ProjectAnalysisPage() {
                   {renderPct === 100 && (
                     <div className="flex items-center gap-2.5 bg-emerald-500/8 border border-emerald-500/20 rounded-xl p-3.5 animate-in fade-in duration-300">
                       <Check size={16} className="text-emerald-400 shrink-0" />
-                      <p className="text-xs text-emerald-300">Video rendered successfully. Download starting...</p>
+                      <p className="text-xs text-emerald-300">
+                        Video rendered successfully. Download starting...
+                      </p>
                     </div>
                   )}
                 </>
