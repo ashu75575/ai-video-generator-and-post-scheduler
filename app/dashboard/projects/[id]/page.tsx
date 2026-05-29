@@ -747,12 +747,14 @@ export default function ProjectAnalysisPage() {
                               </>
                             )}
                           </Button>
-                          <Button
-                            onClick={() => handleScheduleClick(clip)}
-                            className="bg-linear-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
-                          >
-                            <Calendar size={11} /> Schedule
-                          </Button>
+                          {clip.renderStatus === "done" && clip.exportUrl && (
+                            <Button
+                              onClick={() => handleScheduleClick(clip)}
+                              className="bg-linear-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
+                            >
+                              <Calendar size={11} /> Schedule
+                            </Button>
+                          )}
                         </div>
                       </Card>
                     );

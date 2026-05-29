@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -11,6 +12,9 @@ import {
   Download,
   Calendar,
   Clock,
+  Loader2,
+  AlertCircle,
+  ArrowUpRight,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { Sidebar } from "./Sidebar";
@@ -30,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
   const {
     isUploadOpen,
     setIsUploadOpen,
@@ -59,6 +64,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     scheduleCaption,
     setScheduleCaption,
     handleScheduleSubmit,
+    socialAccounts,
+    isLoadingAccounts,
   } = useDashboard();
 
   useEffect(() => {
@@ -404,76 +411,108 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4">
-                {/* Platform Selector */}
-                <div className="space-y-1.5">
-                  <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                    Social Account Channel
-                  </span>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      {
-                        id: "TikTok",
-                        label: "TikTok",
-                        desc: "@devin_creations",
-                      },
-                      {
-                        id: "YouTube Shorts",
-                        label: "YouTube Shorts",
-                        desc: "Devin Innovations",
-                      },
-                      {
-                        id: "Instagram Reels",
-                        label: "Instagram Reels",
-                        desc: "@devin_tech",
-                      },
-                    ].map((plt) => (
-                      <button
-                        key={plt.id}
-                        onClick={() => setSchedulePlatform(plt.id as any)}
-                        className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-300 ${
-                          schedulePlatform === plt.id
-                            ? "border-forge-accent bg-forge-accent/5"
-                            : "border-white/5 bg-white/1 hover:bg-white/3"
-                        }`}
-                      >
-                        <span className="block font-semibold text-xs text-white">
-                          {plt.label}
-                        </span>
-                        <span className="block font-mono text-[8px] text-white/30 truncate mt-0.5">
-                          {plt.desc}
-                        </span>
-                      </button>
-                    ))}
+              {isLoadingAccounts ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                  <Loader2 className="animate-spin text-forge-accent" size={24} />
+                  <span className="text-xs text-white/40">Loading connected accounts...</span>
+                </div>
+              ) : socialAccounts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-6 border border-dashed border-white/10 rounded-2xl bg-white/1.5 space-y-4">
+                  <div className="p-3 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/15">
+                    <AlertCircle size={24} />
                   </div>
+                  <div className="space-y-1 text-center">
+                    <span className="block font-semibold text-sm text-white">
+                      No connected social channels
+                    </span>
+                    <span className="block text-xs text-white/40 max-w-xs mx-auto leading-relaxed">
+                      You need to authorize at least one social media channel to schedule automatic postings.
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setIsScheduleOpen(false);
+                      router.push("/dashboard/social-connections");
+                    }}
+                    className="rounded-xl bg-gradient-forge px-4 h-9 text-xs font-bold text-white shadow hover:shadow-forge-glow cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Connect Social Account</span>
+                    <ArrowUpRight size={13} />
+                  </Button>
                 </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {/* Platform Selector */}
+                    <div className="space-y-1.5">
+                      <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                        Social Account Channel
+                      </span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {socialAccounts.map((acc) => {
+                          const mapPlatformName = (p: string) => {
+                            const lower = p.toLowerCase();
+                            if (lower === "tiktok") return "TikTok";
+                            if (lower === "youtube") return "YouTube Shorts";
+                            if (lower === "instagram") return "Instagram Reels";
+                            if (lower === "twitter" || lower === "x") return "Twitter / X";
+                            if (lower === "linkedin") return "LinkedIn";
+                            if (lower === "bluesky") return "Bluesky";
+                            if (lower === "facebook") return "Facebook Reels";
+                            return p;
+                          };
+                          const displayPlatform = mapPlatformName(acc.platform);
+                          const isSelected = schedulePlatform === displayPlatform;
+                          return (
+                            <button
+                              key={acc._id}
+                              onClick={() => setSchedulePlatform(displayPlatform)}
+                              className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-300 ${
+                                isSelected
+                                  ? "border-forge-accent bg-forge-accent/5"
+                                  : "border-white/5 bg-white/1 hover:bg-white/3"
+                              }`}
+                            >
+                              <span className="block font-semibold text-xs text-white truncate">
+                                {displayPlatform}
+                              </span>
+                              <span className="block font-mono text-[8px] text-white/30 truncate mt-0.5">
+                                {acc.handle || acc.name || "Connected"}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-                {/* Scheduled Time Field */}
-                <div className="space-y-1.5">
-                  <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                    Delivery Time
-                  </span>
-                  <Input
-                    type="text"
-                    value={scheduleTime}
-                    onChange={(e) => setScheduleTime(e.target.value)}
-                    className="h-9 w-full rounded-xl border border-white/8 bg-white/2 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4"
-                  />
-                </div>
+                    {/* Scheduled Time Field */}
+                    <div className="space-y-1.5">
+                      <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                        Delivery Time
+                      </span>
+                      <Input
+                        type="text"
+                        value={scheduleTime}
+                        onChange={(e) => setScheduleTime(e.target.value)}
+                        className="h-9 w-full rounded-xl border border-white/8 bg-white/2 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4"
+                      />
+                    </div>
 
-                {/* Customize Caption */}
-                <div className="space-y-1.5">
-                  <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
-                    Customize Caption & Tags
-                  </span>
-                  <textarea
-                    rows={4}
-                    value={scheduleCaption}
-                    onChange={(e) => setScheduleCaption(e.target.value)}
-                    className="w-full rounded-xl border border-white/8 bg-white/2 p-3 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4 leading-relaxed resize-none"
-                  />
-                </div>
-              </div>
+                    {/* Customize Caption */}
+                    <div className="space-y-1.5">
+                      <span className="block font-mono text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                        Customize Caption & Tags
+                      </span>
+                      <textarea
+                        rows={4}
+                        value={scheduleCaption}
+                        onChange={(e) => setScheduleCaption(e.target.value)}
+                        className="w-full rounded-xl border border-white/8 bg-white/2 p-3 text-xs text-white focus:border-forge-accent/50 focus:ring-0 focus:bg-white/4 leading-relaxed resize-none"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
 
               <DialogFooter className="mt-4">
                 <Button
@@ -483,12 +522,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleScheduleSubmit}
-                  className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow cursor-pointer hover:shadow-forge-glow"
-                >
-                  Schedule Post
-                </Button>
+                {!isLoadingAccounts && socialAccounts.length > 0 && (
+                  <Button
+                    onClick={handleScheduleSubmit}
+                    className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow cursor-pointer hover:shadow-forge-glow"
+                  >
+                    Schedule Post
+                  </Button>
+                )}
               </DialogFooter>
             </div>
           )}

@@ -60,6 +60,9 @@ interface DashboardContextType {
   setScheduledPosts: React.Dispatch<React.SetStateAction<ScheduledPost[]>>;
   rawVideos: RawVideo[];
   setRawVideos: React.Dispatch<React.SetStateAction<RawVideo[]>>;
+  socialAccounts: any[];
+  setSocialAccounts: React.Dispatch<React.SetStateAction<any[]>>;
+  isLoadingAccounts: boolean;
 
   // Dialog & Interactive Upload states
   isUploadOpen: boolean;
@@ -88,10 +91,8 @@ interface DashboardContextType {
   setIsScheduleOpen: (open: boolean) => void;
   clipToSchedule: Clip | null;
   setClipToSchedule: (clip: Clip | null) => void;
-  schedulePlatform: "TikTok" | "Instagram Reels" | "YouTube Shorts";
-  setSchedulePlatform: (
-    platform: "TikTok" | "Instagram Reels" | "YouTube Shorts",
-  ) => void;
+  schedulePlatform: string;
+  setSchedulePlatform: (platform: string) => void;
   scheduleTime: string;
   setScheduleTime: (time: string) => void;
   scheduleCaption: string;
@@ -115,61 +116,12 @@ const DashboardContext = createContext<DashboardContextType | undefined>(
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
 
-  // Initial mock data to give the dashboard initial context
-  const [clips, setClips] = useState<Clip[]>([
-    {
-      id: "clip-1",
-      title: "The Ultimate Guide to Next.js 15 & Base UI",
-      sourceVideo: "nextjs15_guide.mp4",
-      duration: "0:58",
-      viralityScore: 92,
-      views: "124K",
-      likes: "12.8K",
-      platform: "Multi-Platform",
-      thumbnail:
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
-      status: "Ready",
-      transcript:
-        "Base UI handles hydration seamlessly and avoids nesting errors by using clean render composition. This is a game changer for building modern Next.js applications.",
-      description:
-        "Next.js 15 + Base UI is a game-changer! 🚀 Here is why you should switch. #nextjs #webdev #baseui",
-      tags: ["#nextjs", "#webdev", "#baseui"],
-      metrics: {
-        hookStrength: 94,
-        retentionPotential: 89,
-        pacingScore: 92,
-        visualEngagement: 93,
-      },
-    },
-    {
-      id: "clip-2",
-      title: "Why Most Startups Fail in First 6 Months",
-      sourceVideo: "startup_lessons.mp4",
-      duration: "0:42",
-      viralityScore: 89,
-      views: "89K",
-      likes: "7.4K",
-      platform: "TikTok",
-      thumbnail:
-        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-      status: "Scheduled",
-      transcript:
-        "Product-market fit is not something you think of. It is something you find by talking to customers. Most startups fail because they build in a vacuum.",
-      description:
-        "Why startups fail in 6 months 💡 A harsh truth all founders must hear. #startups #business #tips",
-      tags: ["#startups", "#business", "#tips"],
-      metrics: {
-        hookStrength: 91,
-        retentionPotential: 88,
-        pacingScore: 90,
-        visualEngagement: 85,
-      },
-    },
-  ]);
-
+  // Real database-backed user states
+  const [clips, setClips] = useState<Clip[]>([]);
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
-
   const [rawVideos, setRawVideos] = useState<RawVideo[]>([]);
+  const [socialAccounts, setSocialAccounts] = useState<any[]>([]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -233,9 +185,63 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const fetchClips = async () => {
+      try {
+        const response = await fetch("/api/projects/clips");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.clips) {
+            const mappedClips: Clip[] = data.clips.map((clip: any) => ({
+              id: clip.id,
+              title: clip.title,
+              sourceVideo: clip.projectName,
+              duration: `${Math.round(clip.endTime - clip.startTime)}s`,
+              viralityScore: clip.seoRanking,
+              views: "Ready",
+              likes: "Ready",
+              platform: "Multi-Platform",
+              thumbnail: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+              status: "Ready",
+              transcript: clip.whyBest,
+              description: `${clip.title} - ${clip.whyBest}`,
+              tags: ["#viral", "#ai", "#short"],
+              metrics: {
+                hookStrength: clip.seoRanking,
+                retentionPotential: Math.min(100, clip.seoRanking + 2),
+                pacingScore: Math.min(100, clip.seoRanking - 3),
+                visualEngagement: Math.min(100, clip.seoRanking + 1),
+              },
+            }));
+            setClips(mappedClips);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching clips in useDashboard:", error);
+      }
+    };
+
+    const fetchSocialAccounts = async () => {
+      setIsLoadingAccounts(true);
+      try {
+        const response = await fetch("/api/social/accounts");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setSocialAccounts(data.accounts || []);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching social accounts in useDashboard:", error);
+      } finally {
+        setIsLoadingAccounts(false);
+      }
+    };
+
     if (user) {
       fetchProjects();
       fetchScheduledPosts();
+      fetchClips();
+      fetchSocialAccounts();
     }
   }, [user]);
 
@@ -252,9 +258,25 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [clipToSchedule, setClipToSchedule] = useState<Clip | null>(null);
-  const [schedulePlatform, setSchedulePlatform] = useState<
-    "TikTok" | "Instagram Reels" | "YouTube Shorts"
-  >("TikTok");
+  const [schedulePlatform, setSchedulePlatform] = useState<string>("TikTok");
+
+  useEffect(() => {
+    if (socialAccounts.length > 0) {
+      const mapPlatformName = (p: string) => {
+        const lower = p.toLowerCase();
+        if (lower === "tiktok") return "TikTok";
+        if (lower === "youtube") return "YouTube Shorts";
+        if (lower === "instagram") return "Instagram Reels";
+        if (lower === "twitter" || lower === "x") return "Twitter / X";
+        if (lower === "linkedin") return "LinkedIn";
+        if (lower === "bluesky") return "Bluesky";
+        if (lower === "facebook") return "Facebook Reels";
+        return p;
+      };
+      const firstPlatform = mapPlatformName(socialAccounts[0].platform);
+      setSchedulePlatform(firstPlatform);
+    }
+  }, [socialAccounts]);
   const [scheduleTime, setScheduleTime] = useState("Today, 8:00 PM");
   const [scheduleCaption, setScheduleCaption] = useState("");
 
@@ -480,6 +502,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         setScheduledPosts,
         rawVideos,
         setRawVideos,
+        socialAccounts,
+        setSocialAccounts,
+        isLoadingAccounts,
         isUploadOpen,
         setIsUploadOpen,
         dragActive,
