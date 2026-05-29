@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 
 export interface Clip {
   id: string;
@@ -116,6 +118,16 @@ interface DashboardContextType {
   triggerScheduleDialog: (clip: Clip) => void;
   triggerInspectDialog: (clip: Clip) => void;
   handleDownload: (clipTitle: string) => void;
+
+  // Real Upload states & functions
+  uploadStatus: "idle" | "uploading" | "success";
+  setUploadStatus: (status: "idle" | "uploading" | "success") => void;
+  uploadedProjectId: string | null;
+  setUploadedProjectId: (id: string | null) => void;
+  isAnalyzing: boolean;
+  setIsAnalyzing: (analyzing: boolean) => void;
+  clearSelection: () => void;
+  handleStartAnalysis: () => Promise<void>;
 }
 
 function mapPlatformName(p: string): string {
@@ -136,6 +148,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
+  const router = useRouter();
 
   // Real database-backed user states
   const [clips, setClips] = useState<Clip[]>([]);
@@ -274,6 +287,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [forgePhase, setForgePhase] = useState("");
   const [forgeLogs, setForgeLogs] = useState<string[]>([]);
 
+  // Real Upload states
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success">("idle");
+  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
@@ -309,113 +327,185 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const startAIForger = () => {
+  const startAIForger = async () => {
     if (!selectedFile) return;
     setIsForging(true);
+    setUploadStatus("uploading");
     setForgeProgress(0);
-    setForgeLogs([]);
+    setForgePhase("Uploading video to server...");
+    setForgeLogs(["🚀 Initializing upload pipeline..."]);
 
-    const phases = [
-      {
-        pct: 0,
-        text: "Initializing forge engine & transcribing long-form speech spectrum...",
-        log: "🎙️ [01/05] Speech-to-Text audio decoding: extracting semantic keywords.",
-      },
-      {
-        pct: 25,
-        text: "Analyzing emotional waveforms & face tracking indices...",
-        log: "🎥 [02/05] Vision tracking active: tagging camera zooms, speaker transitions, and facial dynamics.",
-      },
-      {
-        pct: 50,
-        text: "Isolating high-retention clips using virality match engine...",
-        log: "⚡ [03/05] Hook extraction complete: found 1 moment with high virality markers (95% match).",
-      },
-      {
-        pct: 75,
-        text: "Reframing to 9:16 vertical viewport & rendering dynamic subtitles...",
-        log: "🎨 [04/05] Applying premium glassmorphic subtitle overlays and visual enhancers.",
-      },
-      {
-        pct: 95,
-        text: "Indexing virality scores & compiling metadata tags...",
-        log: "🤖 [05/05] Meta indexing: title generation, tags suggestion, and description auto-formatting complete.",
-      },
-    ];
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("name", selectedFile.name);
 
-    let currentPhaseIndex = 0;
+      const response = await fetch("/api/projects/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    const interval = setInterval(() => {
-      setForgeProgress((prev) => {
-        const next = prev + 1;
+      if (!response.ok) {
+        throw new Error("Failed to upload video to server");
+      }
 
-        const phase = phases[currentPhaseIndex];
-        if (phase && next >= phase.pct) {
-          setForgePhase(phase.text);
-          setForgeLogs((logs) => [...logs, phase.log]);
-          currentPhaseIndex++;
-        }
+      const data = await response.json();
+      if (!data.success || !data.projectId) {
+        throw new Error(data.error || "Failed to start upload processing");
+      }
 
-        if (next >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            const newClip: Clip = {
-              id: `clip-${Date.now()}`,
-              title: "How to Bootstrap a $10M Startup Solo",
-              sourceVideo: selectedFile.name,
-              duration: "0:45",
-              viralityScore: 95,
-              views: "0",
-              likes: "0",
-              platform: "Multi-Platform",
-              thumbnail:
-                "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
-              status: "Ready",
-              transcript:
-                "Bootstrapping is not a constraint; it is a massive competitive advantage. It forces you to focus strictly on revenue, customer feedback, and real product value instead of catering to pitch deck slides. Every dollar you spend is real, which makes every decision sharp.",
-              description:
-                "Why bootstrapping makes your startup indestructible. 💸🔥 #bootstrapping #startups #founders",
-              tags: ["#bootstrapping", "#startups", "#founders", "#business"],
-              metrics: {
-                hookStrength: 97,
-                retentionPotential: 94,
-                pacingScore: 96,
-                visualEngagement: 92,
-              },
-            };
+      const projectId = data.projectId;
+      setUploadedProjectId(projectId);
+      setForgePhase("Video saved. Background processing started...");
+      setForgeProgress(15);
+      setForgeLogs((prev) => [
+        ...prev,
+        `📂 Saved file on server. Project ID: ${projectId}`,
+        `⚙️ Starting background pipeline...`,
+      ]);
 
+      // Start polling status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/projects/${projectId}/status`);
+          if (!statusRes.ok) {
+            throw new Error("Failed to fetch processing status");
+          }
+
+          const statusData = await statusRes.json();
+          const { status, progress, videoUrl } = statusData;
+
+          // Update progress bar
+          setForgeProgress(progress);
+
+          if (status === "uploading") {
+            let phase = "Uploading video segments...";
+            if (progress < 40) {
+              phase = "Connecting & starting background pipeline...";
+            } else if (progress < 85) {
+              phase = "Uploading segments to AWS S3 bucket...";
+            } else {
+              phase = "Acquiring viewer signed URL...";
+            }
+            setForgePhase(phase);
+
+            setForgeLogs((prev) => {
+              const lastLog = prev[prev.length - 1];
+              const newLog = `⚡ Syncing: ${progress}% - ${phase}`;
+              if (lastLog !== newLog) {
+                return [...prev, newLog];
+              }
+              return prev;
+            });
+          } else if (status === "completed") {
+            clearInterval(pollInterval);
+            (window as any)._activeUploadPoll = null;
+            setUploadStatus("success");
+            setForgePhase("Upload complete!");
+            setForgeLogs((prev) => [
+              ...prev,
+              `✅ Video successfully uploaded and registered in database.`,
+            ]);
+
+            // Add the new video to rawVideos list with status Analyzing
             const newRawVideo: RawVideo = {
-              id: `raw-${Date.now()}`,
-              title: selectedFile.name || "Imported Video Source",
+              id: projectId,
+              title: selectedFile.name,
               date: new Date().toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
               }),
-              size: selectedFile.size
-                ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`
-                : "120 MB",
-              duration: "0:45",
-              clips: 1,
-              status: "Analyzed",
-              img: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+              size: `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`,
+              duration: "0:00",
+              clips: 0,
+              status: "Analyzing",
+              img: videoUrl || "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
             };
-
-            setClips((prevClips) => [newClip, ...prevClips]);
             setRawVideos((prev) => [newRawVideo, ...prev]);
-            setIsForging(false);
-            setIsUploadOpen(false);
-            setSelectedFile(null);
-            toast("AI Clips Forged!", {
-              description:
-                "Successfully extracted 1 viral short. Ready in AI Clips.",
+
+            toast.success("Upload Successful!", {
+              description: `"${selectedFile.name}" has been uploaded to AWS S3.`,
             });
-          }, 800);
-          return 100;
+          } else if (status === "failed") {
+            clearInterval(pollInterval);
+            (window as any)._activeUploadPoll = null;
+            setIsForging(false);
+            setUploadStatus("idle");
+            toast.error("Processing Failed", {
+              description: "The background upload job failed on the server.",
+            });
+          }
+        } catch (pollErr) {
+          console.error("Polling error:", pollErr);
         }
-        return next;
+      }, 1500);
+
+      // Save interval reference to clear it if component unmounts or user cancels
+      (window as any)._activeUploadPoll = pollInterval;
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      setIsForging(false);
+      setUploadStatus("idle");
+      toast.error("Upload Failed", {
+        description:
+          error.message || "An unexpected error occurred during upload.",
       });
-    }, 80);
+    }
+  };
+
+  const handleStartAnalysis = async () => {
+    if (!uploadedProjectId) return;
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch(
+        `/api/projects/${uploadedProjectId}/analyze`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to start project analysis");
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to start analysis");
+      }
+
+      toast.success("Analysis Started!", {
+        description: "Your video transcription and analysis have begun.",
+      });
+
+      // Clear selection and close dialog
+      setIsUploadOpen(false);
+      clearSelection();
+
+      // Navigate to the project analysis loading pipeline page
+      router.push(`/dashboard/projects/${uploadedProjectId}`);
+    } catch (err: any) {
+      console.error("Start analysis error:", err);
+      toast.error("Failed to Start Analysis", {
+        description: err.message || "An unexpected error occurred.",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const clearSelection = () => {
+    if ((window as any)._activeUploadPoll) {
+      clearInterval((window as any)._activeUploadPoll);
+      (window as any)._activeUploadPoll = null;
+    }
+    setSelectedFile(null);
+    setUploadStatus("idle");
+    setIsForging(false);
+    setForgeProgress(0);
+    setForgePhase("");
+    setForgeLogs([]);
+    setUploadedProjectId(null);
   };
 
   const handleScheduleSubmit = async () => {
@@ -549,6 +639,14 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         triggerScheduleDialog,
         triggerInspectDialog,
         handleDownload,
+        uploadStatus,
+        setUploadStatus,
+        uploadedProjectId,
+        setUploadedProjectId,
+        isAnalyzing,
+        setIsAnalyzing,
+        clearSelection,
+        handleStartAnalysis,
       }}
     >
       {children}

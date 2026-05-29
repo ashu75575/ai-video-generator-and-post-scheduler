@@ -32,264 +32,46 @@ import { useRouter } from "next/navigation";
 export default function DashboardHome() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
-  const { clips, setClips, rawVideos, setRawVideos } = useDashboard();
 
-  // Local Video Upload UI States
-  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const {
+    clips,
+    setClips,
+    rawVideos,
+    setRawVideos,
+    selectedFile,
+    setSelectedFile,
+    isForging,
+    forgeProgress,
+    uploadStatus,
+    forgePhase,
+    uploadedProjectId,
+    isAnalyzing,
+    startAIForger,
+    handleStartAnalysis,
+    clearSelection,
+    dragActive,
+    handleDrag,
+    handleDrop,
+    handleFileSelect,
+  } = useDashboard();
+
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "uploading" | "success"
-  >("idle");
-  const [uploadStatusText, setUploadStatusText] = useState("");
-  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(
-    null,
-  );
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Clean up object URL when file changes
   useEffect(() => {
-    return () => {
-      if (videoPreviewUrl) {
-        URL.revokeObjectURL(videoPreviewUrl);
-      }
-    };
-  }, [videoPreviewUrl]);
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith("video/")) {
-        setSelectedVideoFile(file);
-        setVideoPreviewUrl(URL.createObjectURL(file));
-        toast.success("Video selected!", {
-          description: `"${file.name}" is loaded and ready for preview.`,
-        });
-      } else {
-        toast.error("Invalid file type", {
-          description: "Please drop a valid video file (MP4, MOV, or WEBM).",
-        });
+    if (selectedFile) {
+      if (selectedFile instanceof File) {
+        const url = URL.createObjectURL(selectedFile);
+        setVideoPreviewUrl(url);
+        return () => {
+          URL.revokeObjectURL(url);
+          setVideoPreviewUrl(null);
+        };
       }
     }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedVideoFile(file);
-      setVideoPreviewUrl(URL.createObjectURL(file));
-      toast.success("Video selected!", {
-        description: `"${file.name}" is loaded and ready for preview.`,
-      });
-    }
-  };
-
-  const clearSelection = () => {
-    if ((window as any)._activeUploadPoll) {
-      clearInterval((window as any)._activeUploadPoll);
-      (window as any)._activeUploadPoll = null;
-    }
-    setSelectedVideoFile(null);
-    if (videoPreviewUrl) {
-      URL.revokeObjectURL(videoPreviewUrl);
-      setVideoPreviewUrl(null);
-    }
-    setUploadStatus("idle");
-    setUploadProgress(0);
-    setUploadStatusText("");
-    setUploadedProjectId(null);
-  };
-
-  const startUpload = async () => {
-    if (!selectedVideoFile) return;
-    setIsUploadingVideo(true);
-    setUploadStatus("uploading");
-    setUploadProgress(0);
-    setUploadStatusText("Uploading video to server...");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedVideoFile);
-      formData.append("name", selectedVideoFile.name);
-
-      const response = await fetch("/api/projects/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload video to server");
-      }
-
-      const data = await response.json();
-      if (!data.success || !data.projectId) {
-        throw new Error(data.error || "Failed to start upload processing");
-      }
-
-      const projectId = data.projectId;
-      setUploadedProjectId(projectId);
-      setUploadStatusText("Video saved. Background processing started...");
-      setUploadProgress(15);
-
-      // Start polling status
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusRes = await fetch(`/api/projects/${projectId}/status`);
-          if (!statusRes.ok) {
-            throw new Error("Failed to fetch processing status");
-          }
-
-          const statusData = await statusRes.json();
-          const { status, progress, videoUrl } = statusData;
-
-          // Update progress bar
-          setUploadProgress(progress);
-
-          if (status === "uploading") {
-            if (progress < 40) {
-              setUploadStatusText(
-                "Connecting & starting background pipeline...",
-              );
-            } else if (progress < 85) {
-              setUploadStatusText("Uploading segments to AWS S3 bucket...");
-            } else {
-              setUploadStatusText("Acquiring viewer signed URL...");
-            }
-          } else if (status === "completed") {
-            clearInterval(pollInterval);
-            (window as any)._activeUploadPoll = null;
-            setUploadStatus("success");
-            setUploadStatusText("Upload complete!");
-
-            // Add the new video and a generated clip to local context list
-            setTimeout(() => {
-              const newVideoId = `raw-${Date.now()}`;
-              const newRawVideo = {
-                id: newVideoId,
-                title: selectedVideoFile.name,
-                date: new Date().toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }),
-                size: `${(selectedVideoFile.size / (1024 * 1024)).toFixed(1)} MB`,
-                duration: "1:15",
-                clips: 1,
-                status: "Analyzed" as const,
-                img:
-                  videoUrl ||
-                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
-              };
-
-              const newClip = {
-                id: `clip-${Date.now()}`,
-                title: `Isolated Highlight from ${selectedVideoFile.name.split(".")[0]}`,
-                sourceVideo: selectedVideoFile.name,
-                duration: "0:35",
-                viralityScore: 93,
-                views: "0",
-                likes: "0",
-                platform: "Multi-Platform" as const,
-                thumbnail:
-                  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80",
-                status: "Ready" as const,
-                transcript:
-                  "This is a transcript generated from your upload. It represents a highly retention-optimized segment isolated by ClipForge AI.",
-                description: `Checkout this epic clip isolated by ClipForge AI! 🔥 #clips #ai`,
-                tags: ["#clips", "#ai"],
-                metrics: {
-                  hookStrength: 95,
-                  retentionPotential: 90,
-                  pacingScore: 92,
-                  visualEngagement: 91,
-                },
-              };
-
-              setRawVideos((prev) => [newRawVideo, ...prev]);
-              setClips((prev) => [newClip, ...prev]);
-
-              toast.success("Upload Successful!", {
-                description: `"${selectedVideoFile.name}" has been uploaded to AWS S3 and added to your library.`,
-              });
-            }, 1000);
-          } else if (status === "failed") {
-            clearInterval(pollInterval);
-            (window as any)._activeUploadPoll = null;
-            setIsUploadingVideo(false);
-            setUploadStatus("idle");
-            toast.error("Processing Failed", {
-              description: "The background upload job failed on the server.",
-            });
-          }
-        } catch (pollErr) {
-          console.error("Polling error:", pollErr);
-        }
-      }, 1500);
-
-      // Save interval reference to clear it if component unmounts or user cancels
-      (window as any)._activeUploadPoll = pollInterval;
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      setIsUploadingVideo(false);
-      setUploadStatus("idle");
-      toast.error("Upload Failed", {
-        description:
-          error.message || "An unexpected error occurred during upload.",
-      });
-    }
-  };
-
-  const handleStartAnalysis = async () => {
-    if (!uploadedProjectId) return;
-    setIsAnalyzing(true);
-    try {
-      const response = await fetch(
-        `/api/projects/${uploadedProjectId}/analyze`,
-        {
-          method: "POST",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to start project analysis");
-      }
-
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error || "Failed to start analysis");
-      }
-
-      toast.success("Analysis Started!", {
-        description: "Your video transcription and analysis have begun.",
-      });
-
-      // Navigate to the project analysis loading pipeline page
-      router.push(`/dashboard/projects/${uploadedProjectId}`);
-    } catch (err: any) {
-      console.error("Start analysis error:", err);
-      toast.error("Failed to Start Analysis", {
-        description: err.message || "An unexpected error occurred.",
-      });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+    setVideoPreviewUrl(null);
+  }, [selectedFile]);
 
   return (
     <motion.div
@@ -351,7 +133,7 @@ export default function DashboardHome() {
         />
 
         <AnimatePresence mode="wait">
-          {uploadStatus === "idle" && !selectedVideoFile ? (
+          {uploadStatus === "idle" && !selectedFile ? (
             <motion.div
               key="idle-uploader"
               initial={{ opacity: 0, scale: 0.99 }}
@@ -444,7 +226,7 @@ export default function DashboardHome() {
                 </div>
               </div>
             </motion.div>
-          ) : uploadStatus === "idle" && selectedVideoFile ? (
+          ) : uploadStatus === "idle" && selectedFile ? (
             <motion.div
               key="preview-panel"
               initial={{ opacity: 0, scale: 0.98 }}
@@ -483,7 +265,7 @@ export default function DashboardHome() {
 
                   <div className="space-y-2">
                     <h2 className="font-heading font-bold text-lg text-white leading-snug wrap-break-word">
-                      {selectedVideoFile.name}
+                      {selectedFile.name}
                     </h2>
 
                     <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-white/2 border border-white/5 font-mono text-xs text-white/50">
@@ -492,7 +274,7 @@ export default function DashboardHome() {
                           Size
                         </span>
                         <strong className="text-white/80">
-                          {(selectedVideoFile.size / (1024 * 1024)).toFixed(2)}{" "}
+                          {(selectedFile.size / (1024 * 1024)).toFixed(2)}{" "}
                           MB
                         </strong>
                       </div>
@@ -501,7 +283,7 @@ export default function DashboardHome() {
                           Format
                         </span>
                         <strong className="text-white/80">
-                          {selectedVideoFile.type
+                          {selectedFile.type
                             .split("/")[1]
                             ?.toUpperCase() || "MP4"}
                         </strong>
@@ -539,7 +321,7 @@ export default function DashboardHome() {
                     Clear File
                   </Button>
                   <Button
-                    onClick={startUpload}
+                    onClick={startAIForger}
                     variant="default"
                     className="flex-1 rounded-xl text-xs px-4 h-10 font-bold cursor-pointer"
                   >
@@ -588,7 +370,7 @@ export default function DashboardHome() {
                       Uploading segments
                     </span>
                     <span className="font-mono font-bold text-forge-accent">
-                      {uploadProgress}%
+                      {forgeProgress}%
                     </span>
                   </div>
 
@@ -596,16 +378,16 @@ export default function DashboardHome() {
                   <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden">
                     <div
                       className="absolute left-0 top-0 h-full bg-gradient-forge shadow-[0_0_10px_rgba(124,106,250,0.6)] transition-all duration-100 rounded-full"
-                      style={{ width: `${uploadProgress}%` }}
+                      style={{ width: `${forgeProgress}%` }}
                     />
                   </div>
 
                   <div className="flex justify-between items-center text-[10px] text-white/30 font-mono">
-                    <span className="animate-pulse">{uploadStatusText}</span>
+                    <span className="animate-pulse">{forgePhase}</span>
                     <span>
-                      {(uploadProgress * 0.45).toFixed(1)} MB /{" "}
-                      {(selectedVideoFile
-                        ? selectedVideoFile.size / (1024 * 1024)
+                      {(forgeProgress * (selectedFile ? selectedFile.size / (1024 * 1024) : 0) / 100).toFixed(1)} MB /{" "}
+                      {(selectedFile
+                        ? selectedFile.size / (1024 * 1024)
                         : 0
                       ).toFixed(1)}{" "}
                       MB
@@ -649,7 +431,7 @@ export default function DashboardHome() {
                   Uploaded Successfully!
                 </h2>
                 <p className="text-xs text-white/50 max-w-sm leading-relaxed font-sans">
-                  &quot;{selectedVideoFile?.name}&quot; has been saved to your AWS S3
+                  &quot;{selectedFile?.name}&quot; has been saved to your AWS S3
                   bucket and registered. Ready for audio transcription and
                   speech extraction.
                 </p>

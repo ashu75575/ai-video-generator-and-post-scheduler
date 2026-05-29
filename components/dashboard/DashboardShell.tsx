@@ -15,6 +15,7 @@ import {
   Loader2,
   AlertCircle,
   ArrowUpRight,
+  Check,
 } from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { Sidebar } from "./Sidebar";
@@ -66,6 +67,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     handleScheduleSubmit,
     socialAccounts,
     isLoadingAccounts,
+    uploadStatus,
+    isAnalyzing,
+    handleStartAnalysis,
+    clearSelection,
   } = useDashboard();
 
   useEffect(() => {
@@ -140,9 +145,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <Dialog
         open={isUploadOpen}
         onOpenChange={(open) => {
-          if (!isForging) {
+          if (uploadStatus === "idle" || uploadStatus === "success") {
             setIsUploadOpen(open);
-            setSelectedFile(null);
+            if (!open) {
+              clearSelection();
+            }
           }
         }}
       >
@@ -158,7 +165,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </DialogDescription>
           </DialogHeader>
 
-          {!isForging ? (
+          {uploadStatus === "idle" ? (
             <div className="space-y-5">
               {/* Drag/Drop Zone */}
               <div
@@ -255,8 +262,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </Button>
               </DialogFooter>
             </div>
-          ) : (
-            /* ACTIVE SIMULATED FORGING ENGINE PIPELINE */
+          ) : uploadStatus === "uploading" ? (
+            /* ACTIVE FORGING ENGINE PIPELINE */
             <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
@@ -295,6 +302,57 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </AnimatePresence>
               </div>
             </div>
+          ) : (
+            /* SUCCESS STATE: READY FOR ANALYSIS */
+            <motion.div
+              key="success-panel"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex flex-col items-center justify-center py-4 text-center z-10 w-full space-y-6"
+            >
+              <div className="flex flex-col items-center">
+                <div className="h-14 w-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(52,211,153,0.25)]">
+                  <Check size={28} className="stroke-3" />
+                </div>
+                <h2 className="font-heading text-base font-bold text-white mb-1.5">
+                  Uploaded Successfully!
+                </h2>
+                <p className="text-[11px] text-white/50 max-w-xs leading-relaxed font-sans">
+                  &quot;{selectedFile?.name}&quot; has been saved to your AWS S3
+                  bucket. Ready for audio transcription and hook extraction.
+                </p>
+              </div>
+
+              <div className="flex gap-3 w-full justify-center">
+                <Button
+                  onClick={clearSelection}
+                  variant="outline"
+                  className="rounded-xl text-xs px-4 h-9 cursor-pointer font-mono"
+                  disabled={isAnalyzing}
+                >
+                  Clear File
+                </Button>
+                <Button
+                  onClick={handleStartAnalysis}
+                  variant="default"
+                  className="rounded-xl text-xs px-5 h-9 font-bold cursor-pointer flex items-center gap-1.5"
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={12} />
+                      Start Analysis
+                    </>
+                  )}
+                </Button>
+              </div>
+            </motion.div>
           )}
         </DialogContent>
       </Dialog>
