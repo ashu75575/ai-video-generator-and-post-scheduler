@@ -35,7 +35,6 @@ export function Sidebar() {
       icon: Share2,
     },
     { href: "/dashboard/schedule", label: "Schedule Posts", icon: Calendar },
-    { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   ] as const;
 
   const userDisplayName =
