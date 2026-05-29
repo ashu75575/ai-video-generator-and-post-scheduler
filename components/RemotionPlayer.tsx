@@ -164,7 +164,10 @@ export default function RemotionPlayer({
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    const handle = setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+    return () => clearTimeout(handle);
   }, []);
 
   if (!isMounted) {

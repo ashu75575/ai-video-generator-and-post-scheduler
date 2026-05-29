@@ -42,6 +42,15 @@ export interface ScheduledPost {
   status: "Pending" | "Posted" | "Failed";
 }
 
+export interface SocialAccount {
+  _id?: string;
+  id: string;
+  platform: string;
+  name?: string | null;
+  handle?: string | null;
+  avatarUrl?: string | null;
+}
+
 export interface RawVideo {
   id: string;
   title: string;
@@ -60,8 +69,8 @@ interface DashboardContextType {
   setScheduledPosts: React.Dispatch<React.SetStateAction<ScheduledPost[]>>;
   rawVideos: RawVideo[];
   setRawVideos: React.Dispatch<React.SetStateAction<RawVideo[]>>;
-  socialAccounts: any[];
-  setSocialAccounts: React.Dispatch<React.SetStateAction<any[]>>;
+  socialAccounts: SocialAccount[];
+  setSocialAccounts: React.Dispatch<React.SetStateAction<SocialAccount[]>>;
   isLoadingAccounts: boolean;
 
   // Dialog & Interactive Upload states
@@ -109,6 +118,18 @@ interface DashboardContextType {
   handleDownload: (clipTitle: string) => void;
 }
 
+function mapPlatformName(p: string): string {
+  const lower = p.toLowerCase();
+  if (lower === "tiktok") return "TikTok";
+  if (lower === "youtube") return "YouTube Shorts";
+  if (lower === "instagram") return "Instagram Reels";
+  if (lower === "twitter" || lower === "x") return "Twitter / X";
+  if (lower === "linkedin") return "LinkedIn";
+  if (lower === "bluesky") return "Bluesky";
+  if (lower === "facebook") return "Facebook Reels";
+  return p;
+}
+
 const DashboardContext = createContext<DashboardContextType | undefined>(
   undefined,
 );
@@ -120,7 +141,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [clips, setClips] = useState<Clip[]>([]);
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
   const [rawVideos, setRawVideos] = useState<RawVideo[]>([]);
-  const [socialAccounts, setSocialAccounts] = useState<any[]>([]);
+  const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   useEffect(() => {
@@ -260,23 +281,6 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [clipToSchedule, setClipToSchedule] = useState<Clip | null>(null);
   const [schedulePlatform, setSchedulePlatform] = useState<string>("TikTok");
 
-  useEffect(() => {
-    if (socialAccounts.length > 0) {
-      const mapPlatformName = (p: string) => {
-        const lower = p.toLowerCase();
-        if (lower === "tiktok") return "TikTok";
-        if (lower === "youtube") return "YouTube Shorts";
-        if (lower === "instagram") return "Instagram Reels";
-        if (lower === "twitter" || lower === "x") return "Twitter / X";
-        if (lower === "linkedin") return "LinkedIn";
-        if (lower === "bluesky") return "Bluesky";
-        if (lower === "facebook") return "Facebook Reels";
-        return p;
-      };
-      const firstPlatform = mapPlatformName(socialAccounts[0].platform);
-      setSchedulePlatform(firstPlatform);
-    }
-  }, [socialAccounts]);
   const [scheduleTime, setScheduleTime] = useState("Today, 8:00 PM");
   const [scheduleCaption, setScheduleCaption] = useState("");
 
@@ -420,7 +424,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     try {
       // Since scheduleTime in standard clip dialog is a text like "Today, 8:00 PM"
       // We will parse it to a real date, or default to 2 hours from now if invalid
-      let scheduledTimeRaw = new Date();
+      const scheduledTimeRaw = new Date();
       scheduledTimeRaw.setHours(scheduledTimeRaw.getHours() + 2);
 
       const response = await fetch("/api/posts/schedule", {
@@ -447,7 +451,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           clipId: p.clipId,
           title: p.title,
           caption: p.caption,
-          platform: p.platform as any,
+          platform: p.platform as ScheduledPost["platform"],
           time: new Date(p.scheduledTime).toLocaleString("en-US", {
             month: "short",
             day: "numeric",
@@ -468,10 +472,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           description: `Your short will go live on ${schedulePlatform} at ${newPost.time}.`,
         });
       }
-    } catch (err: any) {
-      console.error("Failed to submit schedule:", err);
+    } catch (err) {
+      const error = err as Error;
+      console.error("Failed to submit schedule:", error);
       toast("Error scheduling post", {
-        description: err.message || "Something went wrong.",
+        description: error.message || "Something went wrong.",
       });
     }
   };
@@ -479,6 +484,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const triggerScheduleDialog = (clip: Clip) => {
     setClipToSchedule(clip);
     setScheduleCaption(clip.description);
+    if (socialAccounts.length > 0) {
+      setSchedulePlatform(mapPlatformName(socialAccounts[0].platform));
+    }
     setIsScheduleOpen(true);
   };
 

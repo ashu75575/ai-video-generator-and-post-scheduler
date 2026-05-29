@@ -319,17 +319,17 @@ export default function DashboardHome() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/videos">
+          <Link href="/dashboard/my-videos">
             <Button
-              variant="ghost"
-              className="rounded-xl border border-white/10 bg-white/2  text-white/80 text-xs font-semibold px-4 h-9 cursor-pointer"
+              variant="outline"
+              className="rounded-xl text-xs font-semibold px-4 h-9 cursor-pointer"
             >
               <Video size={14} className="mr-1.5" />
               My Videos ({rawVideos.length})
             </Button>
           </Link>
           <Link href="/dashboard/clips">
-            <Button className="rounded-xl bg-gradient-forge text-xs font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 px-4 h-9 cursor-pointer">
+            <Button variant="default" className="rounded-xl text-xs font-bold px-4 h-9 cursor-pointer">
               <Scissors size={14} className="mr-1.5" />
               AI Clips ({clips.length})
             </Button>
@@ -433,8 +433,8 @@ export default function DashboardHome() {
                     </p>
                   </div>
                   <Button
-                    variant="ghost"
-                    className="h-8 rounded-lg border border-white/10 bg-white/2 px-4 text-xs text-white/70 hover:text-black cursor-pointer"
+                    variant="outline"
+                    className="h-8 rounded-lg px-4 text-xs cursor-pointer"
                   >
                     Select Local Video
                   </Button>
@@ -532,15 +532,16 @@ export default function DashboardHome() {
                 <div className="flex items-center gap-3 pt-2">
                   <Button
                     onClick={clearSelection}
-                    variant="ghost"
-                    className="flex-1 rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-4 h-10 cursor-pointer"
+                    variant="outline"
+                    className="flex-1 rounded-xl text-xs px-4 h-10 cursor-pointer"
                   >
                     <X size={14} className="mr-1.5" />
                     Clear File
                   </Button>
                   <Button
                     onClick={startUpload}
-                    className="flex-1 rounded-xl bg-gradient-forge text-xs px-4 h-10 font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 cursor-pointer animate-pulse-glow"
+                    variant="default"
+                    className="flex-1 rounded-xl text-xs px-4 h-10 font-bold cursor-pointer"
                   >
                     <Sparkles size={14} className="mr-1.5" />
                     Upload & Extract
@@ -625,8 +626,8 @@ export default function DashboardHome() {
 
                 <Button
                   onClick={clearSelection}
-                  variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-4 h-9 cursor-pointer"
+                  variant="outline"
+                  className="rounded-xl text-xs px-4 h-9 cursor-pointer"
                 >
                   Cancel Upload
                 </Button>
@@ -648,7 +649,7 @@ export default function DashboardHome() {
                   Uploaded Successfully!
                 </h2>
                 <p className="text-xs text-white/50 max-w-sm leading-relaxed font-sans">
-                  "{selectedVideoFile?.name}" has been saved to your AWS S3
+                  &quot;{selectedVideoFile?.name}&quot; has been saved to your AWS S3
                   bucket and registered. Ready for audio transcription and
                   speech extraction.
                 </p>
@@ -657,15 +658,16 @@ export default function DashboardHome() {
               <div className="flex gap-4 w-full max-w-md justify-center">
                 <Button
                   onClick={clearSelection}
-                  variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/70 hover:text-white text-xs px-5 h-10 cursor-pointer font-mono"
+                  variant="outline"
+                  className="rounded-xl text-xs px-5 h-10 cursor-pointer font-mono"
                   disabled={isAnalyzing}
                 >
                   Cancel & Clear
                 </Button>
                 <Button
                   onClick={handleStartAnalysis}
-                  className="rounded-xl bg-gradient-forge text-xs px-6 h-10 font-bold text-white shadow-md hover:shadow-forge-glow transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+                  variant="default"
+                  className="rounded-xl text-xs px-6 h-10 font-bold cursor-pointer flex items-center gap-1.5"
                   disabled={isAnalyzing}
                 >
                   {isAnalyzing ? (

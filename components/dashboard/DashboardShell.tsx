@@ -69,7 +69,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   } = useDashboard();
 
   useEffect(() => {
-    setMounted(true);
+    const handle = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(handle);
   }, []);
 
   if (!mounted) return null;
@@ -237,15 +240,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DialogFooter className="mt-4">
                 <Button
                   onClick={() => setIsUploadOpen(false)}
-                  variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                  variant="outline"
+                  className="rounded-xl text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </Button>
                 <Button
                   disabled={!selectedFile}
                   onClick={startAIForger}
-                  className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow-md disabled:opacity-40 cursor-pointer"
+                  variant="default"
+                  className="rounded-xl px-4 font-sans text-xs font-bold cursor-pointer"
                 >
                   Forge Shorts
                 </Button>
@@ -370,8 +374,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   <div className="flex flex-wrap items-center justify-end gap-2 pt-4 border-t border-white/5">
                     <Button
                       onClick={() => handleDownload(selectedClip.title)}
-                      variant="ghost"
-                      className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/70 cursor-pointer"
+                      variant="outline"
+                      className="rounded-xl text-xs font-semibold cursor-pointer"
                     >
                       <Download size={13} className="mr-1.5" />
                       Download MP4
@@ -381,7 +385,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         setIsDetailOpen(false);
                         triggerScheduleDialog(selectedClip);
                       }}
-                      className="rounded-xl bg-gradient-forge px-4 text-xs font-bold text-white shadow hover:shadow-forge-glow cursor-pointer"
+                      variant="default"
+                      className="rounded-xl px-4 text-xs font-bold cursor-pointer"
                     >
                       Schedule Publication
                     </Button>
@@ -434,7 +439,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       setIsScheduleOpen(false);
                       router.push("/dashboard/social-connections");
                     }}
-                    className="rounded-xl bg-gradient-forge px-4 h-9 text-xs font-bold text-white shadow hover:shadow-forge-glow cursor-pointer flex items-center gap-1.5"
+                    variant="default"
+                    className="rounded-xl px-4 h-9 text-xs font-bold cursor-pointer flex items-center gap-1.5"
                   >
                     <span>Connect Social Account</span>
                     <ArrowUpRight size={13} />
@@ -517,15 +523,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <DialogFooter className="mt-4">
                 <Button
                   onClick={() => setIsScheduleOpen(false)}
-                  variant="ghost"
-                  className="rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-xs font-semibold text-white/60 hover:text-white cursor-pointer"
+                  variant="outline"
+                  className="rounded-xl text-xs font-semibold cursor-pointer"
                 >
                   Cancel
                 </Button>
                 {!isLoadingAccounts && socialAccounts.length > 0 && (
                   <Button
                     onClick={handleScheduleSubmit}
-                    className="rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow cursor-pointer hover:shadow-forge-glow"
+                    variant="default"
+                    className="rounded-xl px-4 font-sans text-xs font-bold cursor-pointer"
                   >
                     Schedule Post
                   </Button>

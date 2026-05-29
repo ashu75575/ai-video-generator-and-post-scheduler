@@ -122,7 +122,8 @@ export default function MyVideosPage() {
         </div>
         <Button
           onClick={() => router.push("/dashboard")}
-          className="rounded-xl bg-gradient-forge px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer hover:shadow-forge-glow transition-shadow duration-300"
+          variant="default"
+          className="rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
         >
           <Upload size={14} className="mr-1.5" />
           Upload New Video
@@ -148,7 +149,8 @@ export default function MyVideosPage() {
           </span>
           <Button
             onClick={() => router.push("/dashboard")}
-            className="mt-4 h-8 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-4 text-xs font-bold text-white cursor-pointer"
+            variant="default"
+            className="mt-4 h-8 rounded-lg px-4 text-xs font-bold cursor-pointer"
           >
             Upload Source Video
           </Button>
@@ -224,10 +226,11 @@ export default function MyVideosPage() {
                         </span>
 
                         <Button
+                          variant="default"
                           size="sm"
                           disabled={actionLoading !== null}
                           onClick={() => handleStartAnalysis(project.id)}
-                          className="h-7 rounded-lg bg-gradient-forge hover:shadow-forge-glow text-[10px] font-bold text-white cursor-pointer px-3 flex items-center gap-1"
+                          className="h-7 rounded-lg text-[10px] font-bold cursor-pointer px-3 flex items-center gap-1"
                         >
                           {actionLoading === project.id ? (
                             <RefreshCw size={10} className="animate-spin" />
@@ -245,11 +248,12 @@ export default function MyVideosPage() {
                         </span>
 
                         <Button
+                          variant="outline"
                           size="sm"
                           onClick={() =>
                             router.push(`/dashboard/projects/${project.id}`)
                           }
-                          className="h-7 rounded-lg bg-white/4 border border-white/8 hover:bg-white/8 px-3 text-[10px] font-bold text-white cursor-pointer flex items-center"
+                          className="h-7 rounded-lg px-3 text-[10px] font-bold cursor-pointer flex items-center"
                         >
                           View Progress{" "}
                           <ChevronRight size={10} className="ml-0.5" />
@@ -263,9 +267,10 @@ export default function MyVideosPage() {
                         </span>
 
                         <Button
+                          variant="destructive"
                           size="sm"
                           disabled
-                          className="h-7 rounded-lg bg-red-500/10 text-red-400 border border-red-500/10 px-3 text-[10px] font-bold"
+                          className="h-7 rounded-lg px-3 text-[10px] font-bold"
                         >
                           System Error
                         </Button>
@@ -278,11 +283,12 @@ export default function MyVideosPage() {
                         </span>
 
                         <Button
+                          variant="outline"
                           size="sm"
                           onClick={() =>
                             router.push(`/dashboard/projects/${project.id}`)
                           }
-                          className="h-7 rounded-lg bg-white/4 border border-white/8 hover:bg-white/8 px-3 text-[10px] font-bold text-white cursor-pointer flex items-center gap-1"
+                          className="h-7 rounded-lg px-3 text-[10px] font-bold cursor-pointer flex items-center gap-1"
                         >
                           <FileText size={10} />
                           View Transcript

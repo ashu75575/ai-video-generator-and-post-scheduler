@@ -41,7 +41,7 @@ export default async function RootLayout({
     <html
       lang="en"
       className={cn(
-        "h-full antialiased",
+        "h-full antialiased dark",
         spaceGrotesk.variable,
         dmSans.variable,
         geistMono.variable,

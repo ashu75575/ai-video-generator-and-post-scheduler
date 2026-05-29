@@ -188,9 +188,12 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
-    fetchScheduledPosts();
-    fetchExportedClips();
-    fetchConnectedAccounts();
+    const handle = setTimeout(() => {
+      fetchScheduledPosts();
+      fetchExportedClips();
+      fetchConnectedAccounts();
+    }, 0);
+    return () => clearTimeout(handle);
   }, []);
 
   // Calendar math
@@ -482,24 +485,24 @@ export default function SchedulePage() {
               <div className="flex items-center gap-1.5">
                 <Button
                   onClick={handlePrevMonth}
-                  variant="ghost"
+                  variant="outline"
                   size="icon-sm"
-                  className="h-8 w-8 rounded-lg border border-white/5 bg-white/1 text-white/70 hover:text-white cursor-pointer hover:bg-white/3"
+                  className="h-8 w-8 rounded-lg cursor-pointer"
                 >
                   <ChevronLeft size={16} />
                 </Button>
                 <Button
                   onClick={() => setCurrentDate(new Date())}
-                  variant="ghost"
-                  className="h-8 rounded-lg border border-white/5 bg-white/1 px-3 text-xs font-semibold text-white/70 hover:text-white cursor-pointer hover:bg-white/3"
+                  variant="outline"
+                  className="h-8 rounded-lg px-3 text-xs font-semibold cursor-pointer"
                 >
                   Today
                 </Button>
                 <Button
                   onClick={handleNextMonth}
-                  variant="ghost"
+                  variant="outline"
                   size="icon-sm"
-                  className="h-8 w-8 rounded-lg border border-white/5 bg-white/1 text-white/70 hover:text-white cursor-pointer hover:bg-white/3"
+                  className="h-8 w-8 rounded-lg cursor-pointer"
                 >
                   <ChevronRight size={16} />
                 </Button>
@@ -586,7 +589,8 @@ export default function SchedulePage() {
                         {/* Hover Action Button */}
                         <Button
                           onClick={() => handleAddPostClick(date)}
-                          className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-1.5 right-1.5 h-6 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-2 text-[9px] font-bold text-white flex items-center gap-0.5 shadow-md shadow-forge-glow/20 cursor-pointer"
+                          variant="default"
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-1.5 right-1.5 h-6 rounded-lg px-2 text-[9px] font-bold flex items-center gap-0.5 cursor-pointer"
                         >
                           <Plus size={10} />
                           <span>Add</span>
@@ -661,7 +665,7 @@ export default function SchedulePage() {
                           onClick={() => handleDeletePost(post.id)}
                           variant="ghost"
                           size="icon-sm"
-                          className="h-6 w-6 rounded-md hover:bg-red-500/10 text-white/30 hover:text-red-400 cursor-pointer transition-colors"
+                          className="h-6 w-6 rounded-md hover:text-red-400 cursor-pointer transition-colors"
                         >
                           <Trash2 size={12} />
                         </Button>
@@ -692,7 +696,8 @@ export default function SchedulePage() {
                   </span>
                   <Button
                     onClick={() => router.push("/dashboard/social-connections")}
-                    className="mt-3 text-[10px] h-7 bg-[#7c6afa] hover:bg-[#7c6afa]/80 cursor-pointer text-white font-bold"
+                    variant="default"
+                    className="mt-3 text-[10px] h-7 cursor-pointer font-bold"
                   >
                     Connect a Channel
                   </Button>
@@ -776,7 +781,7 @@ export default function SchedulePage() {
                       No exported clips found
                     </span>
                     <span className="block text-[10px] mt-0.5 leading-relaxed">
-                      You must export or render clips first under "AI Clips" to
+                      You must export or render clips first under &quot;AI Clips&quot; to
                       make them available here.
                     </span>
                   </div>
@@ -826,15 +831,16 @@ export default function SchedulePage() {
                         No connected channels
                       </span>
                       <span className="block text-[10px] mt-0.5 leading-relaxed">
-                        You need to link a channel first under "Social
-                        Connections" to publish.
+                        You need to link a channel first under &quot;Social
+                        Connections&quot; to publish.
                       </span>
                       <Button
                         onClick={() => {
                           setIsDialogOpen(false);
                           router.push("/dashboard/social-connections");
                         }}
-                        className="mt-2 text-[9px] h-6 bg-[#7c6afa] hover:bg-[#7c6afa]/80 cursor-pointer text-white font-bold"
+                        variant="default"
+                        className="mt-2 text-[9px] h-6 cursor-pointer font-bold"
                       >
                         Go to Social Connections
                       </Button>
@@ -866,7 +872,7 @@ export default function SchedulePage() {
                   AI Writing Hook & Hashtags...
                 </span>
                 <span className="text-[10px] text-white/30 max-w-xs">
-                  We are analyzing this clip's transcript using Gemini to
+                  We are analyzing this clip&apos;s transcript using Gemini to
                   construct optimal visual hooks and hashtags for your platform.
                 </span>
               </div>
@@ -934,15 +940,16 @@ export default function SchedulePage() {
           <DialogFooter className="mt-6 flex justify-end gap-2 border-t border-white/5 pt-4">
             <Button
               onClick={() => setIsDialogOpen(false)}
-              variant="ghost"
-              className="h-9 rounded-lg border border-white/5 bg-white/2 hover:bg-white/5 px-4 text-xs font-bold text-white/80 cursor-pointer"
+              variant="outline"
+              className="h-9 rounded-lg px-4 text-xs font-bold cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               disabled={isSaving || isGeneratingAI}
               onClick={handleSavePost}
-              className="h-9 rounded-lg bg-gradient-forge hover:opacity-90 px-5 text-xs font-bold text-white shadow-md shadow-forge-glow/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="default"
+              className="h-9 rounded-lg px-5 text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>

@@ -35,15 +35,16 @@ export default function ClipsPage() {
         </div>
         <Button
           onClick={() => setIsUploadOpen(true)}
-          className="rounded-xl bg-gradient-forge px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer hover:shadow-forge-glow transition-shadow duration-300"
+          variant="default"
+          className="rounded-xl px-4 py-2 text-xs font-bold cursor-pointer"
         >
           Forge More Clips
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-4">
         {/* Left Column: Clips List Grid */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4">
           {clips.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center text-white/20 border border-dashed border-white/5 bg-white/0.5 rounded-2xl p-6 min-h-[350px]">
               <Video size={36} className="stroke-[1.5] mb-3 text-white/10" />
@@ -56,7 +57,8 @@ export default function ClipsPage() {
               </span>
               <Button
                 onClick={() => setIsUploadOpen(true)}
-                className="mt-4 h-8 rounded-lg bg-forge-accent hover:bg-forge-accent/90 px-4 text-xs font-bold text-white cursor-pointer"
+                variant="default"
+                className="mt-4 h-8 rounded-lg px-4 text-xs font-bold cursor-pointer"
               >
                 Forge First Clip
               </Button>
@@ -78,8 +80,9 @@ export default function ClipsPage() {
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <Button
                         onClick={() => triggerInspectDialog(clip)}
+                        variant="default"
                         size="icon-sm"
-                        className="h-8 w-8 rounded-full bg-forge-accent hover:bg-forge-accent/90 text-white cursor-pointer"
+                        className="h-8 w-8 rounded-full cursor-pointer"
                       >
                         <Play size={12} className="fill-white ml-0.5" />
                       </Button>
@@ -123,14 +126,15 @@ export default function ClipsPage() {
                       <div className="flex items-center gap-2">
                         <Button
                           onClick={() => triggerInspectDialog(clip)}
-                          variant="ghost"
-                          className="h-8 rounded-lg border border-white/5 bg-white/1 hover:bg-white/6 px-3 text-xs font-semibold text-white/70 hover:text-white cursor-pointer"
+                          variant="outline"
+                          className="h-8 rounded-lg px-3 text-xs font-semibold cursor-pointer"
                         >
                           Inspect AI
                         </Button>
                         <Button
                           onClick={() => triggerScheduleDialog(clip)}
-                          className="h-8 rounded-lg bg-gradient-forge px-3.5 text-xs font-bold text-white shadow hover:shadow-forge-glow cursor-pointer"
+                          variant="default"
+                          className="h-8 rounded-lg px-3.5 text-xs font-bold cursor-pointer"
                         >
                           Schedule
                         </Button>
@@ -141,67 +145,6 @@ export default function ClipsPage() {
               </Card>
             ))
           )}
-        </div>
-
-        {/* Right Column: AI Auto Captions presets */}
-        <div className="space-y-6">
-          <Card className="bg-white/2.5 border border-white/5 rounded-[20px] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={16} className="text-forge-accent-2" />
-              <h3 className="font-heading text-sm font-bold text-white">
-                Subtitles Presets (Auto-Captions)
-              </h3>
-            </div>
-            <p className="text-xs text-white/40 leading-relaxed mb-4">
-              Apply modern social media caption presets instantly before export.
-            </p>
-
-            <div className="space-y-3">
-              {[
-                {
-                  name: "Devin-Glass Style",
-                  tags: "Pop, Neon, Fast",
-                  example: "THE #1 RULE",
-                },
-                {
-                  name: "Hermonzi Impact",
-                  tags: "Bold, Yellow/Red, Dynamic",
-                  example: "NEVER WRITE",
-                },
-                {
-                  name: "Minimalist Sans",
-                  tags: "Clean, Bottom-centered",
-                  example: "building a saas",
-                },
-                {
-                  name: "Karaoke Highlighter",
-                  tags: "Word-by-word active glow",
-                  example: "a single line",
-                },
-              ].map((style, i) => (
-                <div
-                  key={i}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition-all duration-300 hover:bg-white/3 ${
-                    i === 0
-                      ? "border-forge-accent bg-forge-accent/5"
-                      : "border-white/5 bg-white/1"
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-1.5">
-                    <span className="font-semibold text-xs text-white">
-                      {style.name}
-                    </span>
-                    <Badge className="bg-white/5 text-white/40 hover:bg-white/5 font-mono text-[8px] uppercase tracking-wide px-1">
-                      {style.tags}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-center h-14 bg-black/60 rounded-lg border border-white/5 font-heading text-sm font-extrabold tracking-tight text-gradient-forge shadow-inner">
-                    {style.example}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
         </div>
       </div>
     </motion.div>

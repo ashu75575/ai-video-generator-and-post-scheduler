@@ -120,7 +120,8 @@ export function Header() {
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
             onClick={() => setIsUploadOpen(true)}
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-gradient-forge px-4 font-sans text-xs font-bold text-white shadow-md cursor-pointer"
+            variant="default"
+            className="flex h-9 items-center gap-1.5 rounded-xl px-4 font-sans text-xs font-bold cursor-pointer"
           >
             <Plus size={14} className="stroke-[2.5]" />
             <span>Create Clip</span>
@@ -132,9 +133,9 @@ export function Header() {
           <DropdownMenuTrigger
             render={
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="relative h-9 w-9 rounded-xl border border-white/5 bg-white/2 hover:bg-white/6 text-white/60 hover:text-white cursor-pointer transition-colors"
+                className="relative h-9 w-9 rounded-xl cursor-pointer"
               />
             }
           >

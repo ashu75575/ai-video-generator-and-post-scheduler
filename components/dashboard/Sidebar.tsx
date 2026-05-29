@@ -138,21 +138,20 @@ export function Sidebar() {
         {/* Action buttons */}
         <div className="grid grid-cols-2 gap-2">
           <Button
-            variant="ghost"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/1 hover:bg-white/4 px-2 py-2 text-xs font-medium text-white/60 hover:text-white cursor-pointer transition-colors"
+            variant="outline"
+            className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium cursor-pointer"
           >
-            <Settings size={13} className="text-white/40" />
+            <Settings size={13} />
             <span>Settings</span>
           </Button>
 
           <Button
             onClick={() => signOut({ redirectUrl: "/" })}
-            variant="ghost"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/5 bg-white/1 hover:bg-red-500/10 px-2 py-2 text-xs font-medium text-white/60 hover:text-red-400 cursor-pointer transition-colors"
+            variant="outline"
+            className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium hover:bg-red-500/10 hover:text-red-400 cursor-pointer transition-colors"
           >
             <LogOut
               size={13}
-              className="text-white/40 group-hover:text-red-400"
             />
             <span>Logout</span>
           </Button>

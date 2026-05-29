@@ -706,7 +706,8 @@ export default function ProjectAnalysisPage() {
                         <div className="flex gap-2 pt-2 border-t border-white/4">
                           <Button
                             onClick={() => handleEditClick(clip)}
-                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                            variant="outline"
+                            className="text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <Paintbrush size={11} className="text-violet-400" />{" "}
                             Edit Style
@@ -717,7 +718,8 @@ export default function ProjectAnalysisPage() {
                               clip.renderStatus === "rendering" ||
                               clip.renderStatus?.startsWith("rendering:")
                             }
-                            className="bg-white/5 hover:bg-white/10 text-white border border-white/5 text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                            variant="outline"
+                            className="text-[10px] h-9 px-2 rounded-xl font-semibold flex-1 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             {clip.renderStatus === "rendering" ||
                             clip.renderStatus?.startsWith("rendering:") ? (
@@ -750,7 +752,8 @@ export default function ProjectAnalysisPage() {
                           {clip.renderStatus === "done" && clip.exportUrl && (
                             <Button
                               onClick={() => handleScheduleClick(clip)}
-                              className="bg-linear-to-r from-violet-600 to-indigo-500 text-white text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(124,106,250,0.2)] hover:shadow-[0_0_15px_rgba(124,106,250,0.35)] transition-all"
+                              variant="default"
+                              className="text-[10px] h-9 px-2 rounded-xl font-bold flex-1 flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                               <Calendar size={11} /> Schedule
                             </Button>

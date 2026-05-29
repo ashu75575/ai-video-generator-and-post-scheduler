@@ -192,7 +192,10 @@ export default function SocialConnectionsPage() {
   };
 
   useEffect(() => {
-    fetchConnections();
+    const handle = setTimeout(() => {
+      fetchConnections();
+    }, 0);
+    return () => clearTimeout(handle);
   }, []);
 
   const handleConnect = async (platformId: string) => {
@@ -211,7 +214,7 @@ export default function SocialConnectionsPage() {
           id: "connect-flow",
         });
         // Redirect browser to Zernio's platform auth url
-        window.location.href = data.authUrl;
+        window.location.assign(data.authUrl);
       } else {
         toast.error(
           data.error || `Could not initiate connection for ${platformId}`,
@@ -383,7 +386,7 @@ export default function SocialConnectionsPage() {
                             }
                             variant="ghost"
                             size="icon-sm"
-                            className="h-7 w-7 rounded-md hover:bg-red-500/10 text-white/30 hover:text-red-400 cursor-pointer"
+                            className="h-7 w-7 rounded-md hover:text-red-400 cursor-pointer"
                             title="Disconnect Account"
                           >
                             {disconnectingAccount === conn._id ? (
@@ -401,11 +404,8 @@ export default function SocialConnectionsPage() {
                   <Button
                     disabled={connectingPlatform === platform.id}
                     onClick={() => handleConnect(platform.id)}
-                    className={`w-full h-9 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
-                      isConnected
-                        ? "border border-white/10 bg-white/2 hover:bg-white/5 text-white/80"
-                        : "bg-gradient-forge text-white shadow-md shadow-forge-glow/20"
-                    }`}
+                    variant={isConnected ? "outline" : "default"}
+                    className="w-full h-9 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {connectingPlatform === platform.id ? (
                       <>
