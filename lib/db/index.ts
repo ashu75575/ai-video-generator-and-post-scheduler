@@ -1,6 +1,13 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
+import dns from "dns";
+
+// Prevent connection timeouts in dual-stack/IPv6-preferred environments (e.g., macOS dev servers)
+// by prioritizing IPv4 DNS resolution for database connection pools.
+if (dns && typeof dns.setDefaultResultOrder === "function") {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -12,3 +19,4 @@ if (!databaseUrl) {
 
 // Connect to Neon Database using HTTP connection, only if databaseUrl is available
 export const db = databaseUrl ? drizzle(neon(databaseUrl), { schema }) : null;
+
