@@ -119,9 +119,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           />
         </svg>
 
-        {/* Glowing Blobs */}
-        <div className="absolute left-[20%] top-[10%] h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(124,106,250,0.12)_0%,transparent_70%)] blur-[60px]" />
-        <div className="absolute right-[5%] top-[30%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(62,207,207,0.07)_0%,transparent_70%)] blur-[50px]" />
+
       </div>
 
       {/* Main Layout Grid */}
@@ -139,9 +137,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* ========================================================
-          DIALOG: FORGE CLIPS (INTERACTIVE MULTI-STAGE UPLOADER)
-          ======================================================== */}
       <Dialog
         open={isUploadOpen}
         onOpenChange={(open) => {

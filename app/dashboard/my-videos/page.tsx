@@ -132,7 +132,7 @@ export default function MyVideosPage() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
-          <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
+          <RefreshCw className="h-8 w-8 text-orange-500 animate-spin" />
           <p className="text-xs text-white/30 font-mono tracking-widest uppercase">
             FETCHING VIDEO LIBRARY
           </p>
@@ -164,10 +164,10 @@ export default function MyVideosPage() {
             return (
               <Card
                 key={project.id}
-                className="bg-white/1.5 border border-white/5 rounded-2xl overflow-hidden group hover:border-white/10 transition-colors duration-300 flex flex-col h-full justify-between"
+                className="rounded-2xl overflow-hidden group flex flex-col h-full justify-between"
               >
                 {/* Visual Preview Box */}
-                <div className="relative aspect-video bg-black overflow-hidden border-b border-white/5 flex items-center justify-center">
+                <div className="relative aspect-video overflow-hidden border-b border-white/5 flex items-center justify-center">
                   {project.videoUrl ? (
                     <video
                       src={project.videoUrl}

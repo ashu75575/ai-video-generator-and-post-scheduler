@@ -120,7 +120,7 @@ export default function DashboardHome() {
       </div>
 
       {/* Main Studio Card workspace */}
-      <Card className="relative overflow-hidden bg-white/3 border border-white/8 backdrop-blur-xl rounded-[24px] shadow-forge-panel p-6 md:p-8 min-h-[420px] flex flex-col justify-center select-none">
+      <Card className="relative overflow-hidden bg-zinc-900 border border-white/8 backdrop-blur-xl rounded-[24px] shadow-forge-panel p-6 md:p-8 min-h-[420px] flex flex-col justify-center select-none">
         <span className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-forge-accent/15 blur-3xl pointer-events-none" />
         <span className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-forge-accent-2/10 blur-3xl pointer-events-none" />
 

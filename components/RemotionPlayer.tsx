@@ -172,7 +172,7 @@ export default function RemotionPlayer({
 
   if (!isMounted) {
     return (
-      <div className="aspect-9/16 w-full bg-[#0a0814] rounded-2xl flex items-center justify-center border border-white/5">
+      <div className="aspect-9/16 w-full rounded-2xl flex items-center justify-center border">
         <div className="animate-pulse text-xs text-white/40 uppercase tracking-widest font-mono">
           Initializing Engine...
         </div>
@@ -186,7 +186,7 @@ export default function RemotionPlayer({
   const durationInFrames = Math.max(30, Math.round(durationInSeconds * fps));
 
   return (
-    <div className="relative aspect-9/16 w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(139,92,246,0.15)] bg-black">
+    <div className="relative aspect-9/16 w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border ">
       <Player
         component={ShortVideoComposition}
         inputProps={{ videoUrl, startTime, endTime, captions, captionStyle }}

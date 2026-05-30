@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-forge-accent: #7c6afa;
-  --color-forge-accent-2: #3ecfcf;
+  --color-forge-accent: #f78555;
+  --color-forge-accent-2: #f78555;
   --color-forge-bg: #05050a;
   --font-heading: var(--font-space-grotesk);
   --font-body: var(--font-dm-sans);
@@ -153,11 +153,11 @@
     @apply bg-gradient-to-br from-forge-accent to-forge-accent-2;
   }
   .shadow-forge-glow {
-    box-shadow: 0 0 40px rgba(124, 106, 250, 0.35);
+    box-shadow: 0 0 40px rgba(234, 166, 94, 0.35);
   }
   .shadow-forge-panel {
     box-shadow:
-      0 0 80px rgba(124, 106, 250, 0.2),
+      0 0 80px rgba(238, 131, 17, 0.193),
       0 30px 60px rgba(0, 0, 0, 0.5);
   }
   /* GPU-accelerated transform for animated elements */
