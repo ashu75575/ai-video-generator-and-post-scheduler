@@ -13,6 +13,8 @@ export default function SignInPage() {
         appearance={{
           theme: dark,
         }}
+        fallbackRedirectUrl="/dashboard"
+        signUpFallbackRedirectUrl="/dashboard"
       />
     </main>
   );

@@ -625,7 +625,7 @@ export default function ProjectAnalysisPage() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-10"
               >
-                <div className="flex items-center gap-2 border-b border-white/5 pb-4">
+                <div className="flex items-center gap-2 border-b border-white/15 pb-4">
                   <Flame className="h-5 w-5 text-orange-500" />
                   <h2 className="font-heading text-lg font-bold text-white uppercase tracking-wider">
                     Isolated AI Clips Grid ({project.shortVideos.length})
@@ -758,7 +758,7 @@ export default function ProjectAnalysisPage() {
                 </div>
 
                 {/* TECHNICAL DATA ACCORDION (Full Transcript & Captions) */}
-                <div className="pt-6 border-t border-white/5">
+                <div className="pt-6 border-t border-white/15">
                   <button
                     onClick={() =>
                       setShowTechnicalDetails(!showTechnicalDetails)

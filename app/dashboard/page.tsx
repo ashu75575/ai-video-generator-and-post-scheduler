@@ -82,7 +82,7 @@ export default function DashboardHome() {
       className="space-y-8 max-w-[1000px] mx-auto will-change-transform"
     >
       {/* Centered Premium Welcoming Typography & Info */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/15">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-forge-accent/20 bg-forge-accent/10 px-3 py-1">
             <Sparkles size={11} className="text-forge-accent" />

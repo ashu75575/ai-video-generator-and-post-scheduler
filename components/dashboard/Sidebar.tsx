@@ -50,7 +50,7 @@ export function Sidebar() {
   const userAvatar = isLoaded && user ? user.imageUrl : "";
 
   return (
-    <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/5 bg-forge-bg/90 backdrop-blur-xl px-4 py-6 md:flex">
+    <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/15 bg-forge-bg/90 backdrop-blur-xl px-4 py-6 md:flex">
       {/* Sidebar Logo */}
       <div className="mb-8 flex items-center gap-2.5 px-3">
         <motion.div
@@ -112,7 +112,7 @@ export function Sidebar() {
       </nav>
 
       {/* Sidebar Footer Area */}
-      <div className="mt-auto space-y-4 border-t border-white/5 pt-4">
+      <div className="mt-auto space-y-4 border-t border-white/15 pt-4">
         {/* User profile section */}
         <div className="flex items-center gap-3 px-3 py-1.5">
           <Avatar className="h-9 w-9 border border-white/10 ring-1 ring-forge-accent/20">
