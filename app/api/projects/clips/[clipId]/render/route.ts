@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { shortVideos, projects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { inngest } from "@/lib/inngest/client";
+import { cache } from "@/lib/redis";
 
 // GET /api/projects/clips/[clipId]/render
 // Returns current render status for polling on the frontend
@@ -20,6 +21,14 @@ export async function GET(
       );
     }
 
+    const cacheKey = `clip_render_status:${clipId}`;
+    const cached = await cache.get<any>(cacheKey);
+    if (cached) {
+      console.log(`[CACHE HIT] GET render status for clip: ${clipId}`);
+      return NextResponse.json(cached);
+    }
+
+    console.log(`[CACHE MISS] GET render status for clip: ${clipId}`);
     const result = await db
       .select()
       .from(shortVideos)
@@ -32,11 +41,16 @@ export async function GET(
 
     const clip = result[0];
 
-    return NextResponse.json({
+    const responseData = {
       clipId,
       renderStatus: clip.renderStatus || "pending",
       exportUrl: clip.exportUrl || null,
-    });
+    };
+
+    // Cache rendering status for 5 minutes (300 seconds) for polling efficiency
+    await cache.set(cacheKey, responseData, 300);
+
+    return NextResponse.json(responseData);
   } catch (err: any) {
     console.error("❌ Get render status route error:", err);
     return NextResponse.json(
@@ -75,7 +89,7 @@ export async function POST(
 
     const clip = clipResult[0];
 
-    // Fetch the parent project to get videoUrl
+    // Fetch the parent project to get videoUrl and userId
     const projectResult = await db
       .select()
       .from(projects)
@@ -105,6 +119,16 @@ export async function POST(
       })
       .where(eq(shortVideos.id, clipId));
 
+    // Invalidate caches because database state has changed
+    const userId = project.userId;
+    await Promise.all([
+      cache.del(`clip_render_status:${clipId}`),
+      cache.del(`project_status:${clip.projectId}`),
+      cache.del(`clips:${userId}`),
+    ]);
+
+    console.log(`[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to render start`);
+
     // Send the Inngest event to trigger the background render job
     await inngest.send({
       name: "clip/render.started",
@@ -131,3 +155,4 @@ export async function POST(
     );
   }
 }
+

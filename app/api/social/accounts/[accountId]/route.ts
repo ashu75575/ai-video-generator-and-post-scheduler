@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { users, socialAccounts } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function DELETE(
   req: NextRequest,
@@ -82,6 +83,10 @@ export async function DELETE(
         ),
       );
 
+    // Invalidate social accounts cache for this user
+    await cache.del(`social_accounts:${userId}`);
+    console.log(`[CACHE INVALIDATION] Invalidate social_accounts:${userId} due to account disconnect`);
+
     return NextResponse.json({
       success: true,
       message: "Social channel disconnected successfully.",
@@ -94,3 +99,4 @@ export async function DELETE(
     );
   }
 }
+

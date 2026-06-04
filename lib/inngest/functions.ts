@@ -2,6 +2,60 @@ import { inngest } from "./client";
 import { db } from "../db";
 import { projects, shortVideos } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { cache } from "../redis";
+
+async function invalidateProjectCache(projectId: string) {
+  if (!db) return;
+  try {
+    const res = await db
+      .select({ userId: projects.userId })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+    if (res && res.length > 0) {
+      const userId = res[0].userId;
+      await Promise.all([
+        cache.del(`projects:${userId}`),
+        cache.del(`project_status:${projectId}`),
+      ]);
+      console.log(`[CACHE INVALIDATION] Invalidated projects:${userId} and project_status:${projectId}`);
+    }
+  } catch (err) {
+    console.error("Failed to invalidate project cache:", err);
+  }
+}
+
+async function invalidateClipCache(clipId: string) {
+  if (!db) return;
+  try {
+    const clipRes = await db
+      .select({ projectId: shortVideos.projectId })
+      .from(shortVideos)
+      .where(eq(shortVideos.id, clipId))
+      .limit(1);
+    if (clipRes && clipRes.length > 0) {
+      const projectId = clipRes[0].projectId;
+      const projRes = await db
+        .select({ userId: projects.userId })
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
+      const userId = projRes?.[0]?.userId;
+
+      const promises = [
+        cache.del(`clip_render_status:${clipId}`),
+        cache.del(`project_status:${projectId}`),
+      ];
+      if (userId) {
+        promises.push(cache.del(`clips:${userId}`));
+      }
+      await Promise.all(promises);
+      console.log(`[CACHE INVALIDATION] Invalidated clip:${clipId}, project_status:${projectId}, clips:${userId}`);
+    }
+  } catch (err) {
+    console.error("Failed to invalidate clip cache:", err);
+  }
+}
 import fs from "fs/promises";
 import { existsSync, createReadStream } from "fs";
 import {
@@ -32,6 +86,7 @@ export const processVideoUpload = inngest.createFunction(
           .update(projects)
           .set({ status: "uploading", progress: 20, updatedAt: new Date() })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
     });
 
@@ -42,6 +97,7 @@ export const processVideoUpload = inngest.createFunction(
           .update(projects)
           .set({ status: "uploading", progress: 50, updatedAt: new Date() })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
 
       const bucketName = process.env.AWS_BUCKET_NAME;
@@ -92,6 +148,7 @@ export const processVideoUpload = inngest.createFunction(
           .update(projects)
           .set({ status: "uploading", progress: 85, updatedAt: new Date() })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
       return actualUrl;
     });
@@ -120,6 +177,7 @@ export const processVideoUpload = inngest.createFunction(
             updatedAt: new Date(),
           })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
       console.log(
         `Successfully completed upload process for project: ${projectId}`,
@@ -191,6 +249,7 @@ export const analyzeProjectVideo = inngest.createFunction(
           .update(projects)
           .set({ status: "transcribing", progress: 10, updatedAt: new Date() })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
     });
 
@@ -201,6 +260,7 @@ export const analyzeProjectVideo = inngest.createFunction(
           .update(projects)
           .set({ status: "transcribing", progress: 40, updatedAt: new Date() })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
 
       const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
@@ -250,6 +310,7 @@ export const analyzeProjectVideo = inngest.createFunction(
             updatedAt: new Date(),
           })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
     });
 
@@ -411,6 +472,13 @@ Return the output as a JSON object matching the requested schema.`,
       console.log(
         `Successfully saved ${shortVideoSegments.length} short videos for project: ${projectId}`,
       );
+
+      // Invalidate projects, project status, and clips caches
+      await invalidateProjectCache(projectId);
+      const res = await db.select({ userId: projects.userId }).from(projects).where(eq(projects.id, projectId)).limit(1);
+      if (res && res.length > 0) {
+        await cache.del(`clips:${res[0].userId}`);
+      }
     });
 
     // Step 6: Save transcription results and finalize project status
@@ -426,6 +494,7 @@ Return the output as a JSON object matching the requested schema.`,
             updatedAt: new Date(),
           })
           .where(eq(projects.id, projectId));
+        await invalidateProjectCache(projectId);
       }
       console.log(
         `Successfully transcribed and analyzed video for project: ${projectId}`,
@@ -473,6 +542,7 @@ export const renderShortVideoClip = inngest.createFunction(
           updatedAt: new Date(),
         })
         .where(eq(shortVideos.id, clipId));
+      await invalidateClipCache(clipId);
     });
 
     // Step 2: Generate a clean presigned URL without x-amz-checksum-mode=ENABLED
@@ -588,6 +658,7 @@ export const renderShortVideoClip = inngest.createFunction(
               updatedAt: new Date(),
             })
             .where(eq(shortVideos.id, clipId));
+          await invalidateClipCache(clipId);
         }
 
         if (progress.done) {
@@ -622,6 +693,7 @@ export const renderShortVideoClip = inngest.createFunction(
           updatedAt: new Date(),
         })
         .where(eq(shortVideos.id, clipId));
+      await invalidateClipCache(clipId);
     });
 
     return { success: true, clipId, exportUrl };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { projects, shortVideos } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function GET(
   req: NextRequest,
@@ -17,6 +18,14 @@ export async function GET(
       );
     }
 
+    const cacheKey = `project_status:${projectId}`;
+    const cached = await cache.get<any>(cacheKey);
+    if (cached) {
+      console.log(`[CACHE HIT] GET status for project: ${projectId}`);
+      return NextResponse.json(cached);
+    }
+
+    console.log(`[CACHE MISS] GET status for project: ${projectId}`);
     const result = await db
       .select()
       .from(projects)
@@ -35,7 +44,7 @@ export async function GET(
       .from(shortVideos)
       .where(eq(shortVideos.projectId, projectId));
 
-    return NextResponse.json({
+    const responseData = {
       id: project.id,
       name: project.name,
       status: project.status,
@@ -46,7 +55,12 @@ export async function GET(
       shortVideos: shorts,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
-    });
+    };
+
+    // Cache project status for 1 hour (3600 seconds)
+    await cache.set(cacheKey, responseData, 3600);
+
+    return NextResponse.json(responseData);
   } catch (err: any) {
     console.error("❌ Get project status route error:", err);
     return NextResponse.json(
@@ -55,3 +69,4 @@ export async function GET(
     );
   }
 }
+

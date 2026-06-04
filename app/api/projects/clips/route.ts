@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { projects, shortVideos } from "@/lib/db/schema";
 import { eq, and, isNotNull } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,6 +23,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const cacheKey = `clips:${userId}`;
+    const cached = await cache.get<any[]>(cacheKey);
+    if (cached) {
+      console.log(`[CACHE HIT] GET clips for user: ${userId}`);
+      return NextResponse.json({
+        success: true,
+        clips: cached,
+      });
+    }
+
+    console.log(`[CACHE MISS] GET clips for user: ${userId}`);
     // Fetch all successfully exported clips belonging to this user
     const userClips = await db
       .select({
@@ -50,6 +62,9 @@ export async function GET(req: NextRequest) {
         ),
       );
 
+    // Cache user clips for 1 hour (3600 seconds)
+    await cache.set(cacheKey, userClips, 3600);
+
     return NextResponse.json({
       success: true,
       clips: userClips,
@@ -62,3 +77,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

@@ -6,6 +6,7 @@ import { inngest } from "@/lib/inngest/client";
 import { promises as fs } from "fs";
 import path from "path";
 import { uploadApiProtector } from "@/lib/arcjet";
+import { cache } from "@/lib/redis";
 
 export async function POST(req: NextRequest) {
   try {
@@ -105,6 +106,10 @@ export async function POST(req: NextRequest) {
       progress: 10,
     });
     console.log(`Database record created for project: ${projectId}`);
+
+    // Invalidate user projects cache list
+    await cache.del(`projects:${userId}`);
+    console.log(`[CACHE INVALIDATION] Invalidate projects:${userId} due to new project upload`);
 
     // 5. Trigger the background Inngest event
     try {

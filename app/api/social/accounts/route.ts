@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { users, socialAccounts } from "@/lib/db/schema";
 import { eq, and, notInArray } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,6 +23,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const cacheKey = `social_accounts:${userId}`;
+    const cached = await cache.get<any[]>(cacheKey);
+    if (cached) {
+      console.log(`[CACHE HIT] GET social accounts for user: ${userId}`);
+      return NextResponse.json({
+        success: true,
+        accounts: cached,
+      });
+    }
+
+    console.log(`[CACHE MISS] GET social accounts for user: ${userId}`);
     // Fetch user details from DB
     const userResult = await db
       .select()
@@ -120,16 +132,21 @@ export async function GET(req: NextRequest) {
       .from(socialAccounts)
       .where(eq(socialAccounts.userId, userId));
 
+    const finalAccounts = dbAccounts.map((acc) => ({
+      _id: acc.id,
+      platform: acc.platform,
+      handle: acc.handle,
+      name: acc.name,
+      profileId: acc.profileId,
+      createdAt: acc.createdAt,
+    }));
+
+    // Cache the synced accounts for 10 minutes (600 seconds)
+    await cache.set(cacheKey, finalAccounts, 600);
+
     return NextResponse.json({
       success: true,
-      accounts: dbAccounts.map((acc) => ({
-        _id: acc.id,
-        platform: acc.platform,
-        handle: acc.handle,
-        name: acc.name,
-        profileId: acc.profileId,
-        createdAt: acc.createdAt,
-      })),
+      accounts: finalAccounts,
     });
   } catch (err: any) {
     console.error("❌ GET Zernio accounts error:", err);
@@ -139,3 +156,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

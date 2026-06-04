@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { shortVideos } from "@/lib/db/schema";
+import { shortVideos, projects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function PATCH(
   req: NextRequest,
@@ -34,7 +35,27 @@ export async function PATCH(
       return NextResponse.json({ error: "Clip not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, clip: updated[0] });
+    const clip = updated[0];
+    const projectId = clip.projectId;
+
+    // Fetch the project to get userId for cache invalidation
+    const projectResult = await db
+      .select({ userId: projects.userId })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+    const userId = projectResult?.[0]?.userId;
+
+    if (userId) {
+      await Promise.all([
+        cache.del(`clip_render_status:${clipId}`),
+        cache.del(`project_status:${projectId}`),
+        cache.del(`clips:${userId}`),
+      ]);
+      console.log(`[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to clip PATCH`);
+    }
+
+    return NextResponse.json({ success: true, clip });
   } catch (err: any) {
     console.error("❌ Update short video clip route error:", err);
     return NextResponse.json(
@@ -43,3 +64,4 @@ export async function PATCH(
     );
   }
 }
+

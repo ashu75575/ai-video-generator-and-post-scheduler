@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { scheduledPosts } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import crypto from "crypto";
+import { cache } from "@/lib/redis";
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,11 +24,25 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const cacheKey = `scheduled_posts:${userId}`;
+    const cached = await cache.get<any[]>(cacheKey);
+    if (cached) {
+      console.log(`[CACHE HIT] GET scheduled posts for user: ${userId}`);
+      return NextResponse.json({
+        success: true,
+        posts: cached,
+      });
+    }
+
+    console.log(`[CACHE MISS] GET scheduled posts for user: ${userId}`);
     const posts = await db
       .select()
       .from(scheduledPosts)
       .where(eq(scheduledPosts.userId, userId))
       .orderBy(desc(scheduledPosts.scheduledTime));
+
+    // Cache scheduled posts for 1 hour (3600 seconds)
+    await cache.set(cacheKey, posts, 3600);
 
     return NextResponse.json({
       success: true,
@@ -89,6 +104,10 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
+    // Invalidate scheduled posts cache for this user
+    await cache.del(`scheduled_posts:${userId}`);
+    console.log(`[CACHE INVALIDATION] Invalidate scheduled_posts:${userId} due to new scheduled post`);
+
     return NextResponse.json({
       success: true,
       post: newPost[0],
@@ -101,3 +120,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

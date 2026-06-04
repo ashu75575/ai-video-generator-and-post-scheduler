@@ -3,6 +3,7 @@ import { inngest } from "@/lib/inngest/client";
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { cache } from "@/lib/redis";
 
 export async function POST(
   req: NextRequest,
@@ -30,7 +31,9 @@ export async function POST(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    videoUrl = result[0].videoUrl || "";
+    const project = result[0];
+    const userId = project.userId;
+    videoUrl = project.videoUrl || "";
 
     if (!videoUrl) {
       return NextResponse.json(
@@ -75,6 +78,13 @@ export async function POST(
       console.error("❌ Failed to update project status in DB:", dbError);
     }
 
+    // Invalidate caches
+    await Promise.all([
+      cache.del(`projects:${userId}`),
+      cache.del(`project_status:${projectId}`),
+    ]);
+    console.log(`[CACHE INVALIDATION] Invalidate projects:${userId} and project_status:${projectId} due to analyze trigger`);
+
     return NextResponse.json({
       success: true,
       message: "Project analysis background job triggered successfully.",
@@ -87,3 +97,4 @@ export async function POST(
     );
   }
 }
+
