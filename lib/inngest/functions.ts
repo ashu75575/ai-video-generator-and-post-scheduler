@@ -73,7 +73,34 @@ import {
 } from "@remotion/lambda/client";
 
 export const processVideoUpload = inngest.createFunction(
-  { id: "process-video-upload" },
+  {
+    id: "process-video-upload",
+    retries: 2,
+    onFailure: async ({ event, step }) => {
+      const { projectId, filePath } = event.data.event.data;
+      await step.run("mark-project-failed", async () => {
+        if (db) {
+          await db
+            .update(projects)
+            .set({ status: "failed", updatedAt: new Date() })
+            .where(eq(projects.id, projectId));
+          await invalidateProjectCache(projectId);
+        }
+      });
+      if (filePath) {
+        await step.run("cleanup-temp-file", async () => {
+          try {
+            if (existsSync(filePath)) {
+              await fs.unlink(filePath);
+              console.log(`[onFailure] Cleaned up local temp file: ${filePath}`);
+            }
+          } catch (err) {
+            console.error(`[onFailure] Failed to delete local file ${filePath}:`, err);
+          }
+        });
+      }
+    },
+  },
   { event: "video/upload.started" },
   async ({ event, step }) => {
     const { projectId, filePath, fileName } = event.data;
@@ -237,7 +264,22 @@ function groupWordsIntoSentences(words: Word[]): Sentence[] {
 }
 
 export const analyzeProjectVideo = inngest.createFunction(
-  { id: "analyze-project-video" },
+  {
+    id: "analyze-project-video",
+    retries: 2,
+    onFailure: async ({ event, step }) => {
+      const { projectId } = event.data.event.data;
+      await step.run("mark-analysis-failed", async () => {
+        if (db) {
+          await db
+            .update(projects)
+            .set({ status: "failed", updatedAt: new Date() })
+            .where(eq(projects.id, projectId));
+          await invalidateProjectCache(projectId);
+        }
+      });
+    },
+  },
   { event: "project/analysis.started" },
   async ({ event, step }) => {
     const { projectId, videoUrl } = event.data;
@@ -515,7 +557,23 @@ Return the output as a JSON object matching the requested schema.`,
 // no exportUrl (or has been edited since last render).
 // ─────────────────────────────────────────────────────────
 export const renderShortVideoClip = inngest.createFunction(
-  { id: "render-short-video-clip", concurrency: { limit: 3 } },
+  {
+    id: "render-short-video-clip",
+    concurrency: { limit: 3 },
+    retries: 2,
+    onFailure: async ({ event, step }) => {
+      const { clipId } = event.data.event.data;
+      await step.run("mark-clip-render-failed", async () => {
+        if (db) {
+          await db
+            .update(shortVideos)
+            .set({ renderStatus: "failed", updatedAt: new Date() })
+            .where(eq(shortVideos.id, clipId));
+          await invalidateClipCache(clipId);
+        }
+      });
+    },
+  },
   { event: "clip/render.started" },
   async ({ event, step }) => {
     const { clipId, videoUrl, startTime, endTime, captions, captionStyle } =

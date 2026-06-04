@@ -266,14 +266,31 @@ export default function MyVideosPage() {
                           Failed
                         </span>
 
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled
-                          className="h-7 rounded-lg px-3 text-[10px] font-bold"
-                        >
-                          System Error
-                        </Button>
+                        {project.videoUrl ? (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={actionLoading !== null}
+                            onClick={() => handleStartAnalysis(project.id)}
+                            className="h-7 rounded-lg px-3 text-[10px] font-bold cursor-pointer flex items-center gap-1 bg-red-950/40 hover:bg-red-900 border border-red-500/20 text-red-400"
+                          >
+                            {actionLoading === project.id ? (
+                              <RefreshCw size={10} className="animate-spin" />
+                            ) : (
+                              <RefreshCw size={10} />
+                            )}
+                            Retry Analysis
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => router.push("/dashboard")}
+                            className="h-7 rounded-lg px-3 text-[10px] font-bold cursor-pointer bg-red-950/40 hover:bg-red-900 border border-red-500/20 text-red-400"
+                          >
+                            Re-upload
+                          </Button>
+                        )}
                       </>
                     ) : (
                       <>

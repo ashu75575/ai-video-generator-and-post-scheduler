@@ -95,6 +95,7 @@ export default function ProjectAnalysisPage() {
   const [project, setProject] = useState<ProjectStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pollTrigger, setPollTrigger] = useState(0);
 
   // Track playing clip ID separately to isolate playback inside the grid
   const [playingClipId, setPlayingClipId] = useState<string | null>(null);
@@ -320,6 +321,39 @@ export default function ProjectAnalysisPage() {
     }
   };
 
+  const handleRetryAnalysis = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/analyze`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to trigger video analysis.");
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Analysis failed to start.");
+      }
+
+      toast.success("Analysis Triggered", {
+        description: "Background transcription and caption extraction started.",
+      });
+
+      // Update state to start showing the pipeline progress and restart polling
+      setProject((prev) => prev ? { ...prev, status: "transcribing", progress: 10 } : null);
+      setPollTrigger((p) => p + 1);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Analysis Retry Failed", {
+        description: err.message || "Could not restart audio transcription.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let pollInterval: NodeJS.Timeout;
 
@@ -330,7 +364,14 @@ export default function ProjectAnalysisPage() {
           throw new Error("Failed to fetch project status");
         }
         const data = await response.json();
-        setProject(data);
+        setProject((prev) => {
+          if (data.status === "failed" && prev && prev.status !== "failed") {
+            toast.error("Pipeline Failed", {
+              description: "The background processing pipeline failed after multiple retries.",
+            });
+          }
+          return data;
+        });
         setLoading(false);
 
         // Stop polling if completed successfully or failed
@@ -349,7 +390,7 @@ export default function ProjectAnalysisPage() {
     pollInterval = setInterval(fetchStatus, 1500);
 
     return () => clearInterval(pollInterval);
-  }, [projectId]);
+  }, [projectId, pollTrigger]);
 
   if (loading) {
     return (
@@ -477,7 +518,47 @@ export default function ProjectAnalysisPage() {
           </p>
         </div>
 
-        {project.status !== "ready" && (
+        {project.status === "failed" ? (
+          <Card className="border border-red-500/25 bg-red-950/10 backdrop-blur-xl p-8 rounded-3xl max-w-2xl mx-auto shadow-2xl shadow-red-950/20 space-y-6 text-center">
+            <div className="mx-auto h-14 w-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center animate-bounce">
+              <AlertCircle size={28} className="text-red-400" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-base font-bold text-white font-heading">
+                Pipeline Processing Failed
+              </h2>
+              <p className="text-xs text-white/60 max-w-md mx-auto leading-relaxed">
+                The background video ingestion and analysis pipeline failed after multiple retries. This could be due to network timeout, transcription service issues, or prompt injection validation.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              {project.videoUrl ? (
+                <Button
+                  onClick={handleRetryAnalysis}
+                  className="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs px-4 h-9 rounded-xl cursor-pointer"
+                >
+                  <RefreshCw size={12} className="mr-1.5" />
+                  Retry Analysis
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => router.push("/dashboard")}
+                  className="bg-white/10 hover:bg-white/20 text-white text-xs px-4 h-9 rounded-xl cursor-pointer"
+                >
+                  <ArrowLeft size={12} className="mr-1.5" />
+                  Re-upload Video
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/dashboard")}
+                className="text-white/60 hover:text-white text-xs px-4 h-9 rounded-xl"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          </Card>
+        ) : project.status !== "ready" && (
           <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-orange-950/20">
             <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-orange-500 animate-pulse" />
@@ -968,7 +1049,16 @@ export default function ProjectAnalysisPage() {
               )}
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex gap-2 sm:justify-end">
+              {renderError && renderingClip && (
+                <Button
+                  onClick={() => handleDownloadClick(renderingClip)}
+                  className="rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold text-xs px-4 h-9 cursor-pointer flex items-center gap-1.5"
+                >
+                  <RefreshCw size={12} className="mr-1.5" />
+                  Retry Render
+                </Button>
+              )}
               {(renderError || renderPct === 100) && (
                 <Button
                   onClick={() => {
