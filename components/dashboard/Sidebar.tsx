@@ -5,24 +5,15 @@ import {
   Home,
   Film,
   Calendar,
-  BarChart3,
   Sparkles,
-  Settings,
-  LogOut,
   Scissors,
-  User,
   Share2,
 } from "lucide-react";
-import { useUser, useClerk } from "@clerk/nextjs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 export function Sidebar() {
-  const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
   const pathname = usePathname();
 
   const menuItems = [
@@ -37,17 +28,6 @@ export function Sidebar() {
     { href: "/dashboard/schedule", label: "Schedule Posts", icon: Calendar },
   ] as const;
 
-  const userDisplayName =
-    isLoaded && user
-      ? `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-        user.username ||
-        "Creator"
-      : "Alex Vance";
-  const userEmail =
-    isLoaded && user
-      ? user.primaryEmailAddress?.emailAddress
-      : "alex@clipforge.ai";
-  const userAvatar = isLoaded && user ? user.imageUrl : "";
 
   return (
     <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/15 bg-forge-bg/90 backdrop-blur-xl px-4 py-6 md:flex">
@@ -111,52 +91,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Sidebar Footer Area */}
-      <div className="mt-auto space-y-4 border-t border-white/15 pt-4">
-        {/* User profile section */}
-        <div className="flex items-center gap-3 px-3 py-1.5">
-          <Avatar className="h-9 w-9 border border-white/10 ring-1 ring-forge-accent/20">
-            {userAvatar ? (
-              <AvatarImage src={userAvatar} alt={userDisplayName} />
-            ) : (
-              <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" />
-            )}
-            <AvatarFallback className="bg-forge-accent/10 text-forge-accent">
-              <User size={14} />
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col min-w-0">
-            <span className="font-sans text-xs font-semibold text-white truncate leading-none">
-              {userDisplayName}
-            </span>
-            <span className="mt-1 font-mono text-[10px] text-white/35 truncate">
-              {userEmail}
-            </span>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium cursor-pointer"
-          >
-            <Settings size={13} />
-            <span>Settings</span>
-          </Button>
-
-          <Button
-            onClick={() => signOut({ redirectUrl: "/" })}
-            variant="outline"
-            className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium hover:bg-red-500/10 hover:text-red-400 cursor-pointer transition-colors"
-          >
-            <LogOut
-              size={13}
-            />
-            <span>Logout</span>
-          </Button>
-        </div>
-      </div>
     </aside>
   );
 }
