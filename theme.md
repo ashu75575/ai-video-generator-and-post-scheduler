@@ -6,14 +6,14 @@ These rules MUST be followed by all agents working on this project. Violating th
 
 ## 1. Color Palette
 
-| Token                    | Value                              | Usage                                             |
-| ------------------------ | ---------------------------------- | ------------------------------------------------- |
-| `--color-forge-accent`   | `#7C6AFA`                          | Primary accent — CTAs, active states, highlights  |
-| `--color-forge-accent-2` | `#3ECFCF`                          | Secondary accent — badges, captions, teal accents |
-| `--color-forge-bg`       | `#05050A`                          | Page background (deep near-black)                 |
-| White text               | `text-white`                       | Headings only                                     |
-| Muted text               | `text-white/45` to `text-white/55` | Body copy                                         |
-| Subtle text              | `text-white/25` to `text-white/35` | Captions, timestamps, labels                      |
+| Token                    | Value                              | Usage                                            |
+| ------------------------ | ---------------------------------- | ------------------------------------------------ |
+| `--color-forge-accent`   | `#f78555`                          | Primary accent — CTAs, active states, highlights |
+| `--color-forge-accent-2` | `#f78555`                          | Secondary accent — badges, captions, accents     |
+| `--color-forge-bg`       | `#05050A`                          | Page background (deep near-black)                |
+| White text               | `text-white`                       | Headings only                                    |
+| Muted text               | `text-white/45` to `text-white/55` | Body copy                                        |
+| Subtle text              | `text-white/25` to `text-white/35` | Captions, timestamps, labels                     |
 
 **Never use plain Tailwind colors** (red-500, blue-500, etc.) for brand elements.  
 Use hex values with opacity modifiers (e.g., `#FF6B6B` for danger/energy accents).
@@ -59,8 +59,8 @@ rounded-[18px]  (or 14px for smaller cards, 20px for major panels)
 
 Shadow system:
 
-- `shadow-forge-glow` → `box-shadow: 0 0 40px rgba(124,106,250,0.35)`
-- `shadow-forge-panel` → `box-shadow: 0 0 80px rgba(124,106,250,0.2), 0 30px 60px rgba(0,0,0,0.5)`
+- `shadow-forge-glow` → `box-shadow: 0 0 40px rgba(234, 166, 94, 0.35)`
+- `shadow-forge-panel` → `box-shadow: 0 0 80px rgba(238, 131, 17, 0.193), 0 30px 60px rgba(0, 0, 0, 0.5)`
 
 ---
 
@@ -139,7 +139,7 @@ whileTap={{ scale: 0.97 }}
 ```tsx
 import { dark } from "@clerk/themes";
 
-<ClerkProvider appearance={{ baseTheme: dark, variables: { colorPrimary: "#7C6AFA", colorBackground: "#05050A", colorInputBackground: "#0d0d18", colorText: "#ffffff" } }}>
+<ClerkProvider appearance={{ baseTheme: dark, variables: { colorPrimary: "#f78555", colorBackground: "#05050A", colorInputBackground: "#0d0d18", colorText: "#ffffff" } }}>
 ```
 
 The `SignIn` and `SignUp` components on their dedicated pages must also set `appearance` matching the forge palette.
