@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       console.log(`[CACHE HIT] GET projects for user: ${userId}`);
       return NextResponse.json({
         success: true,
-        projects: cached,
+        projects: [], 
       });
     }
 
