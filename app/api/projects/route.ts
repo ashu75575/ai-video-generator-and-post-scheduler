@@ -18,8 +18,11 @@ export async function GET(req: NextRequest) {
 
     if (!db) {
       return NextResponse.json(
-        { error: "Database connection is not available." },
-        { status: 500 },
+        {
+          error:
+            "Database connection is not available. Set DATABASE_URL in your .env file and restart the dev server.",
+        },
+        { status: 503 },
       );
     }
 
@@ -29,7 +32,7 @@ export async function GET(req: NextRequest) {
       console.log(`[CACHE HIT] GET projects for user: ${userId}`);
       return NextResponse.json({
         success: true,
-        projects: [], 
+        projects: cached,
       });
     }
 
