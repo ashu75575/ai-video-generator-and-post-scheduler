@@ -872,7 +872,7 @@ export default function SchedulePage() {
                   AI Writing Hook & Hashtags...
                 </span>
                 <span className="text-[10px] text-white/30 max-w-xs">
-                  We are analyzing this clip&apos;s transcript using Gemini to
+                  We are analyzing this clip&apos;s transcript using Groq to
                   construct optimal visual hooks and hashtags for your platform.
                 </span>
               </div>

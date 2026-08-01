@@ -47,10 +47,12 @@ export default function MyVideosPage() {
   const loadProjects = async () => {
     try {
       const response = await fetch("/api/projects");
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error("Failed to load video library.");
+        throw new Error(
+          data.error || "Failed to load video library.",
+        );
       }
-      const data = await response.json();
       if (data.success) {
         setProjects(data.projects || []);
       }

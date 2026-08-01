@@ -19,8 +19,16 @@ export async function GET(
     }
 
     const cacheKey = `project_status:${projectId}`;
-    const cached = await cache.get<any>(cacheKey);
-    if (cached) {
+    const cached = await cache.get<{
+      status?: string;
+      progress?: number;
+    }>(cacheKey);
+
+    // Never serve cached in-progress statuses — with in-memory cache, Inngest
+    // invalidation may not reach the same isolate that served the poll, which
+    // leaves the UI stuck (e.g. generating_shorts @ 70%).
+    const terminalStatuses = new Set(["ready", "failed", "completed"]);
+    if (cached?.status && terminalStatuses.has(cached.status)) {
       console.log(`[CACHE HIT] GET status for project: ${projectId}`);
       return NextResponse.json(cached);
     }
@@ -57,16 +65,20 @@ export async function GET(
       updatedAt: project.updatedAt,
     };
 
-    // Cache project status for 1 hour (3600 seconds)
-    await cache.set(cacheKey, responseData, 3600);
+    // Only cache terminal states, and keep TTL short so UI recovers quickly.
+    if (terminalStatuses.has(project.status)) {
+      await cache.set(cacheKey, responseData, 30);
+    } else {
+      // Drop any stale in-progress entry left from earlier polls.
+      await cache.del(cacheKey);
+    }
 
     return NextResponse.json(responseData);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ Get project status route error:", err);
-    return NextResponse.json(
-      { error: err.message || "Internal server error" },
-      { status: 500 },
-    );
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

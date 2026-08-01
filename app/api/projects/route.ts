@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { cache } from "@/lib/redis";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const authResult = await auth();
     const userId = authResult?.userId;
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     }
 
     const cacheKey = `projects:${userId}`;
-    const cached = await cache.get<any[]>(cacheKey);
+    const cached = await cache.get(cacheKey);
     if (cached) {
       console.log(`[CACHE HIT] GET projects for user: ${userId}`);
       return NextResponse.json({
@@ -50,12 +50,11 @@ export async function GET(req: NextRequest) {
       success: true,
       projects: userProjects,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ GET projects route error:", err);
-    return NextResponse.json(
-      { error: err.message || "Internal server error" },
-      { status: 500 },
-    );
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

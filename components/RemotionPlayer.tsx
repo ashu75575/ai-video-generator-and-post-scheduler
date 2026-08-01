@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { Video, useCurrentFrame, useVideoConfig } from "remotion";
-import { CaptionStyle } from "@/lib/caption-styles";
+import {
+  ShortVideoComposition,
+  type CaptionStyleProps,
+} from "@/remotion/ShortVideoComposition";
 
 interface Word {
   word: string;
@@ -17,142 +19,8 @@ interface RemotionPlayerProps {
   startTime: number;
   endTime: number;
   captions: Word[];
-  captionStyle?: CaptionStyle;
+  captionStyle?: CaptionStyleProps;
 }
-
-// Composition Component rendered inside Remotion Player
-const ShortVideoComposition: React.FC<RemotionPlayerProps> = ({
-  videoUrl,
-  startTime,
-  endTime,
-  captions,
-  captionStyle,
-}) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  // Current playback time in seconds, calculated frame-accurately
-  const currentTime = startTime + frame / fps;
-
-  // Find index of the active word in the captions array
-  const activeIndex = captions
-    ? captions.findIndex((w) => currentTime >= w.start && currentTime <= w.end)
-    : -1;
-
-  const CHUNK_SIZE = 3;
-  let wordGroup: Word[] = [];
-  let groupStart = -1;
-
-  if (activeIndex !== -1 && captions) {
-    groupStart = Math.floor(activeIndex / CHUNK_SIZE) * CHUNK_SIZE;
-    const groupEnd = Math.min(groupStart + CHUNK_SIZE, captions.length);
-    wordGroup = captions.slice(groupStart, groupEnd);
-  }
-
-  const startFrame = Math.round(startTime * fps);
-
-  return (
-    <div
-      style={{
-        flex: 1,
-        backgroundColor: "#000",
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
-      <Video
-        src={videoUrl}
-        startFrom={startFrame}
-        pauseWhenBuffering={true}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
-
-      {wordGroup.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            pointerEvents: "none",
-            zIndex: 10,
-            padding: "0 6%",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor:
-                captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)",
-              padding: captionStyle?.padding || "24px 44px",
-              borderRadius: captionStyle?.borderRadius || "32px",
-              border: captionStyle?.border || "none",
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: captionStyle?.gap || "24px",
-              maxWidth: "92%",
-              wordBreak: "break-word",
-            }}
-          >
-            {wordGroup.map((w, idx) => {
-              const globalIdx = groupStart + idx;
-              const isCurrent = globalIdx === activeIndex;
-
-              return (
-                <span
-                  key={globalIdx}
-                  style={{
-                    fontFamily:
-                      captionStyle?.fontFamily ||
-                      "Impact, Arial Black, sans-serif",
-                    color: isCurrent
-                      ? captionStyle?.colorActive || "#facc15"
-                      : captionStyle?.colorInactive || "#ffffff",
-                    fontSize: isCurrent
-                      ? captionStyle?.fontSizeActive || "5.4rem"
-                      : captionStyle?.fontSizeInactive || "4.8rem",
-                    fontWeight: 900,
-                    textTransform: captionStyle?.textTransform || "uppercase",
-                    letterSpacing: captionStyle?.letterSpacing || "0.04em",
-                    transform: isCurrent ? "scale(1.1)" : "scale(1.0)",
-                    transition:
-                      "transform 0.05s ease-out, color 0.05s ease-out",
-                    display: "inline-block",
-                    textShadow:
-                      captionStyle?.textShadow ||
-                      `
-                      -4px -4px 0 #000,
-                       4px -4px 0 #000,
-                      -4px  4px 0 #000,
-                       4px  4px 0 #000,
-                       0px  6px 12px rgba(0, 0, 0, 0.9)
-                    `,
-                    animation: isCurrent
-                      ? "scaleIn 0.08s ease-out forwards"
-                      : "none",
-                  }}
-                >
-                  {w.word}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default function RemotionPlayer({
   videoUrl,
@@ -182,14 +50,19 @@ export default function RemotionPlayer({
 
   const fps = 30;
   const durationInSeconds = endTime - startTime;
-  // Fallback to at least 1 second if duration is invalid
   const durationInFrames = Math.max(30, Math.round(durationInSeconds * fps));
 
   return (
     <div className="relative aspect-9/16 w-full max-w-[340px] mx-auto rounded-3xl overflow-hidden border ">
       <Player
         component={ShortVideoComposition}
-        inputProps={{ videoUrl, startTime, endTime, captions, captionStyle }}
+        inputProps={{
+          videoUrl,
+          startTime,
+          endTime,
+          captions,
+          captionStyle: captionStyle || null,
+        }}
         durationInFrames={durationInFrames}
         fps={fps}
         compositionWidth={1080}

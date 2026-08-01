@@ -1,210 +1,339 @@
-# 🎬 ClipForge AI — Video Generator & Post Scheduler
+# ClipForge AI — Video Generator & Post Scheduler
 
-ClipForge AI is an advanced, automated, enterprise-grade video processing application built with [Next.js](https://nextjs.org) and [Remotion](https://www.remotion.dev). It enables users to upload long-form video content, automatically transcribe audio, extract the most engaging highlights using Google Gemini AI, style customizable captions, render short vertical video compositions using AWS Lambda, and schedule posts across major platforms (TikTok, Instagram Reels, YouTube Shorts) utilizing the Zernio API.
-
----
-
-## 🚀 Key Features
-
-- **Secure Video Uploads**: Validated by [Arcjet](https://arcjet.com) Web Application Firewall (Shield), bot protection, and user-rate limits (3 uploads/day).
-- **Deepgram AI Speech-to-Text**: Fast, sub-second transcription with word-level start and end timestamps.
-- **Gemini AI Viral Highlight Identification**: Auto-clipping driven by [Gemini 2.5 Flash](https://aistudio.google.com) to find engaging, hook-centric moments with explainability and SEO ranking metrics.
-- **Dynamic Caption Generator**: Grouped, multi-word stylized text overlays supporting user-defined custom properties (font family, colors, shadows, border-radii, backgrounds, scale adjustments).
-- **Headless AWS Lambda Rendering**: Powered by Remotion Lambda for distributed, highly parallelized, fast rendering of 9:16 vertical compositions.
-- **Social Accounts Connection & Post Scheduler**: Full cross-platform account authentication, account sync, and scheduled publishing pipeline driven by the [Zernio API](https://zernio.com).
-- **Robust Background Pipelines & Failure Recovery**: Managed by [Inngest](https://www.inngest.com) for event-driven, fault-tolerant execution steps with configured retries, `onFailure` status update/cache invalidation hooks, and client-side retry/recovery options (e.g. Retry Analysis, Retry Render).
-- **Redis Caching Layer**: High-performance caching using Redis (via `ioredis` with an in-memory fallback cache) to cache server-side queries for projects, clips, and scheduled posts, invalidating cache states automatically via event hooks in Inngest background tasks.
-- **User Profile Settings**: Dedicated account configuration settings page coupled with dynamic Clerk database syncing APIs.
+ClipForge AI is an automated video processing application built with [Next.js](https://nextjs.org) and [Remotion](https://www.remotion.dev). Users upload long-form video, get audio transcribed, extract engaging short clips with Groq AI, style captions, render 9:16 compositions on AWS Lambda, and schedule posts to TikTok, Instagram Reels, and YouTube Shorts via the Zernio API.
 
 ---
 
+## Key Features
 
-### Component Breakdown
-
-1.  **Frontend (Next.js client-side UI)**: Uses [DM Sans](https://fonts.google.com/specimen/DM+Sans) and [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), glassmorphism cards, and Framer Motion transitions. Includes a dedicated Settings page to configure profiles, and a player component integrating `@remotion/player` for live, real-time caption styling preview before rendering.
-2.  **API Gateway (Next.js App Router)**: Standardized serverless routes for uploading media, querying project analysis statuses, updating user profile settings, generating captions, connecting social profiles, and scheduling posts.
-3.  **Security Layer (Arcjet)**: Runs on the edge/serverless boundaries in [lib/arcjet.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/lib/arcjet.ts) to intercept requests before executing business logic, protecting against bots and malicious prompt injections.
-4.  **Database Layer (Neon + Drizzle ORM)**: PostgreSQL schemas located in [lib/db/schema.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/lib/db/schema.ts) that represent relations between user records, project statuses, short clip metadata, social platform credentials, and scheduled queues.
-5.  **Distributed Video Rendering Pipeline (AWS Lambda + Remotion)**: Renders composition files dynamically. Sources video from S3 via re-signed query links with checksum calculation disabled, avoiding browser-level render delays.
-6.  **Background Processor (Inngest Dev/Production Server)**: An external runner that polls the Next.js API `/api/inngest` endpoint to run decoupled steps in [lib/inngest/functions.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/lib/inngest/functions.ts) with concurrency limitations, automated state-polling retry logic (configured with `retries: 2` and `onFailure` fallback logic to clean up temporary files/assets and mark project status as `failed` in db).
-7.  **Caching Layer (Redis / In-memory)**: Defined in [lib/redis.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/lib/redis.ts). Uses Redis (via `ioredis` with an in-memory fallback cache) to cache server-side queries for projects, clips, and scheduled posts, invalidating cache states automatically via event hooks in Inngest background tasks.
-
----
-
-## 🛠️ Database Schema Design
-
-The application's relational data model is defined inside [lib/db/schema.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/lib/db/schema.ts):
-
-- **`users`**: Synced profile record of users authenticated via Clerk. Contains user info and their corresponding `zernioProfileId`.
-- **`projects`**: Tracks uploaded source videos. Columns include execution state (`status` e.g., transcribing, ready), progress percentage, original S3 video URL, full transcript text, and complete transcript captions JSON.
-- **`short_videos`**: Holds individual clips segmented from long videos. Columns include start/end boundaries, AI rating details, customized caption styles JSON, export URL, and Remotion rendering job metrics (`renderStatus` and `renderJobId`).
-- **`social_accounts`**: Stores profiles connected via Zernio (TikTok, YouTube, Instagram, etc.), matching their profile indicators back to local user identifiers.
-- **`scheduled_posts`**: Post schedule configurations, storing the target platform, scheduled time, post title/description copy, and execution queue status (`pending`, `posted`, `failed`).
+- **Secure Video Uploads**: Validated by [Arcjet](https://arcjet.com) (Shield, bot protection, rate limits).
+- **Deepgram Speech-to-Text**: Word-level timestamps for captions and clip boundaries.
+- **Groq AI Highlight Detection**: Auto-clipping with [`llama-3.3-70b-versatile`](https://console.groq.com) (chunked prompts for free-tier TPM limits).
+- **Dynamic Captions**: Multi-word stylized overlays with customizable fonts, colors, and shadows.
+- **Remotion Lambda Rendering**: Distributed 9:16 renders using `@remotion/media` during Lambda execution.
+- **Social Scheduling**: Account connect + scheduled publishing via [Zernio](https://zernio.com).
+- **Background Jobs (Inngest)**: Upload → analyze → render pipelines with retries and failure hooks.
+- **Caching**: Redis via `ioredis`, with automatic in-memory fallback when `REDIS_URL` is unset.
+- **Auth & Profiles**: Clerk authentication with Neon-synced user profiles.
 
 ---
 
-## 📋 Prerequisites
+## Architecture
 
-Ensure you have the following installed on your machine:
+1. **Frontend (Next.js)** — Dashboard UI, Remotion Player preview, settings.
+2. **API routes** — Upload, project status, clip render, social connect, scheduling.
+3. **Arcjet** — Bot / WAF / prompt-injection guards (`lib/arcjet.ts`).
+4. **Neon + Drizzle** — Schema in `lib/db/schema.ts`.
+5. **S3 (`AWS_BUCKET_NAME`)** — Private storage for user-uploaded source videos (presigned URLs).
+6. **Remotion Lambda** — Function + site bucket (`REMOTION_BUCKET_NAME`) for composition bundles and render outputs.
+7. **Inngest** — Background steps in `lib/inngest/functions.ts`.
+8. **Cache** — `lib/redis.ts` (Redis or in-memory).
 
-- [Node.js](https://nodejs.org) (v18.x or v20.x recommended)
-- [npm](https://www.npmjs.com) or [pnpm](https://pnpm.io)
-- An AWS Account (with IAM user permissions for S3 and Lambda)
-- Accounts & API keys for the third-party providers listed in the environment variables setup below.
+### Two S3 buckets (do not mix)
+
+| Env var | Purpose | Example |
+|---|---|---|
+| `AWS_BUCKET_NAME` | **User uploads** (source videos) | `clipforge-project` |
+| `REMOTION_BUCKET_NAME` | **Remotion** site bundles + render artifacts | `remotionlambda-eunorth1-xxxxx` |
+
+These must be **different buckets**, but in the **same AWS region** as `AWS_REGION`, the Remotion function, and `REMOTION_SERVE_URL`.
 
 ---
 
-## ⚙️ Setup and Installation Guide
+## Database Schema
 
-### Step 1: Clone the Repository
+Defined in `lib/db/schema.ts`:
+
+- **`users`** — Clerk-synced profiles + optional `zernioProfileId`
+- **`projects`** — Source videos, status/progress, transcript, captions, S3 URL
+- **`short_videos`** — Clip windows, AI metadata, caption styles, `exportUrl`, `renderStatus`
+- **`social_accounts`** — Connected platforms via Zernio
+- **`scheduled_posts`** — Queue of posts (`pending` / `posted` / `failed`)
+
+---
+
+## Prerequisites
+
+- Node.js 18+ or 20+
+- npm
+- AWS account (IAM user with S3 + Lambda permissions)
+- API keys for Clerk, Neon, Deepgram, Groq, Arcjet, Zernio (see `.env.example`)
+
+---
+
+## Setup and Installation
+
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/ashu75575/ai-video-generator-and-post-scheduler.git
-cd "ai video generator and post scheduler"
-```
-
-### Step 2: Install Dependencies
-
-```bash
+cd ai-video-generator-and-post-scheduler
 npm install
 ```
 
-### Step 3: Configure Environment Variables
+### 2. Environment variables
 
-1. Copy the environment variables template file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open the newly created `.env` file and populate it with your specific API credentials. For details on what each variable does and where to get them, inspect [.env.example](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/.env.example).
+```bash
+cp .env.example .env.local
+```
 
-> [!IMPORTANT]
-> Make sure `DATABASE_URL` is set to your Neon PostgreSQL database, and your S3 bucket allows read access for Remotion Lambda renders.
+Fill in values from `.env.example`. At minimum for local video pipelines:
 
-### Step 4: Sync the Database Schema
+- `DATABASE_URL`
+- `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET_NAME`
+- `DEEPGRAM_API_KEY`, `GROQ_API_KEY`
+- `REMOTION_SERVE_URL`, `REMOTION_BUCKET_NAME`, `REMOTION_FUNCTION_NAME`
+- `INNGEST_DEV=1` (local)
 
-Sync your schemas directly with Neon PostgreSQL using Drizzle Kit:
+> Redis (`REDIS_URL`) is optional. If unset or unreachable, the app falls back to in-memory cache.
+
+### 3. Database
 
 ```bash
 npx drizzle-kit push
-```
-
-If you need to view and manage database tables locally, run:
-
-```bash
+# optional UI:
 npx drizzle-kit studio
 ```
 
-### Step 5: Setup and Start Inngest Local Dev Server
+---
 
-Inngest is used to handle background video uploads, transcription calls, AI clipping, and video rendering state loops.
+## AWS setup — user video storage
 
-Start the Inngest local simulator pointing to your application's API endpoint:
+Use **one region** for everything (example: `eu-north-1`).
+
+### 1. Create the videos bucket
+
+1. AWS Console → **S3 → Create bucket**
+2. Name: e.g. `clipforge-project` (globally unique)
+3. Region: same as `AWS_REGION`
+4. Keep **Block Public Access** enabled (app uses private + presigned URLs)
+
+### 2. Configure CORS on that bucket
+
+S3 → bucket → **Permissions → CORS**:
+
+```json
+[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["GET", "HEAD", "PUT", "POST"],
+    "AllowedOrigins": ["*"],
+    "ExposeHeaders": ["ETag", "Content-Length", "Content-Range", "Accept-Ranges"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Restrict `AllowedOrigins` to your domains in production.
+
+### 3. Create an IAM user
+
+1. IAM → Users → create e.g. `clipforge-app`
+2. Create an access key (Application running outside AWS)
+3. Put keys in `.env.local` as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+4. Attach S3 access for `AWS_BUCKET_NAME`, plus Remotion policies (next section)
+
+Upload flow: local temp file → `s3://AWS_BUCKET_NAME/projects/{projectId}/...` → presigned GET URL stored on the project.
+
+---
+
+## AWS setup — Remotion Lambda
+
+Follow [Remotion Lambda setup](https://www.remotion.dev/docs/lambda/setup) for full IAM details. Summary:
+
+### 1. Export credentials in your shell
 
 ```bash
-npx inngest-cli@latest dev -u http://localhost:3000/api/inngest
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_REGION=eu-north-1
 ```
 
-Keep this process running in a separate terminal window.
+### 2. Apply Remotion IAM policies
 
-### Step 6: Deploy Remotion Lambda (AWS Setup)
+```bash
+npx remotion lambda policies role
+npx remotion lambda policies user
+npx remotion lambda policies validate --region=eu-north-1
+```
 
-To enable video rendering on AWS Lambda, you need to configure and deploy the Remotion project:
+Attach the printed policy JSON to your IAM user / role as documented by Remotion.
 
-1. **Deploy the Lambda Function**:
-   Run the following command to set up the necessary Lambda function layers in your preferred AWS region (must match `AWS_REGION` in `.env`):
-   ```bash
-   npx remotion lambda functions deploy --region=eu-north-1
-   ```
-2. **Deploy the Render Site Bundle**:
-   Bundles your composition components (located in [remotion/ShortVideoComposition.tsx](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/remotion/ShortVideoComposition.tsx)) and uploads them to an S3 site bundle:
-   ```bash
-   npx remotion lambda sites create remotion/index.ts --site-name=clipforge-site --region=eu-north-1
-   ```
-3. **Update Environment variables**:
-   Once the site is created and the function is deployed:
-   - Copy the S3 URL generated during the site creation process and save it as `REMOTION_SERVE_URL` in `.env`.
-   - Copy the generated S3 bucket name and save it as `REMOTION_BUCKET_NAME`.
-   - Run `npx remotion lambda functions ls --region=eu-north-1` to view your function names. Copy the exact function name and save it as `REMOTION_FUNCTION_NAME`.
+### 3. Deploy the Lambda function
+
+Prefer **240s timeout** and ~3GB memory for ~60–90s 1080×1920 clips (120s functions often abort during stitching):
+
+```bash
+npx remotion lambda functions deploy \
+  --region=eu-north-1 \
+  --memory=3008 \
+  --disk=2048 \
+  --timeout=240
+```
+
+List and copy the exact function name:
+
+```bash
+npx remotion lambda functions ls --region=eu-north-1
+```
+
+### 4. Deploy the Remotion site (composition bundle)
+
+**Same region** as the function and video bucket:
+
+```bash
+npx remotion lambda sites create remotion/index.ts \
+  --site-name=clipforge-site \
+  --region=eu-north-1
+```
+
+From the output, set:
+
+- Serve URL → `REMOTION_SERVE_URL`
+- Bucket name → `REMOTION_BUCKET_NAME`
+
+```bash
+npx remotion lambda sites ls --region=eu-north-1
+```
+
+### 5. Example `.env.local` Remotion block
+
+```bash
+AWS_REGION=eu-north-1
+AWS_BUCKET_NAME=clipforge-project
+
+REMOTION_SERVE_URL=https://remotionlambda-eunorth1-xxxxx.s3.eu-north-1.amazonaws.com/sites/clipforge-site/index.html
+REMOTION_BUCKET_NAME=remotionlambda-eunorth1-xxxxx
+REMOTION_FUNCTION_NAME=remotion-render-4-0-469-mem3008mb-disk2048mb-240sec
+```
+
+### 6. Redeploy the site after composition changes
+
+Whenever you change files under `remotion/`:
+
+```bash
+npx remotion lambda sites create remotion/index.ts \
+  --site-name=clipforge-site \
+  --region=eu-north-1
+```
 
 ---
 
-## 🖥️ Running the Project in Localhost
+## Inngest (background jobs)
 
-To run ClipForge AI locally, you must run the Next.js development server and the Inngest dev server concurrently:
+Locally, events must go to the Dev Server (not Inngest Cloud):
 
-1.  **Start Inngest Dev Server** (in Terminal A):
-    ```bash
-    npx inngest-cli@latest dev -u http://localhost:3000/api/inngest
-    ```
-2.  **Start Next.js App** (in Terminal B):
-    ```bash
-    npm run dev
-    ```
-3.  Open [http://localhost:3000](http://localhost:3000) on your web browser.
-4.  Open the Inngest dashboard at [http://localhost:8288](http://localhost:8288) to monitor background jobs and event delivery logs.
+```bash
+# .env.local
+INNGEST_DEV=1
+```
+
+Start the Dev Server (default UI: http://localhost:8288):
+
+```bash
+npm run dev:inngest
+# equivalent:
+# npx inngest-cli@latest dev -u http://localhost:3000/api/inngest
+```
+
+For production, unset `INNGEST_DEV` and set `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` from [app.inngest.com](https://app.inngest.com).
 
 ---
 
-## 🔗 Zernio Social Media Setup
+## Running locally
 
-ClipForge AI integrates with Zernio to link and post to TikTok, YouTube, and Instagram:
+You need **two terminals**:
 
-1.  When a user links an account, the backend route [app/api/social/connect/route.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/app/api/social/connect/route.ts) checks if the user has a linked `zernioProfileId` in the local DB.
-2.  If not, it calls Zernio's `/api/v1/profiles` endpoint using the `ZERNIO_API_KEY` to create a new profile for the user and saves it.
-3.  It then fetches an oauth URL from Zernio (`https://zernio.com/api/v1/connect/[platform]`) and redirects the user to complete social authentication.
-4.  Once connected, the accounts are synced locally in the database via the API route [app/api/social/accounts/route.ts](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/app/api/social/accounts/route.ts).
+**Terminal A — Inngest**
+
+```bash
+npm run dev:inngest
+```
+
+**Terminal B — Next.js**
+
+```bash
+npm run dev
+```
+
+Then open:
+
+- App: http://localhost:3000  
+- Inngest: http://localhost:8288  
+
+### Quick verification
+
+1. Upload a video → object appears under `projects/` in `AWS_BUCKET_NAME`
+2. Start analysis → Inngest runs transcription + Groq clipping
+3. Render a clip → Remotion Lambda job completes; `exportUrl` is set on the clip
+
+Optional CLI render smoke test:
+
+```bash
+npx remotion lambda render \
+  "$REMOTION_SERVE_URL" \
+  ShortVideo \
+  --region=eu-north-1 \
+  --function-name="$REMOTION_FUNCTION_NAME" \
+  --props='{"videoUrl":"HTTPS_PRESIGNED_URL","startTime":0,"endTime":15,"captions":[],"captionStyle":null}' \
+  --log=verbose
+```
 
 ---
 
-## 🤝 Contributing Guide
+## Troubleshooting
 
-We welcome contributions to ClipForge AI! Please review these guidelines before submitting a Pull Request (PR).
+| Symptom | Likely cause |
+|---|---|
+| `Event key not found` (401) from Inngest | Dev Server not running, or `INNGEST_DEV` unset |
+| UI stuck at 70% after analysis | Stale status cache; ensure latest status route (in-progress statuses are not cached) |
+| Groq `TPM` / request too large | Long transcripts are chunked automatically; wait between chunks or upgrade Groq tier |
+| Remotion `Too many functions` | Clip too long / low `framesPerLambda` (app clamps clips to ≤90s and scales concurrency) |
+| Remotion stitcher `AbortError` / ~120s timeout | Function timeout too low, or **region mismatch** between site / function / video bucket |
+| Cross-region site vs function | Keep `AWS_REGION`, `REMOTION_SERVE_URL`, and function all in one region |
 
-### Development Process & Branching Strategy
+CloudWatch for a failed render (`renderId=...`):
 
-We follow the standard Git Flow branching model:
+- Chunks: `method=renderer,renderId=...`
+- Main/stitcher: `method=launch,renderId=...`
 
-- `main`: Holds the current production-ready stable release. Direct commits to `main` are strictly forbidden.
-- `develop`: The integration branch for features and fixes.
-- `feature/your-feature-name`: Branch off of `develop` for individual features.
-- `bugfix/your-fix-name`: Branch off of `develop` for bug fixes.
+---
 
-**Pull Request Workflow**:
+## Zernio social setup
 
-1. Branch off `develop` to create your feature branch: `git checkout -b feature/my-cool-feature`.
-2. Commit your changes locally. Follow the commit style guide below.
-3. Push to your origin branch and open a Pull Request targeting `develop`.
-4. Ensure the codebase passes building (`npm run build`) and linting rules (`npm run lint`).
-5. A project maintainer will review the code before merging.
+1. User connects an account via `app/api/social/connect/route.ts`
+2. If needed, a Zernio profile is created with `ZERNIO_API_KEY` and stored on the user
+3. OAuth URL from Zernio completes platform auth
+4. Accounts sync through `app/api/social/accounts/route.ts`
 
-### Commit Message Guidelines
+---
 
-We use conventional commit format. Commit messages must follow this structure:
+## Contributing
+
+### Branching
+
+- `main` — production
+- `develop` — integration
+- `feature/...` / `bugfix/...` — off `develop`
+
+Open PRs against `develop`. Run `npm run build` and `npm run lint` before requesting review.
+
+### Commits
 
 ```
-<type>(<scope>): <short summary description>
+<type>(<scope>): <short summary>
 ```
 
-**Types**:
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`.
 
-- `feat`: A new feature (e.g. `feat(captions): add custom font size controls`).
-- `fix`: A bug fix (e.g. `fix(lambda): resolve checksum issue with AWS URL signing`).
-- `docs`: Documentation changes only.
-- `style`: Code layout adjustments, indentation, prettier updates (no functional changes).
-- `refactor`: Structural code edits that do not alter public APIs or fix bugs.
-- `perf`: Performance optimizations.
-- `test`: Adding or correcting tests.
+### Code style
 
-### Code Style & UX Consistency
+1. Dark UI baseline (`#05050A`); no light-theme toggles.
+2. Typography: `font-sans` (DM Sans), `font-heading` (Space Grotesk).
+3. Accent: `--color-forge-accent` / `#f78555` (see `theme.md`).
+4. Format before PR:
 
-This project adheres to a strict styling policy:
-
-1.  **Dark Mode First**: The system utilizes a deep near-black background (`#05050A`). Do not add light theme toggles.
-2.  **Typography**: Always use `font-sans` ([DM Sans](https://fonts.google.com/specimen/DM+Sans)) for general copy and `font-heading` ([Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk)) with tight tracking for bold headers.
-3.  **Color System**: Reference colors from [theme.md](file:///Users/ishpaulsingh/Desktop/ai%20video%20generator%20and%20post%20scheduler/theme.md). Primary accent must be `--color-forge-accent` (`#f78555` / Orange). Avoid raw Tailwind base colors.
-4.  **Glassmorphism**: Cards and floating panels should utilize subtle transparent white backgrounds (`bg-white/[0.03]`), borders (`border-white/8`), and heavy backdrop blurs (`backdrop-blur-xl`).
-5.  **Prettier & Linting**: Always format your changes before proposing them:
-    ```bash
-    npm run prettier
-    npm run lint
-    ```
+```bash
+npm run prettier
+npm run lint
+```

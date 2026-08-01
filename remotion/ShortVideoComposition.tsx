@@ -1,5 +1,12 @@
-import React from "react";
-import { Video, useCurrentFrame, useVideoConfig } from "remotion";
+import React, { useMemo } from "react";
+import {
+  AbsoluteFill,
+  Html5Video,
+  useCurrentFrame,
+  useRemotionEnvironment,
+  useVideoConfig,
+} from "remotion";
+import { Video as MediaVideo } from "@remotion/media";
 
 // ---- Types ----
 export interface CaptionStyleProps {
@@ -36,15 +43,10 @@ export interface ShortVideoCompositionProps {
   captionStyle: CaptionStyleProps | null;
 }
 
-// Pixel conversion for Remotion: font sizes in rem are designed for the browser
-// where 1rem ≈ 16px but Remotion renders in a 1080×1920 canvas.
-// We treat the style values as pixel values (e.g. "5.4rem" → 86px at 16x scale).
 function remToPx(remStr: string | undefined, fallback: number): number {
   if (!remStr) return fallback;
   const val = parseFloat(remStr);
   if (isNaN(val)) return fallback;
-  // In the 1080px wide canvas, original design targets ~1080px wide player
-  // So treat rem × 16 as browser pixels, then scale for 1080px canvas.
   return val * 16;
 }
 
@@ -53,6 +55,32 @@ function parsePxOrRem(val: string | undefined, fallback: number): number {
   if (val.includes("rem")) return remToPx(val, fallback);
   if (val.includes("px")) return parseFloat(val);
   return parseFloat(val) || fallback;
+}
+
+/**
+ * Binary search for the active caption word at `currentTime`.
+ * Captions from Deepgram are time-ordered; O(log n) beats per-frame findIndex.
+ */
+function findActiveCaptionIndex(captions: Word[], currentTime: number): number {
+  if (!captions.length) return -1;
+
+  let lo = 0;
+  let hi = captions.length - 1;
+  let candidate = -1;
+
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (captions[mid].start <= currentTime) {
+      candidate = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  if (candidate === -1) return -1;
+  const word = captions[candidate];
+  return currentTime <= word.end ? candidate : -1;
 }
 
 export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
@@ -64,91 +92,106 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const env = useRemotionEnvironment();
 
+  const startFrame = Math.max(0, Math.round(startTime * fps));
+  const endFrame = Math.max(startFrame + 1, Math.round(endTime * fps));
   const currentTime = startTime + frame / fps;
 
-  const activeIndex =
-    captions && captions.length > 0
-      ? captions.findIndex(
-          (w) => currentTime >= w.start && currentTime <= w.end,
-        )
-      : -1;
+  const activeIndex = useMemo(
+    () => findActiveCaptionIndex(captions ?? [], currentTime),
+    [captions, currentTime],
+  );
 
   const CHUNK_SIZE = 3;
-  let wordGroup: Word[] = [];
-  let groupStart = -1;
+  const groupStart =
+    activeIndex === -1 ? -1 : Math.floor(activeIndex / CHUNK_SIZE) * CHUNK_SIZE;
+  const wordGroup =
+    groupStart === -1 || !captions
+      ? []
+      : captions.slice(groupStart, groupStart + CHUNK_SIZE);
 
-  if (activeIndex !== -1 && captions) {
-    groupStart = Math.floor(activeIndex / CHUNK_SIZE) * CHUNK_SIZE;
-    const groupEnd = Math.min(groupStart + CHUNK_SIZE, captions.length);
-    wordGroup = captions.slice(groupStart, groupEnd);
-  }
+  const styles = useMemo(() => {
+    const fontFamily =
+      captionStyle?.fontFamily || "Impact, Arial Black, sans-serif";
+    const textTransform =
+      (captionStyle?.textTransform as React.CSSProperties["textTransform"]) ||
+      "uppercase";
+    const colorActive = captionStyle?.colorActive || "#facc15";
+    const colorInactive = captionStyle?.colorInactive || "#ffffff";
+    const bgColor = captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)";
+    const borderRadius = parsePxOrRem(captionStyle?.borderRadius, 32);
+    const border = captionStyle?.border || "none";
+    const letterSpacing = captionStyle?.letterSpacing || "0.04em";
+    const gap = parsePxOrRem(captionStyle?.gap, 24);
+    const fontSizeActive =
+      remToPx(captionStyle?.fontSizeActive || "5.4rem", 86) * 1.5;
+    const fontSizeInactive =
+      remToPx(captionStyle?.fontSizeInactive || "4.8rem", 77) * 1.5;
+    const textShadow =
+      captionStyle?.textShadow ||
+      `-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0px 6px 12px rgba(0,0,0,0.9)`;
+    const paddingRaw = captionStyle?.padding || "24px 44px";
+    const paddingParts = paddingRaw.split(" ");
+    const paddingV = parsePxOrRem(paddingParts[0], 24) * 1.5;
+    const paddingH =
+      parsePxOrRem(paddingParts[1] || paddingParts[0], 44) * 1.5;
 
-  const startFrame = Math.round(startTime * fps);
+    return {
+      fontFamily,
+      textTransform,
+      colorActive,
+      colorInactive,
+      bgColor,
+      borderRadius,
+      border,
+      letterSpacing,
+      gap,
+      fontSizeActive,
+      fontSizeInactive,
+      textShadow,
+      paddingV,
+      paddingH,
+    };
+  }, [captionStyle]);
 
-  // ------ Caption style values ------
-  const fontFamily =
-    captionStyle?.fontFamily || "Impact, Arial Black, sans-serif";
-  const textTransform: React.CSSProperties["textTransform"] =
-    (captionStyle?.textTransform as React.CSSProperties["textTransform"]) ||
-    "uppercase";
-  const colorActive = captionStyle?.colorActive || "#facc15";
-  const colorInactive = captionStyle?.colorInactive || "#ffffff";
-  const bgColor = captionStyle?.backgroundColor || "rgba(5, 5, 10, 0.88)";
-  const borderRadius = parsePxOrRem(captionStyle?.borderRadius, 32);
-  const border = captionStyle?.border || "none";
-  const letterSpacing = captionStyle?.letterSpacing || "0.04em";
-  const gap = parsePxOrRem(captionStyle?.gap, 24);
-
-  // Scale font sizes: the composition is 1080px wide.
-  // Original sizes like 5.4rem (≈86px) look right in browser at ~400px wide preview.
-  // For the 1080px canvas we use larger sizes proportionally.
-  const fontSizeActiveRaw = captionStyle?.fontSizeActive || "5.4rem";
-  const fontSizeInactiveRaw = captionStyle?.fontSizeInactive || "4.8rem";
-  // We'll scale up the font sizes for the high-res canvas
-  const fontSizeActive = remToPx(fontSizeActiveRaw, 86) * 1.5;
-  const fontSizeInactive = remToPx(fontSizeInactiveRaw, 77) * 1.5;
-
-  const textShadow =
-    captionStyle?.textShadow ||
-    `-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0px 6px 12px rgba(0,0,0,0.9)`;
-
-  // Padding: parse for top/bottom and left/right
-  const paddingRaw = captionStyle?.padding || "24px 44px";
-  const paddingParts = paddingRaw.split(" ");
-  const paddingV = parsePxOrRem(paddingParts[0], 24) * 1.5;
-  const paddingH = parsePxOrRem(paddingParts[1] || paddingParts[0], 44) * 1.5;
+  const videoStyle: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  };
 
   return (
-    <div
-      style={{
-        flex: 1,
-        backgroundColor: "#000",
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
-      <Video
-        src={videoUrl}
-        startFrom={startFrame}
-        pauseWhenBuffering={true}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
+    <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
+      {/*
+        Lambda bottleneck fix:
+        Html5 <Video> + pauseWhenBuffering caused chunk workers to hang while
+        seeking/buffering remote S3 media (missing chunks → main timeout).
+
+        - While rendering: @remotion/media Video (WebCodecs, partial downloads)
+        - In Player/Studio preview: Html5Video for simple browser playback
+      */}
+      {env.isRendering ? (
+        <MediaVideo
+          src={videoUrl}
+          trimBefore={startFrame}
+          trimAfter={endFrame}
+          style={videoStyle}
+          // Prefer fast path; fall back to OffthreadVideo if codec unsupported
+          toneFrequency={1}
+        />
+      ) : (
+        <Html5Video
+          src={videoUrl}
+          trimBefore={startFrame}
+          trimAfter={endFrame}
+          style={videoStyle}
+        />
+      )}
 
       {wordGroup.length > 0 && (
-        <div
+        <AbsoluteFill
           style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -159,18 +202,18 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
         >
           <div
             style={{
-              backgroundColor: bgColor,
-              paddingTop: paddingV,
-              paddingBottom: paddingV,
-              paddingLeft: paddingH,
-              paddingRight: paddingH,
-              borderRadius,
-              border,
+              backgroundColor: styles.bgColor,
+              paddingTop: styles.paddingV,
+              paddingBottom: styles.paddingV,
+              paddingLeft: styles.paddingH,
+              paddingRight: styles.paddingH,
+              borderRadius: styles.borderRadius,
+              border: styles.border,
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
               alignItems: "center",
-              gap,
+              gap: styles.gap,
               maxWidth: "92%",
               wordBreak: "break-word",
             }}
@@ -181,17 +224,21 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
 
               return (
                 <span
-                  key={globalIdx}
+                  key={`${globalIdx}-${w.start}`}
                   style={{
-                    fontFamily,
-                    color: isCurrent ? colorActive : colorInactive,
-                    fontSize: isCurrent ? fontSizeActive : fontSizeInactive,
+                    fontFamily: styles.fontFamily,
+                    color: isCurrent
+                      ? styles.colorActive
+                      : styles.colorInactive,
+                    fontSize: isCurrent
+                      ? styles.fontSizeActive
+                      : styles.fontSizeInactive,
                     fontWeight: 900,
-                    textTransform,
-                    letterSpacing,
+                    textTransform: styles.textTransform,
+                    letterSpacing: styles.letterSpacing,
                     transform: isCurrent ? "scale(1.08)" : "scale(1.0)",
                     display: "inline-block",
-                    textShadow,
+                    textShadow: styles.textShadow,
                   }}
                 >
                   {w.word}
@@ -199,8 +246,8 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
               );
             })}
           </div>
-        </div>
+        </AbsoluteFill>
       )}
-    </div>
+    </AbsoluteFill>
   );
 };

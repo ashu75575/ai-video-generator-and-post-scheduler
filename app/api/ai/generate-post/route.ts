@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { config } from "@/lib/config";
+import { getGroqClient, groqJsonCompletion } from "@/lib/groq";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,28 +22,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
+    if (!getGroqClient()) {
       return NextResponse.json(
         { error: "AI service is currently unavailable." },
         { status: 500 },
       );
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${geminiApiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `You are an expert social media manager and content creator.
+    const parsed = await groqJsonCompletion<{
+      title: string;
+      caption: string;
+    }>(`You are an expert social media manager and content creator.
 Your job is to write a highly engaging social media post/caption with relevant hashtags for a short vertical video clip.
 The post is going to be published on the "${platform}" platform.
 
@@ -61,40 +50,8 @@ Output the result strictly as a JSON object matching this schema:
 {
   "title": "A compelling title/headline",
   "caption": "The complete post caption with emojis, spacing, and hashtags"
-}
+}`);
 
-Do not include any markdown format blocks like \`\`\`json in the response, output raw JSON.`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                title: { type: "STRING" },
-                caption: { type: "STRING" },
-              },
-              required: ["title", "caption"],
-            },
-          },
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Gemini API failed: ${response.status} ${errText}`);
-    }
-
-    const data = await response.json();
-    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!responseText) {
-      throw new Error("Empty response received from Gemini API");
-    }
-
-    const parsed = JSON.parse(responseText);
     return NextResponse.json({
       success: true,
       title: parsed.title,

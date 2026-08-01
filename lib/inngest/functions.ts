@@ -64,7 +64,13 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { config } from "../config";
+import { clampClipWindow, config } from "../config";
+import {
+  chunkSentencesByTokens,
+  formatSentencesCompact,
+  getGroqClient,
+  groqJsonCompletion,
+} from "../groq";
 import crypto from "crypto";
 import { contentScanner } from "../arcjet";
 import {
@@ -356,136 +362,113 @@ export const analyzeProjectVideo = inngest.createFunction(
       }
     });
 
-    // Step 4: Use Gemini AI model to find the best engaging moments
-    const shortVideoSegments = await step.run(
-      "generate-short-videos",
-      async () => {
-        const geminiApiKey = process.env.GEMINI_API_KEY;
-        if (!geminiApiKey) {
-          console.warn(
-            "⚠️ GEMINI_API_KEY is not set. Skipping short video generation.",
-          );
-          return [];
-        }
+    // Step 4: Use Groq AI model to find the best engaging moments.
+    // Long transcripts are chunked to stay under Groq free-tier TPM limits.
+    type ShortVideoSegment = {
+      title: string;
+      startTime: number;
+      endTime: number;
+      whyBest: string;
+      seoRanking: number;
+    };
 
-        const sentences = groupWordsIntoSentences(result.captions);
-        if (sentences.length === 0) {
-          console.warn(
-            "No sentences found in transcription. Skipping short video generation.",
-          );
-          return [];
-        }
-
-        // Check for prompt injection attacks in the transcript before calling Gemini API
-        try {
-          const decision = await contentScanner.protect(null as any, {
-            detectPromptInjectionMessage: result.transcript || "",
-          });
-
-          if (decision.isDenied()) {
-            console.error(
-              `❌ Prompt injection detected in transcript for project ${projectId}. Blocking Gemini API call.`,
-            );
-            throw new Error(
-              "Analysis failed: Prompt injection detected in video content.",
-            );
-          }
-        } catch (scanError: any) {
-          if (scanError.message?.includes("Prompt injection detected")) {
-            throw scanError;
-          }
-          console.error(
-            "⚠️ Arcjet prompt injection scan encountered an error:",
-            scanError,
-          );
-        }
-
-        console.log(
-          `Sending ${sentences.length} sentences to Gemini to find best engaging moments.`,
+    const sentenceChunks = await step.run("prepare-transcript-chunks", async () => {
+      if (!getGroqClient()) {
+        console.warn(
+          "⚠️ GROQ_API_KEY is not set. Skipping short video generation.",
         );
+        return [] as ReturnType<typeof chunkSentencesByTokens>;
+      }
 
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${geminiApiKey}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: "user",
-                  parts: [
-                    {
-                      text: `You are an expert viral video editor and content strategist.
-Analyze the following transcript of a long video, which is split into sentences with start and end times (in seconds).
-Identify the top ${config.shortVideoCount} most engaging, viral, and coherent segments suitable for short videos (TikTok, Reels, YouTube Shorts).
+      const sentences = groupWordsIntoSentences(result.captions);
+      if (sentences.length === 0) {
+        console.warn(
+          "No sentences found in transcription. Skipping short video generation.",
+        );
+        return [] as ReturnType<typeof chunkSentencesByTokens>;
+      }
+
+      // Check for prompt injection before any Groq calls.
+      // Cap scan size so Arcjet isn't overwhelmed by long transcripts.
+      try {
+        const scanText = (result.transcript || "").slice(0, 50_000);
+        const decision = await contentScanner.protect(null as any, {
+          detectPromptInjectionMessage: scanText,
+        });
+
+        if (decision.isDenied()) {
+          console.error(
+            `❌ Prompt injection detected in transcript for project ${projectId}. Blocking Groq API call.`,
+          );
+          throw new Error(
+            "Analysis failed: Prompt injection detected in video content.",
+          );
+        }
+      } catch (scanError: unknown) {
+        const message =
+          scanError instanceof Error ? scanError.message : String(scanError);
+        if (message.includes("Prompt injection detected")) {
+          throw scanError;
+        }
+        console.error(
+          "⚠️ Arcjet prompt injection scan encountered an error:",
+          scanError,
+        );
+      }
+
+      const chunks = chunkSentencesByTokens(sentences);
+      console.log(
+        `Prepared ${chunks.length} Groq chunk(s) from ${sentences.length} sentences.`,
+      );
+      return chunks;
+    });
+
+    const shortVideoSegments: ShortVideoSegment[] = [];
+
+    for (let i = 0; i < sentenceChunks.length; i++) {
+      if (i > 0) {
+        // Let Groq TPM budget recover between chunk requests.
+        await step.sleep(`groq-tpm-wait-${i}`, config.groqChunkDelay);
+      }
+
+      const chunkSegments = await step.run(
+        `generate-short-videos-chunk-${i}`,
+        async () => {
+          const chunk = sentenceChunks[i];
+          const clipsPerChunk = Math.max(
+            2,
+            Math.ceil(config.shortVideoCount / sentenceChunks.length),
+          );
+
+          const parsed = await groqJsonCompletion<{
+            shortVideos: ShortVideoSegment[];
+          }>(`You are an expert viral video editor and content strategist.
+Analyze this transcript chunk (format: start-end|text, times in seconds).
+Identify the top ${clipsPerChunk} most engaging, viral, coherent segments for short videos (TikTok, Reels, YouTube Shorts).
 
 Each segment MUST:
 1. Be between 30 and 90 seconds long.
 2. Have a strong hook at the beginning.
-3. Be self-contained and make sense to the viewer.
-4. Align exactly with the sentence boundaries (use the start time of the first sentence and the end time of the last sentence in the segment).
-5. Add SEO ranking from 1 to 10 for each short video, 1 is best and 10 is worst, this SEO ranking is for youtube shorts.
+3. Be self-contained.
+4. Align with sentence boundaries (start of first sentence, end of last).
+5. Include seoRanking from 1 (best) to 10 (worst) for YouTube Shorts.
 
-Here is the sentence list:
-${JSON.stringify(sentences, null, 2)}
+Transcript chunk ${i + 1}/${sentenceChunks.length}:
+${formatSentencesCompact(chunk)}
 
-Return the output as a JSON object matching the requested schema.`,
-                    },
-                  ],
-                },
-              ],
-              generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                  type: "OBJECT",
-                  properties: {
-                    shortVideos: {
-                      type: "ARRAY",
-                      items: {
-                        type: "OBJECT",
-                        properties: {
-                          title: { type: "STRING" },
-                          startTime: { type: "NUMBER" },
-                          endTime: { type: "NUMBER" },
-                          whyBest: { type: "STRING" },
-                          seoRanking: { type: "INTEGER" },
-                        },
-                        required: [
-                          "title",
-                          "startTime",
-                          "endTime",
-                          "whyBest",
-                          "seoRanking",
-                        ],
-                      },
-                    },
-                  },
-                  required: ["shortVideos"],
-                },
-              },
-            }),
-          },
-        );
+Return JSON:
+{"shortVideos":[{"title":"string","startTime":0,"endTime":0,"whyBest":"string","seoRanking":1}]}`);
 
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(
-            `Gemini API failed with status ${response.status}: ${errText}`,
-          );
-        }
+          return parsed.shortVideos || [];
+        },
+      );
 
-        const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!responseText) {
-          throw new Error("Empty response received from Gemini API");
-        }
+      shortVideoSegments.push(...chunkSegments);
+    }
 
-        const parsed = JSON.parse(responseText);
-        return parsed.shortVideos || [];
-      },
-    );
+    // Keep the best overall clips across chunks.
+    shortVideoSegments.sort((a, b) => a.seoRanking - b.seoRanking);
+    shortVideoSegments.splice(config.shortVideoCount);
 
     // Step 5: Save short videos and specific captions to the database
     await step.run("save-short-videos", async () => {
@@ -495,17 +478,24 @@ Return the output as a JSON object matching the requested schema.`,
       }
 
       for (const segment of shortVideoSegments) {
+        // Groq sometimes returns >90s windows which explode Lambda frame counts.
+        const { startTime, endTime } = clampClipWindow(
+          segment.startTime,
+          segment.endTime,
+        );
+
         // Filter the captions array for words that fall within this segment's duration
         const segmentCaptions = result.captions.filter(
-          (w: any) => w.start >= segment.startTime && w.end <= segment.endTime,
+          (w: { start: number; end: number }) =>
+            w.end >= startTime && w.start <= endTime,
         );
 
         await db.insert(shortVideos).values({
           id: crypto.randomUUID(),
           projectId,
           title: segment.title,
-          startTime: segment.startTime,
-          endTime: segment.endTime,
+          startTime,
+          endTime,
           whyBest: segment.whyBest,
           seoRanking: segment.seoRanking,
           captions: segmentCaptions,
@@ -576,8 +566,23 @@ export const renderShortVideoClip = inngest.createFunction(
   },
   { event: "clip/render.started" },
   async ({ event, step }) => {
-    const { clipId, videoUrl, startTime, endTime, captions, captionStyle } =
-      event.data;
+    const {
+      clipId,
+      videoUrl,
+      startTime: rawStartTime,
+      endTime: rawEndTime,
+      captions: rawCaptions,
+      captionStyle,
+    } = event.data;
+
+    // Re-clamp at render time so older oversized DB clips don't spawn huge jobs.
+    const { startTime, endTime } = clampClipWindow(rawStartTime, rawEndTime);
+    const captions = Array.isArray(rawCaptions)
+      ? rawCaptions.filter(
+          (w: { start: number; end: number }) =>
+            w.end >= startTime && w.start <= endTime,
+        )
+      : [];
 
     const region = process.env.AWS_REGION || "eu-north-1";
     const serveUrl = process.env.REMOTION_SERVE_URL;
@@ -588,6 +593,10 @@ export const renderShortVideoClip = inngest.createFunction(
         "REMOTION_SERVE_URL or REMOTION_FUNCTION_NAME is not set in environment variables.",
       );
     }
+
+    console.log(
+      `[render] clip=${clipId} window=${startTime.toFixed(1)}-${endTime.toFixed(1)}s captions=${captions.length} region=${region}`,
+    );
 
     // Step 1: Mark clip as rendering in the database
     await step.run("mark-clip-rendering", async () => {
@@ -664,9 +673,31 @@ export const renderShortVideoClip = inngest.createFunction(
         }
       },
     );
-
+    console.log({
+      region,
+      functionName,
+      serveUrl,
+    });
     // Step 3: Start the Remotion Lambda render with the clean URL
     const renderResult = await step.run("start-lambda-render", async () => {
+      // Composition fps is 30 (see remotion/Root.tsx). Remotion Lambda caps
+      // concurrency at 200 functions; framesPerLambda must keep
+      // ceil(frameCount / framesPerLambda) <= 200.
+      const fps = 30;
+      const maxLambdas = 200;
+      const durationInFrames = Math.max(
+        1,
+        Math.round((endTime - startTime) * fps),
+      );
+      const framesPerLambda = Math.max(
+        20,
+        Math.ceil(durationInFrames / maxLambdas),
+      );
+
+      console.log(
+        `Starting Lambda render for clip ${clipId}: ${durationInFrames} frames, framesPerLambda=${framesPerLambda} (~${Math.ceil(durationInFrames / framesPerLambda)} lambdas)`,
+      );
+
       const { renderId, bucketName } = await renderMediaOnLambda({
         region: region as any,
         functionName,
@@ -676,19 +707,24 @@ export const renderShortVideoClip = inngest.createFunction(
           videoUrl: cleanVideoUrl,
           startTime,
           endTime,
-          captions: captions || [],
+          // Clip-scoped captions only — keeps inputProps small for every worker
+          captions,
           captionStyle: captionStyle || null,
         },
         codec: "h264",
         imageFormat: "jpeg",
-        maxRetries: 1,
-        // Fewer frames per lambda chunk = more reliable loading per invocation
-        framesPerLambda: 20,
+        // Retry flaky chunk downloads/seeks without raising the function timeout
+        maxRetries: 2,
+        framesPerLambda,
         privacy: "public",
         outName: `clip-${clipId}-${Date.now()}.mp4`,
-        // Give each Lambda invocation 2 minutes to load and render its chunk
+        // Must stay within the deployed Lambda timeout (function name …-120sec)
         timeoutInMilliseconds: 120000,
       });
+
+      console.log(
+        `[render] started clip=${clipId} renderId=${renderId} bucket=${bucketName}`,
+      );
 
       return { renderId, bucketName };
     });
@@ -709,6 +745,18 @@ export const renderShortVideoClip = inngest.createFunction(
         // Update progress in DB every 5 attempts (~25s)
         if (attempt % 5 === 0 && db) {
           const pct = Math.round((progress.overallProgress || 0) * 100);
+          const missing =
+            (progress as { missingChunks?: number[] }).missingChunks ?? [];
+          console.log(
+            `[render] progress clip=${clipId} renderId=${renderId} pct=${pct} done=${progress.done} fatal=${progress.fatalErrorEncountered} missingChunks=${JSON.stringify(missing)} errors=${progress.errors?.length ?? 0}`,
+          );
+          if (progress.errors?.length) {
+            console.error(
+              `[render] errors clip=${clipId}:`,
+              JSON.stringify(progress.errors).slice(0, 4000),
+            );
+          }
+
           await db
             .update(shortVideos)
             .set({
