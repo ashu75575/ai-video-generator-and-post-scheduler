@@ -83,7 +83,9 @@ export async function POST(
       cache.del(`projects:${userId}`),
       cache.del(`project_status:${projectId}`),
     ]);
-    console.log(`[CACHE INVALIDATION] Invalidate projects:${userId} and project_status:${projectId} due to analyze trigger`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate projects:${userId} and project_status:${projectId} due to analyze trigger`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -97,4 +99,3 @@ export async function POST(
     );
   }
 }
-

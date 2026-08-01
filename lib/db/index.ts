@@ -19,4 +19,3 @@ if (!databaseUrl) {
 
 // Connect to Neon Database using HTTP connection, only if databaseUrl is available
 export const db = databaseUrl ? drizzle(neon(databaseUrl), { schema }) : null;
-

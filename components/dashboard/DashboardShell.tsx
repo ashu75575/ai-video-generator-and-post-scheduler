@@ -118,8 +118,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             mask="url(#dashboard-mask)"
           />
         </svg>
-
-
       </div>
 
       {/* Main Layout Grid */}
@@ -471,8 +469,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
               {isLoadingAccounts ? (
                 <div className="flex flex-col items-center justify-center py-10 space-y-3">
-                  <Loader2 className="animate-spin text-forge-accent" size={24} />
-                  <span className="text-xs text-white/40">Loading connected accounts...</span>
+                  <Loader2
+                    className="animate-spin text-forge-accent"
+                    size={24}
+                  />
+                  <span className="text-xs text-white/40">
+                    Loading connected accounts...
+                  </span>
                 </div>
               ) : socialAccounts.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-6 border border-dashed border-white/10 rounded-2xl bg-white/1.5 space-y-4">
@@ -484,7 +487,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       No connected social channels
                     </span>
                     <span className="block text-xs text-white/40 max-w-xs mx-auto leading-relaxed">
-                      You need to authorize at least one social media channel to schedule automatic postings.
+                      You need to authorize at least one social media channel to
+                      schedule automatic postings.
                     </span>
                   </div>
                   <Button
@@ -514,18 +518,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             if (lower === "tiktok") return "TikTok";
                             if (lower === "youtube") return "YouTube Shorts";
                             if (lower === "instagram") return "Instagram Reels";
-                            if (lower === "twitter" || lower === "x") return "Twitter / X";
+                            if (lower === "twitter" || lower === "x")
+                              return "Twitter / X";
                             if (lower === "linkedin") return "LinkedIn";
                             if (lower === "bluesky") return "Bluesky";
                             if (lower === "facebook") return "Facebook Reels";
                             return p;
                           };
                           const displayPlatform = mapPlatformName(acc.platform);
-                          const isSelected = schedulePlatform === displayPlatform;
+                          const isSelected =
+                            schedulePlatform === displayPlatform;
                           return (
                             <button
                               key={acc._id}
-                              onClick={() => setSchedulePlatform(displayPlatform)}
+                              onClick={() =>
+                                setSchedulePlatform(displayPlatform)
+                              }
                               className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all duration-300 ${
                                 isSelected
                                   ? "border-forge-accent bg-forge-accent/5"

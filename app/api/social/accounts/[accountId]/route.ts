@@ -85,7 +85,9 @@ export async function DELETE(
 
     // Invalidate social accounts cache for this user
     await cache.del(`social_accounts:${userId}`);
-    console.log(`[CACHE INVALIDATION] Invalidate social_accounts:${userId} due to account disconnect`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate social_accounts:${userId} due to account disconnect`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -99,4 +101,3 @@ export async function DELETE(
     );
   }
 }
-

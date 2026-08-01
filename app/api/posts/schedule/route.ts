@@ -106,7 +106,9 @@ export async function POST(req: NextRequest) {
 
     // Invalidate scheduled posts cache for this user
     await cache.del(`scheduled_posts:${userId}`);
-    console.log(`[CACHE INVALIDATION] Invalidate scheduled_posts:${userId} due to new scheduled post`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate scheduled_posts:${userId} due to new scheduled post`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -120,4 +122,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

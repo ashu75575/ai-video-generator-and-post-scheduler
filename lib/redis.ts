@@ -10,7 +10,10 @@ export interface CacheProvider {
 
 // In-Memory Fallback Cache implementation for development / fallback environments
 class InMemoryCache implements CacheProvider {
-  private cache = new Map<string, { value: unknown; expiresAt: number | null }>();
+  private cache = new Map<
+    string,
+    { value: unknown; expiresAt: number | null }
+  >();
 
   async get<T>(key: string): Promise<T | null> {
     const item = this.cache.get(key);

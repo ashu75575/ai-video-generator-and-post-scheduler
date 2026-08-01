@@ -342,7 +342,9 @@ export default function ProjectAnalysisPage() {
       });
 
       // Update state to start showing the pipeline progress and restart polling
-      setProject((prev) => prev ? { ...prev, status: "transcribing", progress: 10 } : null);
+      setProject((prev) =>
+        prev ? { ...prev, status: "transcribing", progress: 10 } : null,
+      );
       setPollTrigger((p) => p + 1);
     } catch (err: any) {
       console.error(err);
@@ -367,7 +369,8 @@ export default function ProjectAnalysisPage() {
         setProject((prev) => {
           if (data.status === "failed" && prev && prev.status !== "failed") {
             toast.error("Pipeline Failed", {
-              description: "The background processing pipeline failed after multiple retries.",
+              description:
+                "The background processing pipeline failed after multiple retries.",
             });
           }
           return data;
@@ -474,8 +477,6 @@ export default function ProjectAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-[#07050f] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-
-
       <div className="max-w-7xl mx-auto space-y-8 relative z-10">
         {/* Header Navigation */}
         <div className="flex justify-between items-center">
@@ -528,7 +529,9 @@ export default function ProjectAnalysisPage() {
                 Pipeline Processing Failed
               </h2>
               <p className="text-xs text-white/60 max-w-md mx-auto leading-relaxed">
-                The background video ingestion and analysis pipeline failed after multiple retries. This could be due to network timeout, transcription service issues, or prompt injection validation.
+                The background video ingestion and analysis pipeline failed
+                after multiple retries. This could be due to network timeout,
+                transcription service issues, or prompt injection validation.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -558,140 +561,142 @@ export default function ProjectAnalysisPage() {
               </Button>
             </div>
           </Card>
-        ) : project.status !== "ready" && (
-          <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-orange-950/20">
-            <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-orange-500 animate-pulse" />
-              ClipForge Processing Pipeline
-            </h2>
+        ) : (
+          project.status !== "ready" && (
+            <Card className="border border-white/10 bg-white/1 backdrop-blur-xl p-6 rounded-2xl max-w-2xl mx-auto shadow-2xl shadow-orange-950/20">
+              <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-white/60 mb-6 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-orange-500 animate-pulse" />
+                ClipForge Processing Pipeline
+              </h2>
 
-            <div className="space-y-6">
-              {/* Step 1: Video Ingestion */}
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
-                    <Check size={14} className="stroke-[2.5]" />
+              <div className="space-y-6">
+                {/* Step 1: Video Ingestion */}
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
+                      <Check size={14} className="stroke-[2.5]" />
+                    </div>
+                    <div className="w-0.5 h-12 bg-emerald-500/30" />
                   </div>
-                  <div className="w-0.5 h-12 bg-emerald-500/30" />
+                  <div className="space-y-1 mt-0.5">
+                    <h3 className="text-xs font-bold text-white/90">
+                      Video Ingestion & S3 Upload
+                    </h3>
+                    <p className="text-[11px] text-white/45 font-mono">
+                      Video successfully uploaded and registered in database.
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-1 mt-0.5">
-                  <h3 className="text-xs font-bold text-white/90">
-                    Video Ingestion & S3 Upload
-                  </h3>
-                  <p className="text-[11px] text-white/45 font-mono">
-                    Video successfully uploaded and registered in database.
-                  </p>
-                </div>
-              </div>
 
-              {/* Step 2: Audio Transcription */}
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  {getStageStatus("transcription") === "completed" ? (
-                    <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
-                      <Check size={14} className="stroke-[2.5]" />
-                    </div>
-                  ) : getStageStatus("transcription") === "active" ? (
-                    <div className="h-7 w-7 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center text-xs">
-                      <RefreshCw
-                        size={12}
-                        className="animate-spin text-orange-400"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
-                      2
-                    </div>
-                  )}
-                  <div
-                    className={`w-0.5 h-12 ${getStageStatus("transcription") === "completed" ? "bg-emerald-500/30" : "bg-white/5"}`}
-                  />
-                </div>
-                <div className="space-y-1.5 mt-0.5 flex-1">
-                  <h3
-                    className={`text-xs font-bold ${getStageStatus("transcription") !== "pending" ? "text-white/90" : "text-white/30"}`}
-                  >
-                    Deepgram Transcription Engine
-                  </h3>
-                  <p
-                    className={`text-[11px] font-mono ${getStageStatus("transcription") !== "pending" ? "text-white/45" : "text-white/20"}`}
-                  >
-                    {project.status === "transcribing"
-                      ? "Transcribing voice vectors and converting to text..."
-                      : project.status === "generating_shorts"
-                        ? "Completed converting voice segments to text."
-                        : "Awaiting start signal."}
-                  </p>
-
-                  {project.status === "transcribing" && (
-                    <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono text-orange-400">
-                        <span>Transcribing progress</span>
-                        <span>{project.progress}%</span>
+                {/* Step 2: Audio Transcription */}
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    {getStageStatus("transcription") === "completed" ? (
+                      <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
+                        <Check size={14} className="stroke-[2.5]" />
                       </div>
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-linear-to-r from-orange-600 to-indigo-500 rounded-full transition-all duration-300"
-                          style={{ width: `${project.progress}%` }}
+                    ) : getStageStatus("transcription") === "active" ? (
+                      <div className="h-7 w-7 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center text-xs">
+                        <RefreshCw
+                          size={12}
+                          className="animate-spin text-orange-400"
                         />
                       </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Step 3: Clip Isolation */}
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  {getStageStatus("complete") === "completed" ? (
-                    <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
-                      <Check size={14} className="stroke-[2.5]" />
-                    </div>
-                  ) : getStageStatus("complete") === "active" ? (
-                    <div className="h-7 w-7 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center text-xs">
-                      <RefreshCw
-                        size={12}
-                        className="animate-spin text-orange-400"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
-                      3
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1.5 mt-0.5 flex-1">
-                  <h3
-                    className={`text-xs font-bold ${getStageStatus("complete") !== "pending" ? "text-white/90" : "text-white/30"}`}
-                  >
-                    Short Clips & Captions Isolation
-                  </h3>
-                  <p
-                    className={`text-[11px] font-mono ${getStageStatus("complete") !== "pending" ? "text-white/45" : "text-white/20"}`}
-                  >
-                    {project.status === "generating_shorts"
-                      ? "AI isolating hooks, calculating SEO score and matching timestamps..."
-                      : "Awaiting transcription completion."}
-                  </p>
-
-                  {project.status === "generating_shorts" && (
-                    <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
-                      <div className="flex justify-between items-center text-[10px] font-mono text-cyan-400">
-                        <span>Clips extraction active</span>
-                        <span>{project.progress}%</span>
+                    ) : (
+                      <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
+                        2
                       </div>
-                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-linear-to-r from-orange-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 animate-pulse"
-                          style={{ width: `${project.progress}%` }}
+                    )}
+                    <div
+                      className={`w-0.5 h-12 ${getStageStatus("transcription") === "completed" ? "bg-emerald-500/30" : "bg-white/5"}`}
+                    />
+                  </div>
+                  <div className="space-y-1.5 mt-0.5 flex-1">
+                    <h3
+                      className={`text-xs font-bold ${getStageStatus("transcription") !== "pending" ? "text-white/90" : "text-white/30"}`}
+                    >
+                      Deepgram Transcription Engine
+                    </h3>
+                    <p
+                      className={`text-[11px] font-mono ${getStageStatus("transcription") !== "pending" ? "text-white/45" : "text-white/20"}`}
+                    >
+                      {project.status === "transcribing"
+                        ? "Transcribing voice vectors and converting to text..."
+                        : project.status === "generating_shorts"
+                          ? "Completed converting voice segments to text."
+                          : "Awaiting start signal."}
+                    </p>
+
+                    {project.status === "transcribing" && (
+                      <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
+                        <div className="flex justify-between items-center text-[10px] font-mono text-orange-400">
+                          <span>Transcribing progress</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-linear-to-r from-orange-600 to-indigo-500 rounded-full transition-all duration-300"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3: Clip Isolation */}
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    {getStageStatus("complete") === "completed" ? (
+                      <div className="h-7 w-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xs">
+                        <Check size={14} className="stroke-[2.5]" />
+                      </div>
+                    ) : getStageStatus("complete") === "active" ? (
+                      <div className="h-7 w-7 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center text-xs">
+                        <RefreshCw
+                          size={12}
+                          className="animate-spin text-orange-400"
                         />
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="h-7 w-7 rounded-full bg-white/5 text-white/35 border border-white/10 flex items-center justify-center text-xs font-mono">
+                        3
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1.5 mt-0.5 flex-1">
+                    <h3
+                      className={`text-xs font-bold ${getStageStatus("complete") !== "pending" ? "text-white/90" : "text-white/30"}`}
+                    >
+                      Short Clips & Captions Isolation
+                    </h3>
+                    <p
+                      className={`text-[11px] font-mono ${getStageStatus("complete") !== "pending" ? "text-white/45" : "text-white/20"}`}
+                    >
+                      {project.status === "generating_shorts"
+                        ? "AI isolating hooks, calculating SEO score and matching timestamps..."
+                        : "Awaiting transcription completion."}
+                    </p>
+
+                    {project.status === "generating_shorts" && (
+                      <div className="space-y-1.5 max-w-sm mt-1 animate-in fade-in duration-300">
+                        <div className="flex justify-between items-center text-[10px] font-mono text-cyan-400">
+                          <span>Clips extraction active</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-linear-to-r from-orange-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-300 animate-pulse"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )
         )}
 
         {/* RESULTS SHOWCASE VIEW */}

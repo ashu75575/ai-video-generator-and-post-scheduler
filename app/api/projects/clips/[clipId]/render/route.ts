@@ -127,7 +127,9 @@ export async function POST(
       cache.del(`clips:${userId}`),
     ]);
 
-    console.log(`[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to render start`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to render start`,
+    );
 
     // Send the Inngest event to trigger the background render job
     await inngest.send({
@@ -155,4 +157,3 @@ export async function POST(
     );
   }
 }
-

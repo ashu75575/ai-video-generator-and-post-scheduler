@@ -7,7 +7,11 @@ export function AuthButtons() {
   return (
     <>
       <Show when="signed-out">
-        <SignInButton mode="modal" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard">
+        <SignInButton
+          mode="modal"
+          fallbackRedirectUrl="/dashboard"
+          forceRedirectUrl="/dashboard"
+        >
           <motion.button
             type="button"
             whileHover={{ scale: 1.04 }}
@@ -17,7 +21,11 @@ export function AuthButtons() {
             Sign in
           </motion.button>
         </SignInButton>
-        <SignUpButton mode="redirect" fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard">
+        <SignUpButton
+          mode="redirect"
+          fallbackRedirectUrl="/dashboard"
+          forceRedirectUrl="/dashboard"
+        >
           <motion.button
             type="button"
             whileHover={{

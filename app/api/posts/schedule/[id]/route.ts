@@ -44,7 +44,9 @@ export async function DELETE(
 
     // Invalidate scheduled posts cache for this user
     await cache.del(`scheduled_posts:${userId}`);
-    console.log(`[CACHE INVALIDATION] Invalidate scheduled_posts:${userId} due to deleted scheduled post`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate scheduled_posts:${userId} due to deleted scheduled post`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -59,4 +61,3 @@ export async function DELETE(
     );
   }
 }
-

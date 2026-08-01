@@ -52,7 +52,9 @@ export async function PATCH(
         cache.del(`project_status:${projectId}`),
         cache.del(`clips:${userId}`),
       ]);
-      console.log(`[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to clip PATCH`);
+      console.log(
+        `[CACHE INVALIDATION] Invalidate clip render status, project status and user clips cache due to clip PATCH`,
+      );
     }
 
     return NextResponse.json({ success: true, clip });
@@ -64,4 +66,3 @@ export async function PATCH(
     );
   }
 }
-

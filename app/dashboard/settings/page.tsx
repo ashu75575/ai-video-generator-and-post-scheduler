@@ -41,7 +41,8 @@ function SettingsForm({
       await onSave(firstName.trim(), lastName.trim());
     } catch (err: unknown) {
       console.error("❌ Failed to update profile:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to save profile changes.";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to save profile changes.";
       toast.error(errorMessage);
     } finally {
       setIsSaving(false);
@@ -53,7 +54,10 @@ function SettingsForm({
       <div className="space-y-4">
         {/* First Name Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="firstName" className="text-xs font-semibold text-white/70 flex items-center gap-1.5">
+          <Label
+            htmlFor="firstName"
+            className="text-xs font-semibold text-white/70 flex items-center gap-1.5"
+          >
             <User size={13} className="text-white/30" />
             First Name
           </Label>
@@ -70,7 +74,10 @@ function SettingsForm({
 
         {/* Last Name Field */}
         <div className="space-y-1.5">
-          <Label htmlFor="lastName" className="text-xs font-semibold text-white/70 flex items-center gap-1.5">
+          <Label
+            htmlFor="lastName"
+            className="text-xs font-semibold text-white/70 flex items-center gap-1.5"
+          >
             <User size={13} className="text-white/30" />
             Last Name
           </Label>
@@ -87,7 +94,10 @@ function SettingsForm({
 
         {/* Email Field (Readonly) */}
         <div className="space-y-1.5 opacity-70">
-          <Label htmlFor="email" className="text-xs font-semibold text-white/50 flex items-center gap-1.5">
+          <Label
+            htmlFor="email"
+            className="text-xs font-semibold text-white/50 flex items-center gap-1.5"
+          >
             <Mail size={13} className="text-white/30" />
             Email Address
           </Label>
@@ -193,7 +203,10 @@ export default function SettingsPage() {
       {/* Settings Header */}
       <div className="flex flex-col gap-2 pb-4 border-b border-white/15">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="text-white/45 hover:text-white transition-colors">
+          <Link
+            href="/dashboard"
+            className="text-white/45 hover:text-white transition-colors"
+          >
             <ArrowLeft size={16} />
           </Link>
           <div className="inline-flex items-center gap-1.5 rounded-full border border-forge-accent/20 bg-forge-accent/10 px-3 py-0.5">
@@ -214,7 +227,7 @@ export default function SettingsPage() {
       {/* Main Settings Card */}
       <Card className="relative overflow-hidden bg-zinc-900 border border-white/8 backdrop-blur-xl rounded-[24px] shadow-forge-panel p-6 md:p-8 select-none">
         <span className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-forge-accent/10 blur-3xl pointer-events-none" />
-        
+
         <SettingsForm
           initialFirstName={user.firstName || ""}
           initialLastName={user.lastName || ""}

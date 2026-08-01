@@ -134,8 +134,7 @@ export const ShortVideoComposition: React.FC<ShortVideoCompositionProps> = ({
     const paddingRaw = captionStyle?.padding || "24px 44px";
     const paddingParts = paddingRaw.split(" ");
     const paddingV = parsePxOrRem(paddingParts[0], 24) * 1.5;
-    const paddingH =
-      parsePxOrRem(paddingParts[1] || paddingParts[0], 44) * 1.5;
+    const paddingH = parsePxOrRem(paddingParts[1] || paddingParts[0], 44) * 1.5;
 
     return {
       fontFamily,

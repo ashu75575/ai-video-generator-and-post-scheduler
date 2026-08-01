@@ -31,9 +31,9 @@ ClipForge AI is an automated video processing application built with [Next.js](h
 
 ### Two S3 buckets (do not mix)
 
-| Env var | Purpose | Example |
-|---|---|---|
-| `AWS_BUCKET_NAME` | **User uploads** (source videos) | `clipforge-project` |
+| Env var                | Purpose                                      | Example                         |
+| ---------------------- | -------------------------------------------- | ------------------------------- |
+| `AWS_BUCKET_NAME`      | **User uploads** (source videos)             | `clipforge-project`             |
 | `REMOTION_BUCKET_NAME` | **Remotion** site bundles + render artifacts | `remotionlambda-eunorth1-xxxxx` |
 
 These must be **different buckets**, but in the **same AWS region** as `AWS_REGION`, the Remotion function, and `REMOTION_SERVE_URL`.
@@ -118,7 +118,12 @@ S3 → bucket → **Permissions → CORS**:
     "AllowedHeaders": ["*"],
     "AllowedMethods": ["GET", "HEAD", "PUT", "POST"],
     "AllowedOrigins": ["*"],
-    "ExposeHeaders": ["ETag", "Content-Length", "Content-Range", "Accept-Ranges"],
+    "ExposeHeaders": [
+      "ETag",
+      "Content-Length",
+      "Content-Range",
+      "Accept-Ranges"
+    ],
     "MaxAgeSeconds": 3000
   }
 ]
@@ -258,8 +263,8 @@ npm run dev
 
 Then open:
 
-- App: http://localhost:3000  
-- Inngest: http://localhost:8288  
+- App: http://localhost:3000
+- Inngest: http://localhost:8288
 
 ### Quick verification
 
@@ -283,14 +288,14 @@ npx remotion lambda render \
 
 ## Troubleshooting
 
-| Symptom | Likely cause |
-|---|---|
-| `Event key not found` (401) from Inngest | Dev Server not running, or `INNGEST_DEV` unset |
-| UI stuck at 70% after analysis | Stale status cache; ensure latest status route (in-progress statuses are not cached) |
-| Groq `TPM` / request too large | Long transcripts are chunked automatically; wait between chunks or upgrade Groq tier |
-| Remotion `Too many functions` | Clip too long / low `framesPerLambda` (app clamps clips to ≤90s and scales concurrency) |
+| Symptom                                        | Likely cause                                                                            |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `Event key not found` (401) from Inngest       | Dev Server not running, or `INNGEST_DEV` unset                                          |
+| UI stuck at 70% after analysis                 | Stale status cache; ensure latest status route (in-progress statuses are not cached)    |
+| Groq `TPM` / request too large                 | Long transcripts are chunked automatically; wait between chunks or upgrade Groq tier    |
+| Remotion `Too many functions`                  | Clip too long / low `framesPerLambda` (app clamps clips to ≤90s and scales concurrency) |
 | Remotion stitcher `AbortError` / ~120s timeout | Function timeout too low, or **region mismatch** between site / function / video bucket |
-| Cross-region site vs function | Keep `AWS_REGION`, `REMOTION_SERVE_URL`, and function all in one region |
+| Cross-region site vs function                  | Keep `AWS_REGION`, `REMOTION_SERVE_URL`, and function all in one region                 |
 
 CloudWatch for a failed render (`renderId=...`):
 

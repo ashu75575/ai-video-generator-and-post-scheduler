@@ -781,8 +781,8 @@ export default function SchedulePage() {
                       No exported clips found
                     </span>
                     <span className="block text-[10px] mt-0.5 leading-relaxed">
-                      You must export or render clips first under &quot;AI Clips&quot; to
-                      make them available here.
+                      You must export or render clips first under &quot;AI
+                      Clips&quot; to make them available here.
                     </span>
                   </div>
                 </div>

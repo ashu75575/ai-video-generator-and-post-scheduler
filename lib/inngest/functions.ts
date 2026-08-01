@@ -18,7 +18,9 @@ async function invalidateProjectCache(projectId: string) {
         cache.del(`projects:${userId}`),
         cache.del(`project_status:${projectId}`),
       ]);
-      console.log(`[CACHE INVALIDATION] Invalidated projects:${userId} and project_status:${projectId}`);
+      console.log(
+        `[CACHE INVALIDATION] Invalidated projects:${userId} and project_status:${projectId}`,
+      );
     }
   } catch (err) {
     console.error("Failed to invalidate project cache:", err);
@@ -50,7 +52,9 @@ async function invalidateClipCache(clipId: string) {
         promises.push(cache.del(`clips:${userId}`));
       }
       await Promise.all(promises);
-      console.log(`[CACHE INVALIDATION] Invalidated clip:${clipId}, project_status:${projectId}, clips:${userId}`);
+      console.log(
+        `[CACHE INVALIDATION] Invalidated clip:${clipId}, project_status:${projectId}, clips:${userId}`,
+      );
     }
   } catch (err) {
     console.error("Failed to invalidate clip cache:", err);
@@ -98,10 +102,15 @@ export const processVideoUpload = inngest.createFunction(
           try {
             if (existsSync(filePath)) {
               await fs.unlink(filePath);
-              console.log(`[onFailure] Cleaned up local temp file: ${filePath}`);
+              console.log(
+                `[onFailure] Cleaned up local temp file: ${filePath}`,
+              );
             }
           } catch (err) {
-            console.error(`[onFailure] Failed to delete local file ${filePath}:`, err);
+            console.error(
+              `[onFailure] Failed to delete local file ${filePath}:`,
+              err,
+            );
           }
         });
       }
@@ -372,56 +381,59 @@ export const analyzeProjectVideo = inngest.createFunction(
       seoRanking: number;
     };
 
-    const sentenceChunks = await step.run("prepare-transcript-chunks", async () => {
-      if (!getGroqClient()) {
-        console.warn(
-          "⚠️ GROQ_API_KEY is not set. Skipping short video generation.",
-        );
-        return [] as ReturnType<typeof chunkSentencesByTokens>;
-      }
+    const sentenceChunks = await step.run(
+      "prepare-transcript-chunks",
+      async () => {
+        if (!getGroqClient()) {
+          console.warn(
+            "⚠️ GROQ_API_KEY is not set. Skipping short video generation.",
+          );
+          return [] as ReturnType<typeof chunkSentencesByTokens>;
+        }
 
-      const sentences = groupWordsIntoSentences(result.captions);
-      if (sentences.length === 0) {
-        console.warn(
-          "No sentences found in transcription. Skipping short video generation.",
-        );
-        return [] as ReturnType<typeof chunkSentencesByTokens>;
-      }
+        const sentences = groupWordsIntoSentences(result.captions);
+        if (sentences.length === 0) {
+          console.warn(
+            "No sentences found in transcription. Skipping short video generation.",
+          );
+          return [] as ReturnType<typeof chunkSentencesByTokens>;
+        }
 
-      // Check for prompt injection before any Groq calls.
-      // Cap scan size so Arcjet isn't overwhelmed by long transcripts.
-      try {
-        const scanText = (result.transcript || "").slice(0, 50_000);
-        const decision = await contentScanner.protect(null as any, {
-          detectPromptInjectionMessage: scanText,
-        });
+        // Check for prompt injection before any Groq calls.
+        // Cap scan size so Arcjet isn't overwhelmed by long transcripts.
+        try {
+          const scanText = (result.transcript || "").slice(0, 50_000);
+          const decision = await contentScanner.protect(null as any, {
+            detectPromptInjectionMessage: scanText,
+          });
 
-        if (decision.isDenied()) {
+          if (decision.isDenied()) {
+            console.error(
+              `❌ Prompt injection detected in transcript for project ${projectId}. Blocking Groq API call.`,
+            );
+            throw new Error(
+              "Analysis failed: Prompt injection detected in video content.",
+            );
+          }
+        } catch (scanError: unknown) {
+          const message =
+            scanError instanceof Error ? scanError.message : String(scanError);
+          if (message.includes("Prompt injection detected")) {
+            throw scanError;
+          }
           console.error(
-            `❌ Prompt injection detected in transcript for project ${projectId}. Blocking Groq API call.`,
-          );
-          throw new Error(
-            "Analysis failed: Prompt injection detected in video content.",
+            "⚠️ Arcjet prompt injection scan encountered an error:",
+            scanError,
           );
         }
-      } catch (scanError: unknown) {
-        const message =
-          scanError instanceof Error ? scanError.message : String(scanError);
-        if (message.includes("Prompt injection detected")) {
-          throw scanError;
-        }
-        console.error(
-          "⚠️ Arcjet prompt injection scan encountered an error:",
-          scanError,
-        );
-      }
 
-      const chunks = chunkSentencesByTokens(sentences);
-      console.log(
-        `Prepared ${chunks.length} Groq chunk(s) from ${sentences.length} sentences.`,
-      );
-      return chunks;
-    });
+        const chunks = chunkSentencesByTokens(sentences);
+        console.log(
+          `Prepared ${chunks.length} Groq chunk(s) from ${sentences.length} sentences.`,
+        );
+        return chunks;
+      },
+    );
 
     const shortVideoSegments: ShortVideoSegment[] = [];
 
@@ -507,7 +519,11 @@ Return JSON:
 
       // Invalidate projects, project status, and clips caches
       await invalidateProjectCache(projectId);
-      const res = await db.select({ userId: projects.userId }).from(projects).where(eq(projects.id, projectId)).limit(1);
+      const res = await db
+        .select({ userId: projects.userId })
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
       if (res && res.length > 0) {
         await cache.del(`clips:${res[0].userId}`);
       }

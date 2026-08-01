@@ -111,7 +111,10 @@ export default function DashboardHome() {
             </Button>
           </Link>
           <Link href="/dashboard/clips">
-            <Button variant="default" className="rounded-xl text-xs font-bold px-4 h-9 cursor-pointer">
+            <Button
+              variant="default"
+              className="rounded-xl text-xs font-bold px-4 h-9 cursor-pointer"
+            >
               <Scissors size={14} className="mr-1.5" />
               AI Clips ({clips.length})
             </Button>
@@ -274,8 +277,7 @@ export default function DashboardHome() {
                           Size
                         </span>
                         <strong className="text-white/80">
-                          {(selectedFile.size / (1024 * 1024)).toFixed(2)}{" "}
-                          MB
+                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                         </strong>
                       </div>
                       <div>
@@ -283,9 +285,8 @@ export default function DashboardHome() {
                           Format
                         </span>
                         <strong className="text-white/80">
-                          {selectedFile.type
-                            .split("/")[1]
-                            ?.toUpperCase() || "MP4"}
+                          {selectedFile.type.split("/")[1]?.toUpperCase() ||
+                            "MP4"}
                         </strong>
                       </div>
                     </div>
@@ -385,7 +386,14 @@ export default function DashboardHome() {
                   <div className="flex justify-between items-center text-[10px] text-white/30 font-mono">
                     <span className="animate-pulse">{forgePhase}</span>
                     <span>
-                      {(forgeProgress * (selectedFile ? selectedFile.size / (1024 * 1024) : 0) / 100).toFixed(1)} MB /{" "}
+                      {(
+                        (forgeProgress *
+                          (selectedFile
+                            ? selectedFile.size / (1024 * 1024)
+                            : 0)) /
+                        100
+                      ).toFixed(1)}{" "}
+                      MB /{" "}
                       {(selectedFile
                         ? selectedFile.size / (1024 * 1024)
                         : 0

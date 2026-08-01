@@ -109,7 +109,9 @@ export async function POST(req: NextRequest) {
 
     // Invalidate user projects cache list
     await cache.del(`projects:${userId}`);
-    console.log(`[CACHE INVALIDATION] Invalidate projects:${userId} due to new project upload`);
+    console.log(
+      `[CACHE INVALIDATION] Invalidate projects:${userId} due to new project upload`,
+    );
 
     // 5. Trigger the background Inngest event
     try {

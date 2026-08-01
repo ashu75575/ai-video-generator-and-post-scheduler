@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  Scissors,
-  ChevronDown,
-  Settings,
-  LogOut,
-} from "lucide-react";
+import { Menu, Scissors, ChevronDown, Settings, LogOut } from "lucide-react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -34,9 +28,10 @@ export function Header() {
   const userAvatar = user?.imageUrl || "";
 
   // Extract initials for fallback
-  const userInitials = user?.firstName && user?.lastName
-    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-    : userDisplayName.slice(0, 2).toUpperCase();
+  const userInitials =
+    user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : userDisplayName.slice(0, 2).toUpperCase();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/15 bg-forge-bg/60 backdrop-blur-xl px-4 md:px-8">
@@ -101,7 +96,7 @@ export function Header() {
               size={13}
               className={cn(
                 "text-white/40 transition-transform duration-200 shrink-0",
-                isDropdownOpen && "transform rotate-180"
+                isDropdownOpen && "transform rotate-180",
               )}
             />
           </button>
@@ -114,7 +109,7 @@ export function Header() {
                   className="fixed inset-0 z-40 cursor-default"
                   onClick={() => setIsDropdownOpen(false)}
                 />
-                
+
                 <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}

@@ -37,13 +37,15 @@ export async function PATCH(req: NextRequest) {
     await db
       .update(users)
       .set({
-        firstName: firstName !== undefined ? (firstName || null) : undefined,
-        lastName: lastName !== undefined ? (lastName || null) : undefined,
+        firstName: firstName !== undefined ? firstName || null : undefined,
+        lastName: lastName !== undefined ? lastName || null : undefined,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
 
-    console.log(`✅ Successfully updated profile in Neon DB for user: ${userId}`);
+    console.log(
+      `✅ Successfully updated profile in Neon DB for user: ${userId}`,
+    );
 
     return NextResponse.json({
       success: true,

@@ -11,7 +11,6 @@ import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-
 export interface Clip {
   id: string;
   title: string;
@@ -234,7 +233,8 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
               views: "Ready",
               likes: "Ready",
               platform: "Multi-Platform",
-              thumbnail: "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+              thumbnail:
+                "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
               status: "Ready",
               transcript: clip.whyBest,
               description: `${clip.title} - ${clip.whyBest}`,
@@ -288,8 +288,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [forgeLogs, setForgeLogs] = useState<string[]>([]);
 
   // Real Upload states
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success">("idle");
-  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "success"
+  >("idle");
+  const [uploadedProjectId, setUploadedProjectId] = useState<string | null>(
+    null,
+  );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null);
@@ -420,7 +424,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
               duration: "0:00",
               clips: 0,
               status: "Analyzing",
-              img: videoUrl || "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
+              img:
+                videoUrl ||
+                "https://images.unsplash.com/photo-1542744094-2ab25be78b90?auto=format&fit=crop&w=400&q=80",
             };
             setRawVideos((prev) => [newRawVideo, ...prev]);
 

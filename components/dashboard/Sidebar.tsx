@@ -1,14 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Home,
-  Film,
-  Calendar,
-  Sparkles,
-  Scissors,
-  Share2,
-} from "lucide-react";
+import { Home, Film, Calendar, Sparkles, Scissors, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -27,7 +20,6 @@ export function Sidebar() {
     },
     { href: "/dashboard/schedule", label: "Schedule Posts", icon: Calendar },
   ] as const;
-
 
   return (
     <aside className="fixed bottom-0 left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-white/15 bg-forge-bg/90 backdrop-blur-xl px-4 py-6 md:flex">
@@ -90,7 +82,6 @@ export function Sidebar() {
           );
         })}
       </nav>
-
     </aside>
   );
 }
